@@ -1,0 +1,20 @@
+server:
+  port: 8083
+
+spring:
+  application:
+    name: chat-history-service
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/discord_mini_chat
+      auto-index-creation: true
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: ${RABBITMQ_USER:guest}
+    password: ${RABBITMQ_PASS:guest}
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
