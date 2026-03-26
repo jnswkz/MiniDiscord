@@ -1,26 +1,191 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/* ============================================
+   MiniDiscord Design System
+   Discord-accurate color tokens + Dark/Light
+   ============================================ */
 
 @theme inline {
+  /* Font family tokens */
+  --font-sans: var(--font-inter);
+
+  /* Spacing tokens (8-point grid) */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-2xl: 3rem;
+  --spacing-3xl: 4rem;
+
+  /* Shadow depths */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.15);
+
+  /* Radius tokens */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-full: 9999px;
+
+  /* Animation durations */
+  --duration-fast: 150ms;
+  --duration-normal: 200ms;
+  --duration-slow: 300ms;
+
+  /* Semantic color tokens (mapped from CSS vars) */
   --color-background: var(--background);
+  --color-background-secondary: var(--background-secondary);
+  --color-background-tertiary: var(--background-tertiary);
+  --color-background-floating: var(--background-floating);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-destructive: var(--destructive);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-muted: var(--muted);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-sidebar: var(--background-secondary);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* =====================
+   Dark Mode (default)
+   Discord-accurate colors
+   ===================== */
+:root {
+  --background: #313338;
+  --background-secondary: #2B2D31;
+  --background-tertiary: #1E1F22;
+  --background-floating: #111214;
+  --foreground: #F2F3F5;
+  --muted-foreground: #949BA4;
+  --accent: #5865F2;
+  --accent-hover: #4752C4;
+  --destructive: #DA373C;
+  --destructive-foreground: #FFFFFF;
+  --success: #23A559;
+  --warning: #F0B232;
+  --border: #3F4147;
+  --input: #383A40;
+  --ring: #5865F2;
+
+  /* shadcn semantic tokens */
+  --card: #2B2D31;
+  --card-foreground: #F2F3F5;
+  --popover: #111214;
+  --popover-foreground: #F2F3F5;
+  --primary: #5865F2;
+  --primary-foreground: #FFFFFF;
+  --secondary: #4E5058;
+  --secondary-foreground: #F2F3F5;
+  --muted: #3F4147;
+  --accent-foreground: #FFFFFF;
+
+  /* Layout sizes */
+  --server-list-width: 72px;
+  --channel-sidebar-width: 240px;
+  --member-list-width: 240px;
+}
+
+/* =====================
+   Light Mode
+   ===================== */
+.light {
+  --background: #FFFFFF;
+  --background-secondary: #F2F3F5;
+  --background-tertiary: #E3E5E8;
+  --background-floating: #FFFFFF;
+  --foreground: #060607;
+  --muted-foreground: #5C5E66;
+  --accent: #5865F2;
+  --accent-hover: #4752C4;
+  --destructive: #DA373C;
+  --destructive-foreground: #FFFFFF;
+  --success: #23A559;
+  --warning: #F0B232;
+  --border: #E3E5E8;
+  --input: #E3E5E8;
+  --ring: #5865F2;
+
+  --card: #FFFFFF;
+  --card-foreground: #060607;
+  --popover: #FFFFFF;
+  --popover-foreground: #060607;
+  --primary: #5865F2;
+  --primary-foreground: #FFFFFF;
+  --secondary: #E3E5E8;
+  --secondary-foreground: #060607;
+  --muted: #F2F3F5;
+  --accent-foreground: #FFFFFF;
+}
+
+/* =====================
+   Base styles
+   ===================== */
+html {
+  scroll-behavior: smooth;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-inter, "Inter", system-ui, -apple-system, sans-serif);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Custom scrollbar (Discord-style) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background-secondary);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--background-tertiary);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--muted-foreground);
+}
+
+/* Focus visible ring */
+*:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
 }

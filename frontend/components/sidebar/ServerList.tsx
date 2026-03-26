@@ -1,0 +1,111 @@
+"use client";
+
+import { useRouter, useParams, usePathname } from "next/navigation";
+import { ServerIcon } from "@/components/ui/ServerIcon";
+import { Separator } from "@/components/ui/Separator";
+import { ScrollArea } from "@/components/ui/ScrollArea";
+import { Plus, MessageCircle } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/Tooltip";
+import { MOCK_ROOMS, MOCK_CHANNELS } from "@/lib/mock-data";
+import { useTranslation } from "@/lib/i18n";
+import { cn } from "@/lib/utils";
+
+// Map channelId -> roomId for reverse lookup
+function getRoomIdForChannel(channelId: string): string | null {
+  const channel = MOCK_CHANNELS.find((c) => c.id === channelId);
+  return channel?.roomId ?? null;
+}
+
+// Get default channel for a room (first text channel)
+function getDefaultChannelForRoom(roomId: string): string | null {
+  const channel = MOCK_CHANNELS.find(
+    (c) => c.roomId === roomId && c.type === "TEXT"
+  );
+  return channel?.id ?? null;
+}
+
+export function ServerList() {
+  const router = useRouter();
+  const params = useParams();
+  const pathname = usePathname();
+  const { t } = useTranslation();
+
+  // Derive active room from current URL
+  const activeChannelId = (params?.channelId as string) || null;
+  const activeRoomId = activeChannelId
+    ? getRoomIdForChannel(activeChannelId)
+    : null;
+  const isDashboard = pathname?.startsWith("/dashboard");
+
+  function handleServerClick(roomId: string) {
+    const defaultChannel = getDefaultChannelForRoom(roomId);
+    if (defaultChannel) {
+      router.push(`/channels/${defaultChannel}`);
+    }
+  }
+
+  return (
+    <div className="flex h-full w-[72px] flex-col items-center bg-background-tertiary py-3">
+      <ScrollArea className="flex-1 w-full">
+        <div className="flex flex-col items-center gap-2 px-3">
+          {/* DM Button — navigates to /dashboard */}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                onClick={() => router.push("/dashboard")}
+                className={cn(
+                  "flex h-12 w-12 items-center justify-center transition-all duration-200 cursor-pointer",
+                  isDashboard
+                    ? "rounded-[16px] bg-accent"
+                    : "rounded-full bg-background-secondary hover:rounded-[16px] hover:bg-accent"
+                )}
+              >
+                <MessageCircle className="h-6 w-6 text-foreground" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="right">
+              {t("sidebar.directMessages")}
+            </TooltipContent>
+          </Tooltip>
+
+          <Separator className="mx-auto w-8" />
+
+          {/* Server icons */}
+          {MOCK_ROOMS.map((room) => (
+            <ServerIcon
+              key={room.id}
+              name={room.name}
+              iconUrl={room.iconUrl}
+              isActive={activeRoomId === room.id}
+              hasNotification={false}
+              onClick={() => handleServerClick(room.id)}
+            />
+          ))}
+
+          <Separator className="mx-auto w-8" />
+
+          {/* Add Server */}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                className={cn(
+                  "flex h-12 w-12 items-center justify-center rounded-full bg-background-secondary transition-all duration-200 cursor-pointer",
+                  "hover:rounded-[16px] hover:bg-success"
+                )}
+              >
+                <Plus className="h-6 w-6 text-success group-hover:text-white" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="right">
+              {t("sidebar.addServer")}
+            </TooltipContent>
+          </Tooltip>
+        </div>
+      </ScrollArea>
+    </div>
+  );
+}
