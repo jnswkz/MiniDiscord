@@ -7,6 +7,7 @@ import { ChevronDown, ChevronRight, Hash, Volume2 } from "lucide-react";
 import { MOCK_ROOMS, MOCK_CHANNELS } from "@/lib/mock-data";
 import { useTranslation } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
+import { useUIStore } from "@/stores/uiStore";
 import type { Channel } from "@/types";
 
 function ChannelItem({
@@ -24,7 +25,7 @@ function ChannelItem({
     <button
       onClick={onClick}
       className={cn(
-        "flex w-full items-center gap-1.5 rounded-md px-2 py-1.5 text-sm transition-colors duration-150 cursor-pointer",
+        "flex w-full items-center gap-2 rounded-md px-3 py-1.5 text-[15px] transition-colors duration-150 cursor-pointer",
         isActive
           ? "bg-secondary text-foreground font-medium"
           : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
@@ -50,10 +51,10 @@ function ChannelCategory({
   const [isOpen, setIsOpen] = useState(true);
 
   return (
-    <div className="mb-1">
+    <div className="mb-4">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex w-full items-center gap-0.5 px-0.5 py-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+        className="flex w-full items-center gap-1 px-1 py-1.5 text-[12px] font-semibold uppercase tracking-wide text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
       >
         {isOpen ? (
           <ChevronDown className="h-3 w-3" />
@@ -89,6 +90,7 @@ export function ChannelList() {
   const router = useRouter();
   const params = useParams();
   const pathname = usePathname();
+  const sidebarWidth = useUIStore((s) => s.sidebarWidth);
 
   // Derive active channel from URL params
   const activeChannelId = (params?.channelId as string) || null;
@@ -111,15 +113,18 @@ export function ChannelList() {
   }
 
   return (
-    <div className="flex h-full w-[240px] flex-col bg-background-secondary">
+    <div
+      className="flex h-full flex-col bg-background-secondary"
+      style={{ width: sidebarWidth }}
+    >
       {/* Server Name Header */}
-      <button className="flex h-12 items-center justify-between border-b border-border px-4 font-semibold text-foreground hover:bg-secondary/50 transition-colors cursor-pointer">
+      <button className="flex h-12 items-center justify-between px-4 text-[15px] font-semibold text-foreground hover:bg-secondary/50 transition-colors cursor-pointer shadow-sm">
         <span className="truncate">{room?.name || "Server"}</span>
         <ChevronDown className="h-4 w-4 shrink-0 opacity-60" />
       </button>
 
       {/* Channel List */}
-      <ScrollArea className="flex-1 px-2 pt-3">
+      <ScrollArea className="flex-1 px-3 pt-4">
         <ChannelCategory
           title={t("channels.textChannels")}
           channels={textChannels}

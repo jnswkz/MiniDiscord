@@ -1,23 +1,44 @@
 import { create } from "zustand";
+import { useEffect } from "react";
 
 export type Locale = "en" | "vi";
 
 interface I18nState {
   locale: Locale;
+  hydrated: boolean;
   setLocale: (locale: Locale) => void;
+  hydrate: () => void;
 }
 
 export const useI18nStore = create<I18nState>((set) => ({
-  locale: (typeof window !== "undefined"
-    ? (localStorage.getItem("locale") as Locale)
-    : null) || "en",
+  locale: "en",
+  hydrated: false,
   setLocale: (locale) => {
     if (typeof window !== "undefined") {
       localStorage.setItem("locale", locale);
     }
     set({ locale });
   },
+  hydrate: () => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("locale") as Locale | null;
+      if (saved && (saved === "en" || saved === "vi")) {
+        set({ locale: saved, hydrated: true });
+      } else {
+        set({ hydrated: true });
+      }
+    }
+  },
 }));
+
+/** Call this in a top-level client component to hydrate locale from localStorage */
+export function useI18nHydration() {
+  const hydrate = useI18nStore((s) => s.hydrate);
+  const hydrated = useI18nStore((s) => s.hydrated);
+  useEffect(() => {
+    if (!hydrated) hydrate();
+  }, [hydrate, hydrated]);
+}
 
 const translations = {
   en: {

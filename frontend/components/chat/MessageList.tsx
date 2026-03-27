@@ -19,10 +19,10 @@ export function MessageList({ messages, channelName }: MessageListProps) {
           <div className="flex h-[68px] w-[68px] items-center justify-center rounded-full bg-secondary mb-2">
             <Hash className="h-10 w-10 text-foreground" />
           </div>
-          <h2 className="text-3xl font-bold text-foreground">
+          <h2 className="text-[28px] font-bold text-foreground">
             Chào mừng đến #{channelName}!
           </h2>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <p className="mt-1 text-[14px] text-muted-foreground">
             Đây là khởi đầu của kênh #{channelName}. Hãy bắt đầu trò chuyện.
           </p>
         </div>

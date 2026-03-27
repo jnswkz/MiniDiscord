@@ -1,3 +1,5 @@
+"use client";
+
 import { ServerList } from "@/components/sidebar/ServerList";
 import { UserPanel } from "@/components/sidebar/UserPanel";
 import { ChannelList } from "@/components/sidebar/ChannelList";
@@ -5,17 +7,27 @@ import { ChatHeader } from "@/components/chat/ChatHeader";
 import { MessageList } from "@/components/chat/MessageList";
 import { MessageInput } from "@/components/chat/MessageInput";
 import { MemberList } from "@/components/sidebar/MemberList";
+import { ResizeHandle } from "@/components/ui/ResizeHandle";
+import { useUIStore } from "@/stores/uiStore";
 import { MOCK_MESSAGES, MOCK_CHANNELS } from "@/lib/mock-data";
+import { useParams } from "next/navigation";
+import { useCallback } from "react";
 
-export default async function ChannelPage({
-  params,
-}: {
-  params: Promise<{ channelId: string }>;
-}) {
-  const { channelId } = await params;
+export default function ChannelPage() {
+  const params = useParams();
+  const channelId = params?.channelId as string;
+  const showMemberList = useUIStore((s) => s.showMemberList);
+  const sidebarWidth = useUIStore((s) => s.sidebarWidth);
+  const setSidebarWidth = useUIStore((s) => s.setSidebarWidth);
+
   const channel = MOCK_CHANNELS.find((c) => c.id === channelId);
   const channelName = channel?.name || "general";
   const messages = MOCK_MESSAGES.filter((m) => m.channelId === channelId);
+
+  const handleResize = useCallback(
+    (delta: number) => setSidebarWidth(sidebarWidth + delta),
+    [sidebarWidth, setSidebarWidth]
+  );
 
   return (
     <>
@@ -31,6 +43,9 @@ export default async function ChannelPage({
         <UserPanel />
       </div>
 
+      {/* Resize Handle */}
+      <ResizeHandle onResize={handleResize} />
+
       {/* Column 3: Chat Area */}
       <main className="flex flex-1 flex-col min-w-0 bg-background">
         <ChatHeader channelName={channelName} />
@@ -38,8 +53,9 @@ export default async function ChannelPage({
         <MessageInput channelName={channelName} />
       </main>
 
-      {/* Column 4: Member List */}
-      <MemberList />
+      {/* Column 4: Member List (toggleable) */}
+      {showMemberList && <MemberList />}
     </>
   );
 }
+

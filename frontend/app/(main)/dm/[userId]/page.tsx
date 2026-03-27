@@ -1,14 +1,20 @@
+"use client";
+
+import { useParams } from "next/navigation";
 import { ServerList } from "@/components/sidebar/ServerList";
 import { UserPanel } from "@/components/sidebar/UserPanel";
 import { DMSidebar } from "@/components/sidebar/DMSidebar";
 import { DmUserPanel } from "@/components/dm/DmUserPanel";
+import { MessageInput } from "@/components/chat/MessageInput";
 import { StatusAvatar } from "@/components/ui/StatusAvatar";
 import { ScrollArea } from "@/components/ui/ScrollArea";
-import { Phone, Video, Pin, UserX, Ban, Plus, Gift, Smile, Send } from "lucide-react";
+import { Phone, Video, Pin, User } from "lucide-react";
+import { ResizeHandle } from "@/components/ui/ResizeHandle";
+import { useUIStore } from "@/stores/uiStore";
 import { MOCK_USERS, MOCK_DIRECT_MESSAGES, CURRENT_USER } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
+import { useCallback } from "react";
 
-// Mock DM chat messages for demo
 function getDmMessages(userId: string) {
   const user = MOCK_USERS.find((u) => u.id === userId);
   if (!user) return [];
@@ -34,7 +40,9 @@ function getDmMessages(userId: string) {
       senderId: userId,
       senderName: user.username,
       senderAvatar: user.avatarUrl,
-      content: MOCK_DIRECT_MESSAGES.find((dm) => dm.recipientId === userId)?.lastMessage || "Mình ổn, cảm ơn!",
+      content:
+        MOCK_DIRECT_MESSAGES.find((dm) => dm.recipientId === userId)
+          ?.lastMessage || "Mình ổn, cảm ơn!",
       createdAt: "2026-03-26T08:00:00Z",
     },
   ];
@@ -55,17 +63,19 @@ function DmMessageItem({
 
   if (isGrouped) {
     return (
-      <div className="group flex items-start gap-4 px-4 py-0.5 hover:bg-secondary/30">
-        <span className="w-10 text-center text-[10px] text-muted-foreground opacity-0 group-hover:opacity-100 pt-1">
+      <div className="group flex items-start gap-4 px-4 py-[2px] hover:bg-secondary/30">
+        <span className="w-10 text-center text-[11px] text-muted-foreground opacity-0 group-hover:opacity-100 pt-0.5 leading-[1.375rem]">
           {time}
         </span>
-        <p className="text-sm text-foreground">{message.content}</p>
+        <p className="text-[0.9375rem] leading-[1.375rem] text-foreground">
+          {message.content}
+        </p>
       </div>
     );
   }
 
   return (
-    <div className="group flex items-start gap-4 px-4 pt-4 pb-0.5 hover:bg-secondary/30">
+    <div className="group flex items-start gap-4 px-4 pt-[1.0625rem] pb-[2px] hover:bg-secondary/30">
       <StatusAvatar
         src={message.senderAvatar}
         fallback={fallback}
@@ -74,30 +84,39 @@ function DmMessageItem({
       />
       <div className="flex-1 min-w-0">
         <div className="flex items-baseline gap-2">
-          <span className="text-sm font-semibold text-foreground">
+          <span className="text-[0.9375rem] font-semibold text-foreground leading-[1.375rem] hover:underline cursor-pointer">
             {message.senderName}
           </span>
-          <span className="text-[11px] text-muted-foreground">{time}</span>
+          <span className="text-[0.75rem] text-muted-foreground leading-[1.375rem]">{time}</span>
         </div>
-        <p className="text-sm text-foreground">{message.content}</p>
+        <p className="text-[0.9375rem] leading-[1.375rem] text-foreground">
+          {message.content}
+        </p>
       </div>
     </div>
   );
 }
 
-export default async function DmChatPage({
-  params,
-}: {
-  params: Promise<{ userId: string }>;
-}) {
-  const { userId } = await params;
+export default function DmChatPage() {
+  const params = useParams();
+  const userId = params?.userId as string;
+  const showDmUserPanel = useUIStore((s) => s.showDmUserPanel);
+  const toggleDmUserPanel = useUIStore((s) => s.toggleDmUserPanel);
+  const sidebarWidth = useUIStore((s) => s.sidebarWidth);
+  const setSidebarWidth = useUIStore((s) => s.setSidebarWidth);
+
+  const handleResize = useCallback(
+    (delta: number) => setSidebarWidth(sidebarWidth + delta),
+    [sidebarWidth, setSidebarWidth]
+  );
+
   const friend = MOCK_USERS.find((u) => u.id === userId);
   const friendName = friend?.username || "User";
   const messages = getDmMessages(userId);
 
   return (
     <>
-      {/* Left section */}
+      {/* Left section: ServerList + DMSidebar + UserPanel */}
       <div className="flex shrink-0 flex-col">
         <div className="flex flex-1 min-h-0 overflow-hidden">
           <ServerList />
@@ -106,12 +125,15 @@ export default async function DmChatPage({
         <UserPanel />
       </div>
 
+      {/* Resize Handle */}
+      <ResizeHandle onResize={handleResize} />
+
       {/* Column 3: DM Chat */}
       <main className="flex flex-1 flex-col min-w-0 bg-background">
         {/* DM Header */}
-        <div className="flex h-12 items-center justify-between border-b border-border bg-background px-4">
+        <div className="flex h-12 shrink-0 items-center justify-between border-b border-border bg-background px-4">
           <div className="flex items-center gap-2">
-            <span className="text-base font-semibold text-foreground">
+            <span className="text-[15px] font-semibold text-foreground">
               @ {friendName}
             </span>
           </div>
@@ -125,6 +147,18 @@ export default async function DmChatPage({
             <button className="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
               <Pin className="h-5 w-5" />
             </button>
+            <button
+              onClick={toggleDmUserPanel}
+              className={cn(
+                "flex h-8 w-8 items-center justify-center rounded-md transition-colors cursor-pointer",
+                showDmUserPanel
+                  ? "text-foreground bg-secondary"
+                  : "text-muted-foreground hover:text-foreground"
+              )}
+              aria-label="Toggle user panel"
+            >
+              <User className="h-5 w-5" />
+            </button>
           </div>
         </div>
 
@@ -132,31 +166,37 @@ export default async function DmChatPage({
         <ScrollArea className="flex-1">
           <div className="flex flex-col justify-end min-h-full">
             {/* Welcome */}
-            <div className="px-4 pt-16 pb-4">
+            <div className="px-4 pt-20 pb-6">
               <StatusAvatar
                 src={friend?.avatarUrl ?? null}
                 fallback={friendName}
                 status={friend?.status || "OFFLINE"}
                 size="xl"
               />
-              <h2 className="mt-2 text-2xl font-bold text-foreground">
+              <h2 className="mt-3 text-[2rem] font-bold text-foreground leading-tight">
                 {friendName}
               </h2>
-              <p className="text-sm text-muted-foreground">
-                Đây là khởi đầu cuộc trò chuyện trực tiếp với <strong>{friendName}</strong>.
+              <p className="mt-1.5 text-[0.9375rem] leading-[1.375rem] text-muted-foreground">
+                Đây là phần mở đầu trong lịch sử các tin nhắn trực tiếp của bạn với{" "}
+                <strong className="font-semibold text-foreground">{friendName}</strong>.
               </p>
-              <div className="mt-2 flex gap-2">
-                <button className="rounded-md bg-secondary px-3 py-1 text-xs font-medium text-foreground hover:bg-secondary/80 transition-colors cursor-pointer">
+              <div className="mt-4 flex items-center gap-2">
+                <button className="rounded-[3px] border border-border bg-transparent px-4 py-[5px] text-[0.8125rem] font-medium text-foreground hover:bg-secondary/50 transition-colors duration-150 cursor-pointer">
                   Xóa Bạn
                 </button>
-                <button className="rounded-md bg-secondary px-3 py-1 text-xs font-medium text-foreground hover:bg-secondary/80 transition-colors cursor-pointer">
+                <button className="rounded-[3px] border border-border bg-transparent px-4 py-[5px] text-[0.8125rem] font-medium text-foreground hover:bg-secondary/50 transition-colors duration-150 cursor-pointer">
                   Chặn
                 </button>
               </div>
             </div>
 
+            {/* Divider */}
+            <div className="relative mx-4 mb-2">
+              <div className="h-px bg-border" />
+            </div>
+
             {/* Messages */}
-            <div className="pb-4">
+            <div className="pb-2">
               {messages.map((msg, i) => {
                 const prev = messages[i - 1];
                 const isGrouped = !!prev && prev.senderId === msg.senderId;
@@ -173,30 +213,11 @@ export default async function DmChatPage({
         </ScrollArea>
 
         {/* Message Input */}
-        <div className="px-4 pb-6">
-          <div className="flex items-center gap-2 rounded-lg bg-input px-4 py-2.5">
-            <button className="shrink-0 text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
-              <Plus className="h-5 w-5" />
-            </button>
-            <input
-              type="text"
-              placeholder={`Nhắn @${friendName}`}
-              className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none"
-            />
-            <div className="flex items-center gap-1.5">
-              <button className="text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
-                <Gift className="h-5 w-5" />
-              </button>
-              <button className="text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
-                <Smile className="h-5 w-5" />
-              </button>
-            </div>
-          </div>
-        </div>
+        <MessageInput channelName={friendName} isDm />
       </main>
 
-      {/* Column 4: User Info Panel */}
-      <DmUserPanel userId={userId} />
+      {/* Column 4: User Info Panel (toggleable) */}
+      {showDmUserPanel && <DmUserPanel userId={userId} />}
     </>
   );
 }

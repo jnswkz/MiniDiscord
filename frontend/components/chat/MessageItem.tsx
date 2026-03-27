@@ -63,7 +63,7 @@ export function MessageItem({ message, isGrouped = false }: MessageItemProps) {
             size="lg"
           />
         ) : (
-          <span className="hidden group-hover:block text-[10px] text-muted-foreground leading-[22px] text-right w-full">
+          <span className="hidden group-hover:block text-[11px] text-muted-foreground leading-[22px] text-right w-full">
             {formatTime(message.createdAt)}
           </span>
         )}
@@ -73,10 +73,10 @@ export function MessageItem({ message, isGrouped = false }: MessageItemProps) {
       <div className="flex-1 min-w-0">
         {!isGrouped && (
           <div className="flex items-baseline gap-2">
-            <span className="font-semibold text-foreground text-sm hover:underline cursor-pointer">
+            <span className="font-semibold text-foreground text-[15px] hover:underline cursor-pointer">
               {message.senderName}
             </span>
-            <time className="text-xs text-muted-foreground">
+            <time className="text-[12px] text-muted-foreground">
               {formatFullDate(message.createdAt)}
             </time>
             {message.isEdited && (
@@ -96,7 +96,7 @@ export function MessageItem({ message, isGrouped = false }: MessageItemProps) {
           </div>
         )}
 
-        <p className="text-sm text-foreground leading-relaxed break-words">
+        <p className="text-[15px] text-foreground leading-relaxed break-words">
           {message.content}
         </p>
 

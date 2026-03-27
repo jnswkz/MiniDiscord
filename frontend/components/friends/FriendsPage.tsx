@@ -75,7 +75,7 @@ function FriendContextMenu({
             key={i}
             onClick={item.onClick}
             className={cn(
-              "flex w-full items-center gap-2.5 rounded-sm px-2.5 py-2 text-sm transition-colors cursor-pointer",
+              "flex w-full items-center gap-2.5 rounded-sm px-2.5 py-2 text-[13px] transition-colors cursor-pointer",
               item.danger
                 ? "text-destructive hover:bg-destructive hover:text-white"
                 : "text-foreground hover:bg-accent hover:text-white"
@@ -111,7 +111,7 @@ function FriendsHeader({
 
   return (
     <div className="flex h-12 items-center gap-3 border-b border-border px-4">
-      <div className="flex items-center gap-2 text-foreground font-semibold">
+      <div className="flex items-center gap-2 text-[15px] text-foreground font-semibold">
         <Users className="h-5 w-5" />
         <span>{t("friends.title")}</span>
       </div>
@@ -124,7 +124,7 @@ function FriendsHeader({
             key={tab.key}
             onClick={() => onTabChange(tab.key)}
             className={cn(
-              "relative rounded-md px-3 py-1 text-sm font-medium transition-colors cursor-pointer",
+              "relative rounded-md px-3 py-1 text-[14px] font-medium transition-colors cursor-pointer",
               tab.highlight && activeTab !== tab.key
                 ? "bg-success text-white hover:bg-success/80"
                 : activeTab === tab.key
@@ -164,12 +164,22 @@ function FriendItem({
     | "idle"
     | "dnd";
 
-  function handleMessage() {
-    router.push(`/dm/${user.id}`);
+  function handleNavigate() {
+    if (!isPending) {
+      router.push(`/dm/${user.id}`);
+    }
   }
 
   return (
-    <div className="group flex items-center gap-3 rounded-md px-3 py-2 transition-colors hover:bg-secondary/50 border-t border-border/50">
+    <div
+      onClick={handleNavigate}
+      className={cn(
+        "group flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors border-t border-border/30",
+        isPending
+          ? "hover:bg-secondary/50"
+          : "hover:bg-secondary/50 cursor-pointer"
+      )}
+    >
       <StatusAvatar
         src={user.avatarUrl}
         fallback={user.username}
@@ -177,11 +187,11 @@ function FriendItem({
         size="lg"
       />
 
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-semibold text-foreground truncate">
+      <div className="flex-1 min-w-0 flex flex-col justify-center">
+        <p className="text-[15px] font-semibold text-foreground truncate leading-snug">
           {user.username}
         </p>
-        <p className="text-xs text-muted-foreground">
+        <p className="text-[13px] text-muted-foreground leading-snug">
           {isPending
             ? isIncoming
               ? t("friends.incomingRequest")
@@ -190,10 +200,15 @@ function FriendItem({
         </p>
       </div>
 
-      <div className={cn(
-        "flex items-center gap-2",
-        isPending ? "opacity-100" : "opacity-0 group-hover:opacity-100 transition-opacity"
-      )}>
+      <div
+        className={cn(
+          "flex items-center gap-2",
+          isPending
+            ? "opacity-100"
+            : "opacity-0 group-hover:opacity-100 transition-opacity"
+        )}
+        onClick={(e) => e.stopPropagation()}
+      >
         {isPending ? (
           <>
             {isIncoming && (
@@ -214,11 +229,11 @@ function FriendItem({
         ) : (
           <>
             <button
-              onClick={handleMessage}
+              onClick={() => router.push(`/dm/${user.id}`)}
               className="flex h-9 w-9 items-center justify-center rounded-full bg-secondary text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
               aria-label="Message"
             >
-              <MessageCircle className="h-4 w-4" />
+              <MessageCircle className="h-[18px] w-[18px]" />
             </button>
             <div className="relative">
               <button
@@ -226,7 +241,7 @@ function FriendItem({
                 className="flex h-9 w-9 items-center justify-center rounded-full bg-secondary text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
                 aria-label="More"
               >
-                <MoreVertical className="h-4 w-4" />
+                <MoreVertical className="h-[18px] w-[18px]" />
               </button>
               {showMenu && (
                 <FriendContextMenu
@@ -253,18 +268,18 @@ function AllFriends() {
 
   return (
     <div>
-      <div className="px-4 py-3">
+      <div className="px-6 py-4">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
           <input
             type="text"
             placeholder={t("friends.search")}
-            className="h-8 w-full rounded-md bg-background-tertiary pl-9 pr-3 text-sm text-foreground placeholder:text-muted-foreground outline-none"
+            className="h-8 w-full rounded-md bg-background-tertiary pl-9 pr-3 text-[13px] text-foreground placeholder:text-muted-foreground outline-none"
           />
         </div>
       </div>
-      <div className="px-4">
-        <h3 className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+      <div className="px-6 mt-4">
+        <h3 className="mb-2 px-3 text-[12px] font-semibold uppercase tracking-wide text-muted-foreground">
           {t("friends.allCount")} — {friends.length}
         </h3>
         {friends.map((user) => (
@@ -288,8 +303,8 @@ function PendingFriends() {
   });
 
   return (
-    <div className="px-4 pt-3">
-      <h3 className="mb-1 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+    <div className="px-6 pt-8">
+      <h3 className="mb-2 px-3 text-[12px] font-semibold uppercase tracking-wide text-muted-foreground">
         {t("friends.pendingCount")} — {pendingUsers.length}
       </h3>
       {pendingUsers.map(({ friendship, user, isIncoming }) => (
@@ -301,7 +316,7 @@ function PendingFriends() {
         />
       ))}
       {pendingUsers.length === 0 && (
-        <p className="py-8 text-center text-sm text-muted-foreground">
+        <p className="py-8 text-center text-[14px] text-muted-foreground">
           {t("friends.noPending")}
         </p>
       )}
@@ -315,11 +330,11 @@ function AddFriend() {
   const { t } = useTranslation();
 
   return (
-    <div className="px-4 pt-4">
-      <h2 className="text-base font-bold text-foreground">
+    <div className="px-6 pt-4">
+      <h2 className="text-[16px] font-bold text-foreground">
         {t("friends.addTitle")}
       </h2>
-      <p className="mt-1 text-sm text-muted-foreground">
+      <p className="mt-1 text-[14px] text-muted-foreground">
         {t("friends.addDescription")}
       </p>
 
@@ -334,7 +349,7 @@ function AddFriend() {
         </div>
         <Button
           disabled={!username.trim()}
-          className="h-12 px-6 text-sm font-medium"
+          className="h-12 px-6 text-[14px] font-medium"
         >
           {t("friends.sendRequest")}
         </Button>

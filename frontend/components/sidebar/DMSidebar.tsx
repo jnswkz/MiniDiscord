@@ -7,6 +7,7 @@ import { Users, Plus } from "lucide-react";
 import { MOCK_DIRECT_MESSAGES } from "@/lib/mock-data";
 import { useTranslation } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
+import { useUIStore } from "@/stores/uiStore";
 import type { DirectMessage } from "@/types";
 
 function DMItem({
@@ -22,7 +23,7 @@ function DMItem({
     <button
       onClick={onClick}
       className={cn(
-        "group flex w-full items-center gap-3 rounded-md px-2 py-1.5 transition-colors duration-150 cursor-pointer",
+        "group flex w-full items-center gap-4 rounded-md px-3 py-2 transition-colors duration-150 cursor-pointer",
         isActive
           ? "bg-secondary text-foreground"
           : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
@@ -34,7 +35,7 @@ function DMItem({
         status={dm.recipientStatus}
         size="md"
       />
-      <span className="flex-1 truncate text-left text-sm">
+      <span className="flex-1 truncate text-left text-[15px] font-medium">
         {dm.recipientName}
       </span>
       {dm.unreadCount > 0 && (
@@ -50,25 +51,29 @@ export function DMSidebar({ activeUserId }: { activeUserId?: string }) {
   const { t } = useTranslation();
   const router = useRouter();
   const pathname = usePathname();
+  const sidebarWidth = useUIStore((s) => s.sidebarWidth);
 
   const isDashboard = pathname?.startsWith("/dashboard");
 
   return (
-    <div className="flex h-full w-[240px] flex-col bg-background-secondary">
+    <div
+      className="flex h-full flex-col bg-background-secondary"
+      style={{ width: sidebarWidth }}
+    >
       {/* Search bar */}
-      <div className="flex h-12 items-center border-b border-border px-3">
-        <button className="flex h-7 w-full items-center rounded-md bg-background-tertiary px-2 text-xs text-muted-foreground transition-colors hover:bg-background-tertiary/80 cursor-pointer">
+      <div className="flex h-12 items-center px-3">
+        <button className="flex h-7 w-full items-center rounded-md bg-background-tertiary px-2 text-[13px] text-muted-foreground transition-colors hover:bg-background-tertiary/80 cursor-pointer">
           {t("sidebar.searchOrStart")}
         </button>
       </div>
 
       <ScrollArea className="flex-1">
-        <div className="px-2 pt-2">
+        <div className="px-3 pt-3">
           {/* Friends nav */}
           <button
             onClick={() => router.push("/dashboard")}
             className={cn(
-              "flex w-full items-center gap-3 rounded-md px-2 py-2 text-sm font-medium transition-colors cursor-pointer",
+              "flex w-full items-center gap-4 rounded-md px-3 py-2.5 text-[15px] font-medium transition-colors cursor-pointer",
               isDashboard && !activeUserId
                 ? "bg-secondary text-foreground"
                 : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
@@ -79,8 +84,8 @@ export function DMSidebar({ activeUserId }: { activeUserId?: string }) {
           </button>
 
           {/* DM Header */}
-          <div className="mt-4 flex items-center justify-between px-2">
-            <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          <div className="mt-6 mb-1 flex items-center justify-between px-3">
+            <h3 className="text-[12px] font-semibold uppercase tracking-wide text-muted-foreground">
               {t("sidebar.directMessages")}
             </h3>
             <button

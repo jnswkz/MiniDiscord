@@ -40,7 +40,7 @@ export function UserPanel() {
     | "dnd";
 
   return (
-    <div className="flex items-center gap-2 bg-background-tertiary px-2 py-2">
+    <div className="flex h-[58px] shrink-0 items-center gap-2 rounded-lg bg-background-tertiary px-2 mx-2 mb-2">
       <StatusAvatar
         src={CURRENT_USER.avatarUrl}
         fallback={CURRENT_USER.username}
@@ -49,23 +49,23 @@ export function UserPanel() {
       />
 
       <div className="flex-1 min-w-0">
-        <p className="truncate text-sm font-semibold text-foreground leading-tight">
+        <p className="truncate text-[14px] font-semibold text-foreground leading-tight">
           {CURRENT_USER.username}
         </p>
-        <p className="truncate text-xs text-muted-foreground leading-tight">
+        <p className="truncate text-[12px] text-muted-foreground leading-tight">
           {t(`status.${statusKey}`)}
         </p>
       </div>
 
       <div className="flex items-center gap-0.5">
         <IconButton label={t("userPanel.muteMic")}>
-          <Mic className="h-4 w-4" />
+          <Mic className="h-[18px] w-[18px]" />
         </IconButton>
         <IconButton label={t("userPanel.deafen")}>
-          <Headphones className="h-4 w-4" />
+          <Headphones className="h-[18px] w-[18px]" />
         </IconButton>
         <IconButton label={t("userPanel.settings")} onClick={openSettings}>
-          <Settings className="h-4 w-4" />
+          <Settings className="h-[18px] w-[18px]" />
         </IconButton>
       </div>
     </div>

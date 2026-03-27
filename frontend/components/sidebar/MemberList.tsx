@@ -34,15 +34,15 @@ function MemberSection({
   users: typeof MOCK_USERS;
 }) {
   return (
-    <div className="mb-4">
-      <h3 className="mb-1 px-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+    <div className="mb-6">
+      <h3 className="mb-2 px-3 text-[12px] font-semibold uppercase tracking-wide text-muted-foreground">
         {title}
       </h3>
-      <div className="space-y-0.5">
+      <div className="space-y-0.5 px-2">
         {users.map((user) => (
           <button
             key={user.id}
-            className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 transition-colors duration-150 hover:bg-secondary/50 cursor-pointer"
+            className="group flex w-full items-center gap-3 rounded-md px-3 py-1.5 transition-colors duration-150 hover:bg-secondary/50 cursor-pointer"
           >
             <StatusAvatar
               src={user.avatarUrl}
@@ -50,7 +50,7 @@ function MemberSection({
               status={user.status}
               size="md"
             />
-            <span className="truncate text-sm text-muted-foreground">
+            <span className="truncate text-[15px] font-medium text-muted-foreground group-hover:text-foreground transition-colors">
               {user.username}
             </span>
           </button>
