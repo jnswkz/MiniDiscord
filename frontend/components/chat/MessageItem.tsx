@@ -1,13 +1,17 @@
 "use client";
 
 import { StatusAvatar } from "@/components/ui/StatusAvatar";
-import { Smile, Reply, MoreHorizontal } from "lucide-react";
+import { MessageActions } from "@/components/chat/MessageActions";
+import { Reply } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useChatStore } from "@/stores/chatStore";
+import { CURRENT_USER } from "@/lib/mock-data";
 import type { Message } from "@/types";
 
 interface MessageItemProps {
   message: Message;
   isGrouped?: boolean;
+  channelId?: string;
 }
 
 function formatTime(dateStr: string) {
@@ -29,29 +33,41 @@ function formatFullDate(dateStr: string) {
   });
 }
 
-function ActionButton({
-  children,
-  label,
-}: {
-  children: React.ReactNode;
-  label: string;
-}) {
-  return (
-    <button
-      aria-label={label}
-      className="flex h-7 w-7 items-center justify-center rounded text-muted-foreground hover:text-foreground hover:bg-background-tertiary transition-colors cursor-pointer"
-    >
-      {children}
-    </button>
-  );
-}
+export function MessageItem({ message, isGrouped = false, channelId }: MessageItemProps) {
+  const replyingTo = useChatStore((s) => s.replyingTo);
+  const setReplyingTo = useChatStore((s) => s.setReplyingTo);
+  const addReaction = useChatStore((s) => s.addReaction);
 
-export function MessageItem({ message, isGrouped = false }: MessageItemProps) {
+  const isBeingReplied = replyingTo?.messageId === message.id;
+
+  function handleReply() {
+    setReplyingTo({
+      messageId: message.id,
+      senderName: message.senderName,
+      content: message.content,
+    });
+  }
+
+  function handleReaction(emoji: string) {
+    if (channelId) {
+      addReaction(channelId, message.id, emoji);
+    }
+  }
+
+  function handleReactionBadgeClick(emoji: string) {
+    if (channelId) {
+      addReaction(channelId, message.id, emoji);
+    }
+  }
+
   return (
     <div
       className={cn(
-        "group relative flex gap-4 px-4 py-0.5 hover:bg-background-secondary/30 transition-colors",
-        !isGrouped && "mt-4 pt-1"
+        "group relative flex gap-4 px-4 py-0.5 transition-colors",
+        !isGrouped && "mt-4 pt-1",
+        isBeingReplied
+          ? "bg-accent/8 hover:bg-accent/12"
+          : "hover:bg-background-secondary/30"
       )}
     >
       {/* Avatar or timestamp gutter */}
@@ -103,31 +119,35 @@ export function MessageItem({ message, isGrouped = false }: MessageItemProps) {
         {/* Reactions */}
         {message.reactions.length > 0 && (
           <div className="flex flex-wrap gap-1 mt-1">
-            {message.reactions.map((reaction, i) => (
-              <button
-                key={i}
-                className="flex items-center gap-1 rounded-md border border-border bg-background-secondary px-1.5 py-0.5 text-xs transition-colors hover:border-accent cursor-pointer"
-              >
-                <span>{reaction.emoji}</span>
-                <span className="text-muted-foreground">{reaction.count}</span>
-              </button>
-            ))}
+            {message.reactions.map((reaction, i) => {
+              const hasReacted = reaction.userIds.includes(CURRENT_USER.id);
+              return (
+                <button
+                  key={`${reaction.emoji}-${i}`}
+                  onClick={() => handleReactionBadgeClick(reaction.emoji)}
+                  className={cn(
+                    "flex items-center gap-1 rounded-lg px-1.5 py-0.5 text-xs transition-colors cursor-pointer",
+                    hasReacted
+                      ? "bg-[#5865F2]/20 border border-[#5865F2]"
+                      : "bg-[#2b2d31] border border-transparent hover:border-border"
+                  )}
+                >
+                  <span>{reaction.emoji}</span>
+                  <span className={cn(
+                    "font-medium",
+                    hasReacted ? "text-[#5865F2]" : "text-muted-foreground"
+                  )}>
+                    {reaction.count}
+                  </span>
+                </button>
+              );
+            })}
           </div>
         )}
       </div>
 
       {/* Action bar on hover */}
-      <div className="absolute -top-3 right-4 hidden group-hover:flex items-center gap-0.5 rounded-md border border-border bg-background p-0.5 shadow-md">
-        <ActionButton label="Thêm reaction">
-          <Smile className="h-4 w-4" />
-        </ActionButton>
-        <ActionButton label="Trả lời">
-          <Reply className="h-4 w-4" />
-        </ActionButton>
-        <ActionButton label="Thêm">
-          <MoreHorizontal className="h-4 w-4" />
-        </ActionButton>
-      </div>
+      <MessageActions onReaction={handleReaction} onReply={handleReply} />
     </div>
   );
 }

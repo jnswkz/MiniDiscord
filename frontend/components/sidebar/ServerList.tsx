@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+
 import { useRouter, useParams, usePathname } from "next/navigation";
 import { ServerIcon } from "@/components/ui/ServerIcon";
 import { Separator } from "@/components/ui/Separator";
@@ -13,6 +15,8 @@ import {
 import { MOCK_ROOMS, MOCK_CHANNELS } from "@/lib/mock-data";
 import { useTranslation } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
+import { CreateServerModal } from "@/components/server/CreateServerModal";
+import { useNotificationStore } from "@/stores/notificationStore";
 
 // Map channelId -> roomId for reverse lookup
 function getRoomIdForChannel(channelId: string): string | null {
@@ -33,6 +37,9 @@ export function ServerList() {
   const params = useParams();
   const pathname = usePathname();
   const { t } = useTranslation();
+  const [showCreateServer, setShowCreateServer] = useState(false);
+  const getUnreadCount = useNotificationStore((s) => s.getUnreadCount);
+  const markAsRead = useNotificationStore((s) => s.markAsRead);
 
   // Derive active room from current URL
   const activeChannelId = (params?.channelId as string) || null;
@@ -42,6 +49,7 @@ export function ServerList() {
   const isDashboard = pathname?.startsWith("/dashboard");
 
   function handleServerClick(roomId: string) {
+    markAsRead(roomId);
     const defaultChannel = getDefaultChannelForRoom(roomId);
     if (defaultChannel) {
       router.push(`/channels/${defaultChannel}`);
@@ -81,7 +89,8 @@ export function ServerList() {
               name={room.name}
               iconUrl={room.iconUrl}
               isActive={activeRoomId === room.id}
-              hasNotification={false}
+              hasNotification={getUnreadCount(room.id) > 0}
+              unreadCount={getUnreadCount(room.id)}
               onClick={() => handleServerClick(room.id)}
             />
           ))}
@@ -92,6 +101,7 @@ export function ServerList() {
           <Tooltip>
             <TooltipTrigger asChild>
               <button
+                onClick={() => setShowCreateServer(true)}
                 className={cn(
                   "flex h-12 w-12 items-center justify-center rounded-full bg-background-secondary transition-all duration-200 cursor-pointer",
                   "hover:rounded-[16px] hover:bg-success"
@@ -106,6 +116,11 @@ export function ServerList() {
           </Tooltip>
         </div>
       </ScrollArea>
+
+      <CreateServerModal
+        isOpen={showCreateServer}
+        onClose={() => setShowCreateServer(false)}
+      />
     </div>
   );
 }

@@ -1,0 +1,164 @@
+{
+  "auth": {
+    "welcomeBack": "Welcome back!",
+    "gladToSeeYou": "We're glad to see you again!",
+    "email": "Email",
+    "password": "Password",
+    "forgotPassword": "Forgot your password?",
+    "login": "Log In",
+    "needAccount": "Need an account?",
+    "register": "Register",
+    "createAccount": "Create an account",
+    "username": "Username",
+    "confirmPassword": "Confirm Password",
+    "signUp": "Sign Up",
+    "haveAccount": "Already have an account?"
+  },
+  "validation": {
+    "emailInvalid": "Invalid email address",
+    "passwordMin": "Password must be at least 6 characters",
+    "usernameMin": "Username must be at least 3 characters",
+    "usernameMax": "Username must be at most 50 characters",
+    "passwordMismatch": "Passwords do not match"
+  },
+  "sidebar": {
+    "directMessages": "Direct Messages",
+    "friends": "Friends",
+    "searchOrStart": "Find or start a conversation",
+    "addServer": "Add a Server",
+    "createDM": "Create DM"
+  },
+  "userPanel": {
+    "muteMic": "Mute",
+    "deafen": "Deafen",
+    "settings": "User Settings"
+  },
+  "status": {
+    "online": "Online",
+    "offline": "Offline",
+    "idle": "Idle",
+    "dnd": "Do Not Disturb"
+  },
+  "friends": {
+    "title": "Friends",
+    "all": "All",
+    "pending": "Pending",
+    "addFriend": "Add Friend",
+    "allCount": "All Friends",
+    "pendingCount": "Pending",
+    "online": "Online",
+    "onlineCount": "Online",
+    "noOnline": "No friends are online right now.",
+    "search": "Search",
+    "incomingRequest": "Incoming Friend Request",
+    "outgoingRequest": "Outgoing Friend Request",
+    "noPending": "There are no pending friend requests.",
+    "addTitle": "Add Friend",
+    "addDescription": "You can add friends with their username.",
+    "addPlaceholder": "Enter a username",
+    "sendRequest": "Send Friend Request"
+  },
+  "activeNow": {
+    "title": "Active Now",
+    "empty": "It's quiet for now...",
+    "emptyDescription": "When a friend starts an activity — like playing a game or hanging out on voice — we'll show it here!"
+  },
+  "channels": {
+    "textChannels": "Text Channels",
+    "voiceChannels": "Voice Channels"
+  },
+  "chat": {
+    "welcomeTitle": "Welcome to #{channelName}!",
+    "welcomeDesc": "This is the beginning of the #{channelName} channel. Start chatting!",
+    "messagePlaceholder": "Message",
+    "messagePlaceholderChannel": "Message #{channelName}",
+    "messagePlaceholderDm": "Message @{userName}",
+    "edited": "(edited)",
+    "pin": "Pinned Messages",
+    "memberList": "Member List",
+    "inbox": "Inbox",
+    "threads": "Threads",
+    "search": "Search",
+    "help": "Help",
+    "attachFile": "Attach file",
+    "addReaction": "Add Reaction",
+    "reply": "Reply",
+    "more": "More",
+    "uploadFile": "Upload a File",
+    "uploadImage": "Upload an Image",
+    "uploadVideo": "Upload a Video",
+    "unreadBanner": "{count} new messages since {time} on {date}",
+    "markAsRead": "Mark As Read",
+    "newLabel": "NEW",
+    "viewingOldMessages": "You Are Viewing Older Messages",
+    "jumpToPresent": "Jump to present"
+  },
+  "members": {
+    "online": "Online",
+    "offline": "Offline"
+  },
+  "dm": {
+    "welcomeMessage": "This is the beginning of your direct message history with",
+    "mutualServers": "Mutual Servers",
+    "removeFriend": "Remove Friend",
+    "block": "Block",
+    "blocked": "Blocked",
+    "addFriend": "Add Friend",
+    "unblock": "Unblock",
+    "blockedMessage": "You cannot send messages to a blocked user.",
+    "reportSpam": "Report Spam"
+  },
+  "modal": {
+    "cancel": "Cancel",
+    "removeFriendTitle": "Remove",
+    "removeFriendDesc": "Are you sure you want to remove {name} from your friends list? You will need to send a friend request again if you want to reconnect.",
+    "removeFriendConfirm": "Remove Friend",
+    "blockTitle": "Block",
+    "blockDesc": "Are you sure you want to block {name}? This will remove them from your friends list and they won't be able to message you anymore.",
+    "blockConfirm": "Block"
+  },
+  "settings": {
+    "myAccount": "My Account",
+    "languageTime": "Language & Time",
+    "userSettings": "User Settings",
+    "editProfile": "Edit Profile",
+    "editUserProfile": "Edit User Profile",
+    "search": "Search",
+    "logOut": "Log Out",
+    "edit": "Edit",
+    "displayName": "Display Name",
+    "username": "Username",
+    "security": "Security",
+    "standing": "Standing",
+    "changeAvatar": "Change Avatar",
+    "changeDecoration": "Change Decoration",
+    "selectLanguage": "Select Language",
+    "selectLanguageDesc": "Choose the language you want MiniDiscord to display.",
+    "timeFormat": "Time Format",
+    "timeAuto": "Auto",
+    "time12h": "12 hour",
+    "time24h": "24 hour",
+    "accountGood": "in good standing",
+    "accountGoodIntro": "Your account is ",
+    "accountGoodDesc": "Thanks for following Discord's Terms of Service and Community Guidelines. If you break any rules, violations will appear here.",
+    "stepGood": "All good!",
+    "stepLimited": "Limited",
+    "stepSevere": "Severely\nLimited",
+    "stepRisk": "At Risk",
+    "stepSuspended": "Suspended"
+  },
+  "createServer": {
+    "title": "Create Your Server",
+    "subtitle": "Your server is where you and your friends hang out. Make yours and start talking.",
+    "createOwn": "Create My Own",
+    "templateLabel": "Start from a template",
+    "joinTitle": "Already have an invite?",
+    "joinButton": "Join a Server",
+    "template": {
+      "gaming": "Gaming",
+      "friends": "Friends",
+      "study": "Study Group",
+      "school": "School Club"
+    }
+  }
+}

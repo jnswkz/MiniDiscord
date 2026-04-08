@@ -11,7 +11,7 @@ export function MemberList() {
   const offline = MOCK_USERS.filter((u) => u.status === "OFFLINE");
 
   return (
-    <div className="flex h-full w-[240px] flex-col bg-background-secondary border-l border-border">
+    <div className="flex h-full w-[240px] flex-col bg-[#2b2d31] border-l border-border">
       <ScrollArea className="flex-1 px-2 pt-4">
         <MemberSection
           title={`${t("members.online")} — ${online.length}`}

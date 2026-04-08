@@ -6,12 +6,14 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/Tooltip";
+import { UnreadBadge } from "@/components/ui/UnreadBadge";
 
 interface ServerIconProps {
   name: string;
   iconUrl?: string | null;
   isActive?: boolean;
   hasNotification?: boolean;
+  unreadCount?: number;
   onClick?: () => void;
   className?: string;
 }
@@ -21,6 +23,7 @@ export function ServerIcon({
   iconUrl,
   isActive = false,
   hasNotification = false,
+  unreadCount = 0,
   onClick,
   className,
 }: ServerIconProps) {
@@ -72,6 +75,9 @@ export function ServerIcon({
         </TooltipTrigger>
         <TooltipContent side="right">{name}</TooltipContent>
       </Tooltip>
+
+      {/* Unread badge overlay */}
+      <UnreadBadge count={unreadCount} variant="overlay" />
     </div>
   );
 }

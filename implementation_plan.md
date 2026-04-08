@@ -1,476 +1,243 @@
-# Frontend — Implementation Plan (Phase 1 + Phase 2)
+# Frontend Status & Development Plan
 
-> **Goal:** Khởi tạo frontend MiniDiscord với design system hoàn chỉnh (dark/light), auth pages, và bộ khung layout Discord 4 cột pixel-accurate.
+> Last updated: 2026-03-31
+> Scope: Update frontend completion progress based on the current code in `frontend/`, align the next development plan with `.agent/workflows/ui-ux-pro-max.md`, and cross-check the existing design direction in `design-system/minidiscord/MASTER.md`.
 
-## User Review Required
+## Validation Snapshot
 
-> [!IMPORTANT]
-> **shadcn/ui + Tailwind v4 compatibility:** shadcn/ui v2 đã hỗ trợ Tailwind v4 (CSS-first config). Sẽ dùng `npx shadcn@latest init` với cấu hình New York style.
-
-> [!WARNING]
-> **Discord "Blurple" brand color:** Dùng `#5865F2` (Discord Blurple) làm accent chính — đây là màu xanh-tím đặc trưng của Discord, KHÔNG phải purple thuần (không vi phạm Purple Ban vì đây là brand-accurate requirement).
-
----
-
-## Proposed Changes
-
-### Step 1: Design System & Scaffold
-
-#### [MODIFY] [package.json](file:///d:/MiniDiscord/frontend/package.json)
-
-Cài đặt dependencies:
-
-```bash
-# Core UI
-npm install next-themes lucide-react class-variance-authority clsx tailwind-merge
-
-# Forms & Validation
-npm install react-hook-form @hookform/resolvers zod
-
-# State & API
-npm install zustand axios
-```
+| Check | Result | Notes |
+|-------|--------|-------|
+| `npx tsc --noEmit` | Pass | No TypeScript errors on 2026-03-31 |
+| `npm run lint` | Fail | 1 error in `frontend/components/ui/SlidingPanel.tsx`, 6 warnings for unused vars/imports and one `no-img-element` warning |
 
 ---
 
-#### [MODIFY] [globals.css](file:///d:/MiniDiscord/frontend/app/globals.css)
+## Overall Completion
 
-Xây dựng Discord-accurate color system dùng CSS variables. Hệ thống 2 lớp:
+| Metric | Estimate | Meaning |
+|--------|----------|---------|
+| Frontend UI with mock data | `~75%` | Main user-facing flows already exist and are usable |
+| Production-ready frontend | `~40%` | Real API/WebSocket integration, responsive behavior, and polish are still incomplete |
 
-**Layout size variables (Discord-accurate):**
+### Summary
 
-| Token | Value | Mục đích |
-|-------|-------|----------|
-| `--server-list-width` | `72px` | Column 1 — Server icon bar |
-| `--channel-sidebar-width` | `300px` | Column 2 — Channel/DM sidebar |
-| `--member-list-width` | `240px` | Column 4 — Member/Active Now |
-
-**Dark Mode (mặc định — Discord style):**
-
-| Token | Hex | Mục đích |
-|-------|-----|----------|
-| `--background` | `#313338` | Nền chat area |
-| `--background-secondary` | `#2B2D31` | Nền channel sidebar |
-| `--background-tertiary` | `#1E1F22` | Nền server sidebar |
-| `--background-floating` | `#111214` | Popover, dropdown |
-| `--foreground` | `#F2F3F5` | Text chính |
-| `--muted-foreground` | `#949BA4` | Text phụ |
-| `--accent` | `#5865F2` | Discord Blurple |
-| `--accent-hover` | `#4752C4` | Blurple hover |
-| `--destructive` | `#DA373C` | Danger/delete |
-| `--success` | `#23A559` | Online/success |
-| `--warning` | `#F0B232` | Idle/warning |
-| `--border` | `#3F4147` | Borders |
-| `--input` | `#383A40` | Input background |
-| `--ring` | `#5865F2` | Focus ring |
-
-**Light Mode:**
-
-| Token | Hex | Mục đích |
-|-------|-----|----------|
-| `--background` | `#FFFFFF` | Nền chat area |
-| `--background-secondary` | `#F2F3F5` | Nền channel sidebar |
-| `--background-tertiary` | `#E3E5E8` | Nền server sidebar |
-| `--background-floating` | `#FFFFFF` | Popover, dropdown |
-| `--foreground` | `#060607` | Text chính |
-| `--muted-foreground` | `#5C5E66` | Text phụ |
+- The project already has a solid Discord-like frontend shell: auth pages, dashboard/friends, channel chat, DM chat, settings overlay, reusable UI primitives, theming, and in-memory chat state.
+- The biggest remaining gap is not "missing screens", but "missing completion quality": responsive layout, full i18n coverage, lint cleanup, interaction polish, and replacing mock-driven flows with real backend data.
+- The current design-system master file is only partially useful because it was generated with a direction closer to a community/landing product than a desktop chat workspace. We should keep its spacing/interaction rules, but not let it override the functional Discord-like layout already built.
 
 ---
 
-#### [MODIFY] [layout.tsx](file:///d:/MiniDiscord/frontend/app/layout.tsx)
+## Current Progress By Area
 
-- Đổi font sang **Inter** (Google Fonts via `next/font/google`)
-- Wrap children với `<ThemeProvider>` từ `next-themes`
-- Update metadata: title → "MiniDiscord", description phù hợp
-- Set `defaultTheme="dark"`, `attribute="class"`
-
----
-
-#### [NEW] [lib/cn.ts](file:///d:/MiniDiscord/frontend/lib/cn.ts)
-
-Utility function `cn()` = `clsx` + `tailwind-merge` (chuẩn shadcn/ui).
-
----
-
-#### [NEW] [components/providers/ThemeProvider.tsx](file:///d:/MiniDiscord/frontend/components/providers/ThemeProvider.tsx)
-
-Client component wrapping `next-themes` `ThemeProvider`.
+| Area | Status | Progress | Current state |
+|------|--------|----------|---------------|
+| Foundation and theming | Mostly done | `85%` | Tailwind v4, theme provider, Inter font, dark/light tokens, `cn()` helper, reusable UI primitives are in place |
+| Auth UI | Mostly done | `80%` | Login/register screens exist with `react-hook-form` + `zod`, but current submit flow still redirects with mock behavior instead of fully using `authStore` |
+| Main app shell | Mostly done | `78%` | Server list, channel/DM sidebar, user panel, settings entry, resize handle, and 4-column structure exist |
+| Channel chat experience | Mostly done | `80%` | Chat header, message list, message actions, replies, reactions, and member-list toggle are implemented |
+| DM experience | Mostly done | `85%` | DM page, reply flow, user panel, confirm modal, and new-message modal are implemented; some actions are still UI-only |
+| Friends and dashboard | Mostly done | `80%` | Online/all/pending/add-friend tabs and Active Now panel exist with coherent UI |
+| Settings and localization | Partial | `70%` | Settings overlay works and locale store exists, but many strings are still hardcoded and settings is not yet a full-page experience |
+| State and data integration | Partial | `45%` | Zustand stores and Axios client exist, but most views still render from mock data and placeholder hooks |
+| Responsive, accessibility, performance | Early | `40%` | Reduced-motion support exists globally, but mobile/tablet layout handling and accessibility polish are still incomplete |
 
 ---
 
-### Step 2: Base Components (shadcn/ui)
+## Progress Against The Previous Frontend Plan
 
-#### shadcn/ui Components cần thêm:
-
-```bash
-npx shadcn@latest add button input dialog scroll-area tooltip avatar popover separator dropdown-menu
-```
-
-Các component này sẽ được copy vào `components/ui/` với full source code, cho phép custom style theo Discord theme.
-
-#### [NEW] [components/ui/status-avatar.tsx](file:///d:/MiniDiscord/frontend/components/ui/status-avatar.tsx)
-
-Custom Avatar component kế thừa shadcn Avatar, thêm:
-- Status indicator dot (Online=green, Idle=yellow, DND=red, Offline=gray)
-- Size variants: `sm` (24px), [md](file:///d:/MiniDiscord/README.md) (32px), `lg` (40px), `xl` (80px)
-
-#### [NEW] [components/ui/server-icon.tsx](file:///d:/MiniDiscord/frontend/components/ui/server-icon.tsx)
-
-- Hình tròn mặc định → `border-radius` giảm dần thành rounded-square khi hover
-- Active state: pill indicator bên trái
-- Tooltip hiện server name
-
----
-
-### Step 3: Auth Pages
-
-#### [NEW] [app/(auth)/layout.tsx](file:///d:/MiniDiscord/frontend/app/(auth)/layout.tsx)
-
-Layout cho auth routes — centered card trên background gradient.
-
-#### [NEW] [app/(auth)/login/page.tsx](file:///d:/MiniDiscord/frontend/app/(auth)/login/page.tsx)
-
-Login form:
-- Email + Password inputs (shadcn Input)
-- "Log In" button (shadcn Button, accent color)
-- Link → Register
-- Zod schema validation
-- react-hook-form integration
-
-#### [NEW] [app/(auth)/register/page.tsx](file:///d:/MiniDiscord/frontend/app/(auth)/register/page.tsx)
-
-Register form:
-- Username + Email + Password + Confirm Password
-- Link → Login
-- Zod schema validation
-
-#### [MODIFY] [stores/authStore.ts](file:///d:/MiniDiscord/frontend/stores/authStore.ts)
-
-Zustand store implementation:
-- State: `user`, `token`, `isAuthenticated`, `isLoading`
-- Actions: `login()`, `register()`, `logout()`, `setUser()`
-- Persist token to `localStorage`
-
-#### [MODIFY] [lib/api.ts](file:///d:/MiniDiscord/frontend/lib/api.ts)
-
-Axios instance:
-- `baseURL` from env `NEXT_PUBLIC_API_URL`
-- Request interceptor: attach JWT `Authorization: Bearer <token>`
-- Response interceptor: handle 401 → logout
+| Planned item | Updated status | Notes |
+|--------------|----------------|-------|
+| Step 1 - Design system and scaffold | Done | Dependencies, theme provider, global tokens, font setup, and utility helpers are already present |
+| Step 2 - Base UI components | Done | Core UI primitives and custom Discord-style components exist |
+| Step 3 - Auth pages | Mostly done | UI is present; business integration is still partial |
+| Step 4 - Main layout skeleton | Done | Left shell, chat area, and right panel pattern are already in use |
+| 2.1 Column 4 toggle | Done | Channel member list and DM user panel both toggle via UI state |
+| 2.2 UserPanel span verification | Done | User panel is already rendered below the combined left shell |
+| 2.3 Responsive breakpoints | Not done | Desktop-first layout exists, but responsive collapse rules are still missing |
+| 2.4 i18n completion | Partial | Locale store and many keys exist, but multiple components still contain hardcoded text |
+| 2.5 Friends "Online" tab | Done | Online tab is implemented |
+| 2.6 Missing header icons | Done | Threads, inbox, help, and member toggle icons are present |
+| 2.7 DM sidebar close button | Partial | Close button UI exists, but removal logic is still TODO |
+| 2.8 Settings full-page transition | Not done | Current implementation is still a modal-style overlay |
+| 2.9 Micro-animations | Partial | Sliding panel and hover transitions exist, but motion system is not yet consistent |
+| 2.10 SVG language flags | Not done | `LanguageSwitcher` still uses emoji flags |
+| 2.11 Auth page consistency | Partial | Login is more polished than register; register still needs visual alignment |
+| 2.12 Code cleanup | Partial | Some duplication and lint warnings remain |
+| 2.13 Accessibility polish | Partial | Focus and reduced-motion exist, but keyboard flows and non-color status cues still need work |
 
 ---
 
-### Step 4: Main Layout Skeleton
+## UI/UX Direction Based On `ui-ux-pro-max`
 
-#### [MODIFY] [app/(main)/layout.tsx](file:///d:/MiniDiscord/frontend/app/(main)/layout.tsx)
+### Rules we should keep
 
-Discord 4-column layout container (pixel-accurate):
+- Use a dark, high-contrast, desktop-first workspace layout because this product behaves more like a communication tool than a marketing site.
+- Keep hover and panel transitions in the `150-300ms` range.
+- Use SVG/Lucide-style icons only for UI controls.
+- Ensure all clickable elements have visible hover feedback and `cursor-pointer`.
+- Respect `prefers-reduced-motion` for every new animation we add.
+- Verify layout quality at `375px`, `768px`, `1024px`, and `1440px`.
 
-```
-┌──────────────────────────┬─────────────────────┬──────────┐
-│   72px  │   300px        │      flex-1         │  240px   │
-│  Server │  Channel       │     Chat Area       │  Member  │
-│  List   │   List         │                     │  List    │
-│         │                │                     │(toggle)  │
-├─────────┴────────────────┤                     │          │
-│    UserPanel (372px)     │                     │          │
-│  spans Col 1 + Col 2    │                     │          │
-└──────────────────────────┴─────────────────────┴──────────┘
-```
+### How to adapt the workflow for MiniDiscord
 
-> [!IMPORTANT]
-> **UserPanel PHẢI span cả Column 1 + Column 2** (tổng `372px`).
-> UserPanel nằm ở bottom của wrapper div chứa cả ServerList + ChannelList.
->
-> **Column 4 PHẢI toggle được** — ẩn/hiện qua icon button ở ChatHeader.
-> Dashboard view (ActiveNow) luôn hiện. Channel view (MemberList) + DM view (DmUserPanel) toggle được.
+- Keep the current Discord-like information hierarchy: navigation -> conversation -> context panel.
+- Use vibrant accents only for active states, CTAs, and highlights. Do not turn the whole workspace into a marketing-style colorful interface.
+- Favor readable density over decorative effects. Chat products need stable spacing, fast scanning, and low visual noise.
+- Avoid style directions like cyberpunk/glow-heavy UI for the main app shell because they reduce readability in long chat sessions.
+- Continue using shadcn-style primitives where useful, but do not rewrite stable custom layout code only to force a library pattern.
 
-#### [NEW] [components/sidebar/ServerList.tsx](file:///d:/MiniDiscord/frontend/components/sidebar/ServerList.tsx)
+### Design-system caveat
 
-- Vertical list of ServerIcon components
-- DM button ở đầu (Discord icon)
-- Separator giữa DM và servers
-- Add Server button cuối (icon +)
-- Mock data: 3-4 dummy servers
+The current `design-system/minidiscord/MASTER.md` is not a strong visual source of truth for the app shell because:
 
-#### [NEW] [components/sidebar/ChannelList.tsx](file:///d:/MiniDiscord/frontend/components/sidebar/ChannelList.tsx)
+- it was generated with a category closer to community landing / music-style direction;
+- it overemphasizes landing-page patterns instead of workspace patterns;
+- its palette suggestions are less aligned with the existing Discord-like chat interface.
 
-- Server name header (with dropdown menu)
-- Channel categories (collapsible)
-- Text channel items (# icon + name)
-- Voice channel items (speaker icon + name)
-- Active channel highlight
-- Mock data: 2 categories, 4-5 channels mỗi category
+### Recommended use of the current design system
 
-#### [NEW] [components/sidebar/UserPanel.tsx](file:///d:/MiniDiscord/frontend/components/sidebar/UserPanel.tsx)
-
-- Bottom of channel sidebar
-- User avatar + username + status
-- Mic/Headphone/Settings icon buttons
-
-#### [NEW] [components/chat/ChatHeader.tsx](file:///d:/MiniDiscord/frontend/components/chat/ChatHeader.tsx)
-
-- # Channel name
-- Channel description/topic
-- Action icons (pin, members toggle, search, inbox)
-
-#### [NEW] [components/chat/MessageList.tsx](file:///d:/MiniDiscord/frontend/components/chat/MessageList.tsx)
-
-- ScrollArea với mock messages
-- Message grouping by sender
-- Date separators
-
-#### [NEW] [components/chat/MessageItem.tsx](file:///d:/MiniDiscord/frontend/components/chat/MessageItem.tsx)
-
-- Avatar + username + timestamp
-- Message content
-- Hover → show action bar (react, reply, more)
-
-#### [NEW] [components/chat/MessageInput.tsx](file:///d:/MiniDiscord/frontend/components/chat/MessageInput.tsx)
-
-- Input bar với placeholder "Message #channel-name"
-- Attach file button (icon)
-- Emoji picker button (icon)
-- Gift/GIF button (icon)
-
-#### [MODIFY] [components/sidebar/MemberList.tsx](file:///d:/MiniDiscord/frontend/components/sidebar/MemberList.tsx)
-
-- Member categories: "Online — X", "Offline — Y"
-- StatusAvatar + username per member
-- Role color coding
-- **Width: `w-[240px]`** (nhất quán với Col 2)
-
-#### [MODIFY] [lib/mock-data.ts](file:///d:/MiniDiscord/frontend/lib/mock-data.ts)
-
-Centralized mock data file using existing types from `types/`:
-- Mock users, rooms, channels, messages
-- Consistent IDs across all mock entities
-
-#### [MODIFY] [app/(main)/channels/[channelId]/page.tsx](file:///d:/MiniDiscord/frontend/app/(main)/channels/[channelId]/page.tsx)
-
-Channel chat view — assembles ChatHeader + MessageList + MessageInput.
+- Keep: typography choice, spacing rhythm, interaction quality rules, accessibility checklist.
+- Re-define: page-specific rules for `dashboard`, `channel`, `dm`, and `settings`.
+- Do not blindly apply: marketing-oriented hero/testimonial/CTA guidance to the authenticated app shell.
 
 ---
 
-## Phase 2 — Layout Fix & UI Improvements
+## Main Gaps To Close Next
 
-> **Goal:** Sửa layout sai lệch so với Discord gốc, thêm toggle Column 4, hoàn thiện i18n, và nâng cấp UX.
+### Product gaps
 
-### 🔴 P0 — Critical Layout Fixes
+- Auth pages still behave like mock screens rather than real authenticated flows.
+- Most data shown in the app still comes from `mock-data.ts`.
+- WebSocket, auth, and message hooks are still placeholders.
+- Settings still open as an overlay instead of a stronger page-level settings experience.
 
-#### 2.1 Column 4 Toggle Mechanism
+### UI/UX gaps
 
-**Problem:** Column 4 luôn hiển thị, không thể toggle.
+- No real responsive shell for tablet/mobile yet.
+- Mixed hardcoded Vietnamese and English strings reduce translation quality.
+- Register page still trails login in visual polish.
+- The right-side panels are usable, but their motion behavior and layout transitions still need refinement.
 
-**Solution:**
+### Quality gaps
 
-##### [MODIFY] [stores/uiStore.ts](file:///d:/MiniDiscord/frontend/stores/uiStore.ts)
-
-Thêm toggle states:
-```ts
-interface UIState {
-  showSettings: boolean;
-  showMemberList: boolean;    // NEW — toggle Col 4 on Channel view
-  showDmUserPanel: boolean;   // NEW — toggle Col 4 on DM view
-  // actions
-  openSettings: () => void;
-  closeSettings: () => void;
-  toggleMemberList: () => void;   // NEW
-  toggleDmUserPanel: () => void;  // NEW
-}
-```
-
-##### [MODIFY] [components/chat/ChatHeader.tsx](file:///d:/MiniDiscord/frontend/components/chat/ChatHeader.tsx)
-
-- Users icon → `onClick={toggleMemberList}` — toggle MemberList panel
-- Active state highlight khi panel đang mở
-
-##### [MODIFY] [app/(main)/channels/[channelId]/page.tsx](file:///d:/MiniDiscord/frontend/app/(main)/channels/[channelId]/page.tsx)
-
-```tsx
-{showMemberList && <MemberList />}
-```
-
-##### [MODIFY] [app/(main)/dm/[userId]/page.tsx](file:///d:/MiniDiscord/frontend/app/(main)/dm/[userId]/page.tsx)
-
-DM header → thêm toggle button cho DmUserPanel:
-```tsx
-{showDmUserPanel && <DmUserPanel userId={userId} />}
-```
-
-##### Column 4 Animation
-
-- Panel slide-in từ phải: `transition-all duration-200`
-- Chat area mở rộng smooth khi panel đóng
+- Lint blocker in `SlidingPanel`.
+- Unused imports/variables in a few files.
+- `ServerIcon` still uses `<img>` instead of a better image strategy.
+- Some labels, aria text, and status semantics are not yet fully accessible.
 
 ---
 
-#### 2.2 UserPanel Span Verification
+## Prioritized Development Plan
 
-**Problem:** UserPanel phải span cả Col 1 + Col 2 (tổng 312px).
+### P0 - Stabilize The Current Frontend Shell
 
-**Current code:** Flex container đã đúng logic, nhưng cần verify:
-- UserPanel `bg-background-tertiary` cùng màu ServerList → trông "hòa trộn"
-- Cần đảm bảo visual distinction rõ ràng
+Target: 1-3 days
 
-##### [MODIFY] [components/sidebar/UserPanel.tsx](file:///d:/MiniDiscord/frontend/components/sidebar/UserPanel.tsx)
+### Goals
 
-- Đảm bảo width = `w-full` (inherit từ parent = Col1 + Col2)
-- Kiểm tra padding alignment với cả ServerList và ChannelList
+- Make the current frontend clean, accurate, and ready for further integration.
 
----
+### Tasks
 
-#### 2.3 Responsive Breakpoints
+- Fix the lint error in `frontend/components/ui/SlidingPanel.tsx`.
+- Clean unused imports/variables in layout, DM page, friends page, and channel list.
+- Replace remaining high-impact hardcoded strings in chat, DM, auth, and settings with `i18n` keys.
+- Add responsive behavior for the 4-column shell:
+  - `>=1440px`: full desktop layout
+  - `1024-1439px`: column 4 hidden by default
+  - `768-1023px`: collapsible left secondary sidebar
+  - `<768px`: drawer-based navigation and single main content column
+- Make register page visually consistent with login.
+- Decide the final authenticated-app design direction:
+  - keep current Discord-like base;
+  - regenerate or override design-system rules specifically for `dashboard`, `channel`, `dm`, and `settings`.
 
-**Problem:** App hoàn toàn break dưới 1024px.
+### Done when
 
-**Solution:** Thêm responsive handling:
+- `npm run lint` passes.
+- Text content is no longer mixed/hardcoded in the main flows.
+- Desktop, tablet, and mobile shell behaviors are defined and implemented.
 
-| Breakpoint | Col 1 | Col 2 | Col 3 | Col 4 |
-|------------|-------|-------|-------|-------|
-| ≥1440px | 72px | 240px | flex-1 | 240px (toggleable) |
-| 1024-1439px | 72px | 240px | flex-1 | hidden by default |
-| 768-1023px | 72px | collapsed | flex-1 | hidden |
-| <768px | hidden | hidden | flex-1 | hidden (hamburger menu) |
+### P1 - Connect Real App Flows
 
----
+Target: 3-5 days
 
-### 🟡 P1 — Important Improvements
+### Goals
 
-#### 2.4 i18n Completion (~40+ strings)
+- Move from mock-driven UI to frontend flows that can consume backend APIs cleanly.
 
-##### [MODIFY] [lib/i18n.ts](file:///d:/MiniDiscord/frontend/lib/i18n.ts)
+### Tasks
 
-Thêm translation keys cho:
-- `chat.*` — ChatHeader labels, MessageInput placeholders, MessageList welcome
-- `dm.*` — DM page strings, DmUserPanel labels
-- `auth.*` — Login Google section, "HOẶC" divider
-- `settings.*` — Replace `locale === "vi" ? ... : ...` patterns
+- Wire login/register pages to `useAuthStore`.
+- Use `authStore.hydrate()` and fetch current user data after token restore.
+- Introduce data adapters so pages can switch from `mock-data.ts` to backend payloads without major UI rewrites.
+- Start replacing `MOCK_*` usage in:
+  - dashboard/friends;
+  - channel page;
+  - DM page;
+  - member list / user panel.
+- Define empty/loading/error states for lists and chat views.
+- Finish the DM close/remove behavior or clearly defer it behind a disabled state.
+- Convert settings from overlay-only experience into a route-aware settings screen or hybrid page shell.
 
-##### Files affected:
-- [ChatHeader.tsx](file:///d:/MiniDiscord/frontend/components/chat/ChatHeader.tsx) — 4 hardcoded strings
-- [MessageInput.tsx](file:///d:/MiniDiscord/frontend/components/chat/MessageInput.tsx) — 5 strings
-- [MessageItem.tsx](file:///d:/MiniDiscord/frontend/components/chat/MessageItem.tsx) — 1 string
-- [MessageList.tsx](file:///d:/MiniDiscord/frontend/components/chat/MessageList.tsx) — 2 strings
-- [DmUserPanel.tsx](file:///d:/MiniDiscord/frontend/components/dm/DmUserPanel.tsx) — ~15 strings
-- [dm/[userId]/page.tsx](file:///d:/MiniDiscord/frontend/app/(main)/dm/[userId]/page.tsx) — 5 strings
-- [login/page.tsx](file:///d:/MiniDiscord/frontend/app/(auth)/login/page.tsx) — 3 strings
-- [SettingsOverlay.tsx](file:///d:/MiniDiscord/frontend/components/settings/SettingsOverlay.tsx) — refactor inline ternaries
+### Done when
 
-#### 2.5 Friends Tab "Online"
+- Auth and page hydration use real store logic.
+- Mock data is no longer the only source for main screens.
+- The UI handles loading and error states gracefully.
 
-##### [MODIFY] [components/friends/FriendsPage.tsx](file:///d:/MiniDiscord/frontend/components/friends/FriendsPage.tsx)
+### P2 - Real-Time And Interaction Polish
 
-- Thêm tab `"online"` vào `FriendsTab` type
-- Filter friends bởi `status !== "OFFLINE"`
-- Discord gốc có 4 tabs: Online | All | Pending | [Add Friend]
+Target: 5-7 days
 
-#### 2.6 Missing Header Icons
+### Goals
 
-##### [MODIFY] [components/chat/ChatHeader.tsx](file:///d:/MiniDiscord/frontend/components/chat/ChatHeader.tsx)
+- Make the app feel alive and production-ready.
 
-Thêm các icons theo Discord gốc:
-- Threads icon (MessageSquare)
-- Inbox icon (Archive/Inbox)
-- Help icon (HelpCircle) — rightmost
+### Tasks
 
-#### 2.7 DM Sidebar Item Close Button
+- Implement `useWebSocket`, `useMessages`, and real message sync.
+- Add typing indicators, message delivery feedback, and better optimistic updates.
+- Standardize motion:
+  - panel open/close easing;
+  - route transition behavior;
+  - reduced-motion fallback.
+- Improve keyboard support, focus trapping, aria labels, and non-color status indicators.
+- Replace emoji-based language flags with SVG assets.
+- Review hover/active states to ensure no layout shift and consistent motion timing.
 
-##### [MODIFY] [components/sidebar/DMSidebar.tsx](file:///d:/MiniDiscord/frontend/components/sidebar/DMSidebar.tsx)
+### Done when
 
-- Hover DM item → hiện nút X (close/remove) ở bên phải
-- Discord behavior: click X → remove DM from list (not unfriend)
-
-#### 2.8 Settings → Full Page Transition
-
-##### [MODIFY] [components/settings/SettingsOverlay.tsx](file:///d:/MiniDiscord/frontend/components/settings/SettingsOverlay.tsx)
-
-- Chuyển từ modal overlay → full-page layout
-- ESC button ở góc phải (giữ nguyên)
-- Slide transition khi mở/đóng
-
----
-
-### 🟢 P2 — Polish
-
-#### 2.9 Micro-animations
-- Page transitions: route change fade
-- Panel toggle: slide animation
-- Channel switch: subtle crossfade
-
-#### 2.10 LanguageSwitcher SVG Flags
-- Replace emoji flags → SVG flag icons
-
-#### 2.11 Auth Pages Consistency
-- Register page: thêm `backdrop-blur-sm border border-border/30` cho nhất quán với Login
-
-#### 2.12 Code Cleanup
-- Extract duplicate `getRoomIdForChannel()` → `lib/helpers.ts`
-- Typography fine-tuning: category labels `11px` thay vì `12px`
-
-#### 2.13 Accessibility
-- Status dots: thêm shape variants ngoài color (half-moon cho Idle, dash cho DND)
-- Skip-to-content link
-- `role="region"` cho channel categories
+- Core chat flows feel real-time instead of mock-local.
+- Motion is consistent and accessible.
+- Main interaction surfaces pass keyboard and focus checks.
 
 ---
 
-## Verification Plan
+## Suggested Sprint Sequence
 
-### Automated Tests
+| Sprint | Focus | Output |
+|--------|-------|--------|
+| Sprint 1 | UI stabilization | Lint-clean, responsive shell, i18n cleanup, auth visual consistency |
+| Sprint 2 | Data integration | Real auth flow, view adapters, loading/error states, reduced mock dependency |
+| Sprint 3 | Real-time polish | WebSocket integration, typing/presence updates, a11y and motion polish |
 
-```bash
-# 1. Build check — ensures no TypeScript errors
-cd d:\MiniDiscord\frontend && npx tsc --noEmit
+---
 
-# 2. Lint check
-cd d:\MiniDiscord\frontend && npm run lint
+## Immediate Next Tasks
 
-# 3. Dev server starts without crash
-cd d:\MiniDiscord\frontend && npm run dev
-# → Verify output contains "Ready" and no error stack traces
-```
+If we continue right now, the highest-value order is:
 
-### Manual Browser Verification
+1. Fix `SlidingPanel` and make `npm run lint` pass.
+2. Finish the i18n sweep in chat, DM, auth, and settings.
+3. Implement responsive behavior for the 4-column shell.
+4. Wire auth pages to `authStore` and stop using redirect-only mock submit logic.
+5. Regenerate or override the design-system rules for authenticated app pages so future UI work stays consistent.
 
-> Mở browser tại `http://localhost:3000` sau khi `npm run dev`:
+---
 
-1. **Auth Pages:**
-   - Navigate to `/login` → form hiện đúng với 2 fields + button
-   - Navigate to `/register` → form hiện đúng với 4 fields + button
-   - Submit form trống → validation errors hiển thị
+## Notes For Future Frontend Work
 
-2. **Dark/Light Mode:**
-   - Mặc định phải là dark mode
-   - Tìm theme toggle → click → chuyển sang light mode
-   - Toàn bộ UI must update (background, text, borders, inputs)
-   - Click lại → trở về dark mode
-   - Reload page → theme vẫn được lưu
-
-3. **Main Layout (Phase 1 + Phase 2):**
-   - Navigate to `/channels/c1`
-   - Kiểm tra layout 4 cột hiện đúng:
-     - Cột 1 (`72px`): Server icons dạng tròn, hover → bo góc vuông
-     - Cột 2 (`240px`): Channel list với categories
-     - UserPanel span **toàn bộ Col 1 + Col 2** (`312px`) ở bottom
-     - Cột 3 (`flex-1`): Chat area với messages
-     - Cột 4 (`240px`): Member list — **toggle ẩn/hiện bằng icon ở header**
-   - Hover tin nhắn → action bar xuất hiện
-   - Click Users icon ở header → Col 4 toggle
-
-4. **DM View:**
-   - Navigate to `/dm/u2`
-   - Col 4 = DmUserPanel (`340px`) — toggle qua header button
-   - Hover DM item ở sidebar → nút X xuất hiện
-
-5. **Dashboard:**
-   - Navigate to `/dashboard`
-   - ActiveNow panel luôn hiển thị (không toggle)
-   - Friends tabs: Online | All | Pending | [Add Friend]
-
-6. **Responsive:**
-   - 1440px+: full 4-column layout
-   - 1024px: Col 4 auto-hidden
-   - 768px: Col 2 collapsed
-   - 375px: hamburger menu, chỉ hiện chat area
-
+- Treat the current frontend as a strong mock-driven prototype, not as a throwaway build.
+- Do not rebuild the UI from scratch. The better path is to stabilize, refactor, then integrate.
+- The next milestone should optimize for consistency and integration, not for adding more screens.

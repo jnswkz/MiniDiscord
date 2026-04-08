@@ -1,0 +1,164 @@
+{
+  "auth": {
+    "welcomeBack": "Chào mừng trở lại!",
+    "gladToSeeYou": "Rất vui được gặp lại bạn!",
+    "email": "Email",
+    "password": "Mật khẩu",
+    "forgotPassword": "Quên mật khẩu?",
+    "login": "Đăng nhập",
+    "needAccount": "Cần tài khoản?",
+    "register": "Đăng ký",
+    "createAccount": "Tạo tài khoản",
+    "username": "Tên người dùng",
+    "confirmPassword": "Xác nhận mật khẩu",
+    "signUp": "Đăng ký",
+    "haveAccount": "Đã có tài khoản?"
+  },
+  "validation": {
+    "emailInvalid": "Email không hợp lệ",
+    "passwordMin": "Mật khẩu tối thiểu 6 ký tự",
+    "usernameMin": "Tên người dùng tối thiểu 3 ký tự",
+    "usernameMax": "Tên người dùng tối đa 50 ký tự",
+    "passwordMismatch": "Mật khẩu không khớp"
+  },
+  "sidebar": {
+    "directMessages": "Tin nhắn trực tiếp",
+    "friends": "Bạn bè",
+    "searchOrStart": "Tìm hoặc bắt đầu cuộc trò chuyện",
+    "addServer": "Thêm Server",
+    "createDM": "Tạo tin nhắn"
+  },
+  "userPanel": {
+    "muteMic": "Tắt tiếng mic",
+    "deafen": "Tắt âm thanh",
+    "settings": "Cài đặt"
+  },
+  "status": {
+    "online": "Trực tuyến",
+    "offline": "Ngoại tuyến",
+    "idle": "Chờ",
+    "dnd": "Không làm phiền"
+  },
+  "friends": {
+    "title": "Bạn bè",
+    "all": "Tất cả",
+    "pending": "Đang chờ xử lý",
+    "addFriend": "Thêm Bạn",
+    "allCount": "Tất cả bạn bè",
+    "pendingCount": "Đang chờ",
+    "online": "Trực tuyến",
+    "onlineCount": "Trực tuyến",
+    "noOnline": "Không có bạn bè nào đang trực tuyến.",
+    "search": "Tìm kiếm",
+    "incomingRequest": "Lời mời kết bạn đến",
+    "outgoingRequest": "Lời mời kết bạn đi",
+    "noPending": "Không có lời mời kết bạn nào đang chờ xử lý.",
+    "addTitle": "Thêm bạn",
+    "addDescription": "Bạn có thể thêm bạn bè bằng tên người dùng.",
+    "addPlaceholder": "Nhập tên người dùng",
+    "sendRequest": "Gửi lời mời kết bạn"
+  },
+  "activeNow": {
+    "title": "Đang Hoạt Động",
+    "empty": "Hiện tại không có cập nhật mới nào cả...",
+    "emptyDescription": "Nếu bạn bè của bạn có hoạt động mới, ví dụ như chơi game hoặc trò chuyện thoại, chúng tôi sẽ hiển thị hoạt động đó ở đây!"
+  },
+  "channels": {
+    "textChannels": "Kênh Văn Bản",
+    "voiceChannels": "Kênh Thoại"
+  },
+  "chat": {
+    "welcomeTitle": "Chào mừng đến #{channelName}!",
+    "welcomeDesc": "Đây là khởi đầu của kênh #{channelName}. Hãy bắt đầu trò chuyện.",
+    "messagePlaceholder": "Nhắn",
+    "messagePlaceholderChannel": "Nhắn #{channelName}",
+    "messagePlaceholderDm": "Nhắn @{userName}",
+    "edited": "(đã sửa)",
+    "pin": "Tin ghim",
+    "memberList": "Danh sách thành viên",
+    "inbox": "Hộp thư",
+    "threads": "Chủ đề",
+    "search": "Tìm kiếm",
+    "help": "Trợ giúp",
+    "attachFile": "Đính kèm file",
+    "addReaction": "Thêm reaction",
+    "reply": "Trả lời",
+    "more": "Thêm",
+    "uploadFile": "Tải tệp lên",
+    "uploadImage": "Tải ảnh",
+    "uploadVideo": "Tải video",
+    "unreadBanner": "{count} tin nhắn mới từ {time} vào {date}",
+    "markAsRead": "Đánh Dấu Đã Đọc",
+    "newLabel": "MỚI",
+    "viewingOldMessages": "Bạn Đang Xem Các Tin Nhắn Cũ",
+    "jumpToPresent": "Nhảy đến hiện tại"
+  },
+  "members": {
+    "online": "Trực tuyến",
+    "offline": "Ngoại tuyến"
+  },
+  "dm": {
+    "welcomeMessage": "Đây là phần mở đầu trong lịch sử các tin nhắn trực tiếp của bạn với",
+    "mutualServers": "Máy Chủ Chung",
+    "removeFriend": "Xóa Bạn",
+    "block": "Chặn",
+    "blocked": "Đã chặn",
+    "addFriend": "Thêm bạn bè",
+    "unblock": "Bỏ chặn",
+    "blockedMessage": "Bạn không thể gửi tin nhắn cho người dùng đã chặn.",
+    "reportSpam": "Báo Cáo Spam"
+  },
+  "modal": {
+    "cancel": "Hủy",
+    "removeFriendTitle": "Xóa",
+    "removeFriendDesc": "Bạn có chắc chắn muốn xóa {name} khỏi danh sách bạn bè không? Khi xóa xong, bạn sẽ phải thực hiện lại thao tác gửi lời mời kết bạn nếu muốn liên lạc lại.",
+    "removeFriendConfirm": "Xóa Bạn",
+    "blockTitle": "Chặn",
+    "blockDesc": "Bạn có chắc chắn muốn chặn {name} không? Hành động này sẽ xóa họ khỏi danh sách bạn bè của bạn và họ sẽ không thể nhắn tin cho bạn nữa.",
+    "blockConfirm": "Chặn"
+  },
+  "settings": {
+    "myAccount": "Tài Khoản Của Tôi",
+    "languageTime": "Ngôn Ngữ & Thời Gian",
+    "userSettings": "Cài đặt người dùng",
+    "editProfile": "Chỉnh sửa hồ sơ",
+    "editUserProfile": "Chỉnh Sửa Hồ Sơ Người Dùng",
+    "search": "Tìm kiếm",
+    "logOut": "Đăng Xuất",
+    "edit": "Chỉnh sửa",
+    "displayName": "Tên hiển thị",
+    "username": "Tên đăng nhập",
+    "security": "Bảo mật",
+    "standing": "Trạng thái",
+    "changeAvatar": "Đổi Ảnh Đại Diện",
+    "changeDecoration": "Thay Đổi Trang Trí",
+    "selectLanguage": "Chọn Ngôn ngữ",
+    "selectLanguageDesc": "Chọn ngôn ngữ bạn muốn MiniDiscord hiển thị.",
+    "timeFormat": "Định dạng thời gian",
+    "timeAuto": "Tự động",
+    "time12h": "12 giờ",
+    "time24h": "24 giờ",
+    "accountGood": "hoàn toàn ổn",
+    "accountGoodIntro": "Tài khoản của bạn ",
+    "accountGoodDesc": "Cảm ơn vì đã tuân thủ Điều Khoản Dịch Vụ và Nguyên Tắc Cộng Đồng của Discord. Nếu bạn vi phạm các quy tắc, quy tắc bị vi phạm sẽ hiện thị tại đây.",
+    "stepGood": "Hoàn toàn ổn!",
+    "stepLimited": "Bị giới hạn",
+    "stepSevere": "Giới hạn ở\nmức độ\nnghiêm trọng",
+    "stepRisk": "Rủi ro cao",
+    "stepSuspended": "Bị đình chỉ"
+  },
+  "createServer": {
+    "title": "Tạo Máy Chủ Của Bạn",
+    "subtitle": "Máy chủ của bạn là nơi bạn giao lưu với bạn bè của mình. Hãy tạo máy chủ của riêng bạn và bắt đầu trò chuyện.",
+    "createOwn": "Tạo Mẫu Riêng",
+    "templateLabel": "Bắt đầu từ mẫu",
+    "joinTitle": "Bạn đã nhận được lời mời rồi?",
+    "joinButton": "Tham gia máy chủ",
+    "template": {
+      "gaming": "Gaming",
+      "friends": "Bạn bè",
+      "study": "Nhóm Học Tập",
+      "school": "Câu Lạc Bộ Trường Học"
+    }
+  }
+}

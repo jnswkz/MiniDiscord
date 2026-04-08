@@ -10,7 +10,6 @@ import {
   MoreHorizontal,
   UserPlus,
   Calendar,
-  Server,
 } from "lucide-react";
 import {
   MOCK_USERS,
@@ -55,7 +54,7 @@ function UserProfileModal({
   >("activity");
   const [note, setNote] = useState("");
   const mutualServers = getMutualServers(user.id);
-  const isFriend = true; // Mock: assume they are friends if viewing DM
+  const isFriend = true;
 
   const TABS = [
     { key: "activity" as const, label: "Hoạt động" },
@@ -88,7 +87,6 @@ function UserProfileModal({
               />
             </div>
 
-            {/* Name */}
             <h2 className="text-xl font-bold text-foreground">
               {user.username}
             </h2>
@@ -96,7 +94,6 @@ function UserProfileModal({
               {user.username.toLowerCase()}
             </p>
 
-            {/* Action buttons */}
             <div className="mt-3 flex items-center gap-2">
               {isFriend ? (
                 <Button size="sm" className="text-xs h-8 gap-1.5 bg-success hover:bg-success/80">
@@ -117,10 +114,8 @@ function UserProfileModal({
               </button>
             </div>
 
-            {/* Separator */}
             <div className="my-3 border-t border-border" />
 
-            {/* Join date */}
             <div className="mb-3">
               <p className="text-xs font-bold text-foreground">Gia Nhập Từ</p>
               <p className="mt-0.5 text-xs text-muted-foreground">
@@ -128,7 +123,6 @@ function UserProfileModal({
               </p>
             </div>
 
-            {/* Notes */}
             <div className="mb-4">
               <p className="text-xs font-bold text-foreground">
                 Ghi chú (chỉ hiển thị cho bạn)
@@ -146,7 +140,6 @@ function UserProfileModal({
 
         {/* ─── Column 2: Tabs Content ─── */}
         <div className="flex flex-1 flex-col min-w-0 bg-background">
-          {/* Close button */}
           <button
             onClick={onClose}
             className="absolute top-3 right-3 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-black/40 text-white hover:bg-black/60 transition-colors cursor-pointer"
@@ -154,7 +147,6 @@ function UserProfileModal({
             <X className="h-4 w-4" />
           </button>
 
-          {/* Tabs header */}
           <div className="flex gap-4 border-b border-border px-4 pt-4">
             {TABS.map((tab) => (
               <button
@@ -172,7 +164,6 @@ function UserProfileModal({
             ))}
           </div>
 
-          {/* Tab content */}
           <ScrollArea className="flex-1">
             <div className="p-4">
               {activeTab === "activity" && (
@@ -239,7 +230,7 @@ function UserProfileModal({
   );
 }
 
-/* ─── Column 4: DM User Info Panel ─────────────────────────────────── */
+/* ─── Column 4: DM User Info Panel (Discord-accurate) ──────────────── */
 export function DmUserPanel({ userId }: { userId: string }) {
   const [showProfile, setShowProfile] = useState(false);
   const user = MOCK_USERS.find((u) => u.id === userId);
@@ -249,58 +240,82 @@ export function DmUserPanel({ userId }: { userId: string }) {
 
   return (
     <>
-      <aside className="flex h-full w-[340px] shrink-0 flex-col border-l border-border bg-background-secondary">
-        {/* Header */}
-        <div className="flex h-12 items-center border-b border-border px-4">
-          <span className="text-sm font-semibold text-foreground truncate">
-            {user.username}
-          </span>
+      <aside className="flex h-full w-[340px] shrink-0 flex-col border-l border-border bg-[#2b2d31]">
+        {/* ─── Banner (Color Header) ─── */}
+        <div className="relative h-[120px] shrink-0">
+          {/* Banner gradient background */}
+          <div className="absolute inset-0 bg-gradient-to-br from-indigo-500 via-indigo-600 to-purple-700" />
+
+          {/* Avatar: overlap banner → inner card boundary */}
+          <div className="absolute -bottom-[40px] left-4 z-10">
+            <div className="rounded-full border-[6px] border-[#111214]">
+              <StatusAvatar
+                src={user.avatarUrl}
+                fallback={user.username}
+                status={user.status}
+                size="xl"
+              />
+            </div>
+          </div>
         </div>
 
+        {/* Scrollable content area */}
         <ScrollArea className="flex-1">
-          <div className="flex flex-col items-center px-4 pt-6">
-            {/* Avatar */}
-            <StatusAvatar
-              src={user.avatarUrl}
-              fallback={user.username}
-              status={user.status}
-              size="xl"
-            />
+          {/* ─── Inner Profile Card (Dark card) ─── */}
+          <div className="mx-4 mt-2 rounded-xl bg-[#111214] p-4">
+            {/* Spacer for avatar overlap */}
+            <div className="h-[28px]" />
 
-            {/* Name + tag */}
-            <h3 className="mt-3 text-lg font-bold text-foreground">
+            {/* Username + tag */}
+            <h3 className="text-xl font-bold text-white leading-tight">
               {user.username}
             </h3>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-sm text-[#b5bac1] mt-0.5">
               {user.username.toLowerCase()}
             </p>
-          </div>
 
-          {/* Info section */}
-          <div className="mt-4 mx-4 space-y-4 rounded-lg bg-background-tertiary p-4">
-            {/* Join date */}
-            <div>
-              <p className="text-xs font-bold text-foreground mb-0.5">
+            {/* Separator */}
+            <div className="my-3 h-px bg-white/10" />
+
+            {/* ── GIỚI THIỆU VỀ TÔI (About Me) ── */}
+            <div className="mb-3">
+              <p className="text-[11px] font-bold uppercase tracking-wide text-white mb-1">
+                Giới thiệu về tôi
+              </p>
+              <p className="text-[13px] text-[#dbdee1] leading-relaxed">
+                Xin chào! Tôi là {user.username} 👋
+              </p>
+            </div>
+
+            {/* Separator */}
+            <div className="my-3 h-px bg-white/10" />
+
+            {/* ── GIA NHẬP TỪ (Member Since) ── */}
+            <div className="mb-3">
+              <p className="text-[11px] font-bold uppercase tracking-wide text-white mb-1.5">
                 Gia Nhập Từ
               </p>
-              <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                <Calendar className="h-3.5 w-3.5" />
+              <p className="flex items-center gap-1.5 text-[13px] text-[#b5bac1]">
+                <Calendar className="h-3.5 w-3.5 text-[#b5bac1]" />
                 {formatDate(user.createdAt)}
               </p>
             </div>
 
-            {/* Mutual servers */}
+            {/* Separator */}
+            <div className="my-3 h-px bg-white/10" />
+
+            {/* ── MÁY CHỦ CHUNG (Mutual Servers) ── */}
             <div>
-              <p className="text-xs font-bold text-foreground mb-1.5">
+              <p className="text-[11px] font-bold uppercase tracking-wide text-white mb-2">
                 Máy Chủ Chung — {mutualServers.length}
               </p>
-              <div className="space-y-1.5">
+              <div className="space-y-1">
                 {mutualServers.map((server) => (
                   <div
                     key={server.id}
-                    className="flex items-center gap-2 rounded-md p-1.5 hover:bg-secondary/50 transition-colors cursor-pointer"
+                    className="flex items-center gap-2.5 rounded-md p-1.5 hover:bg-white/5 transition-colors cursor-pointer"
                   >
-                    <div className="flex h-7 w-7 items-center justify-center rounded-[10px] bg-accent text-[10px] font-semibold text-foreground">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-[12px] bg-indigo-500 text-[11px] font-bold text-white shrink-0">
                       {server.name
                         .split(" ")
                         .map((w) => w[0])
@@ -308,26 +323,41 @@ export function DmUserPanel({ userId }: { userId: string }) {
                         .slice(0, 2)
                         .toUpperCase()}
                     </div>
-                    <span className="text-xs text-foreground">
+                    <span className="text-[13px] text-[#dbdee1] truncate">
                       {server.name}
                     </span>
                   </div>
                 ))}
                 {mutualServers.length === 0 && (
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-[13px] text-[#b5bac1] py-2">
                     Không có máy chủ chung
                   </p>
                 )}
               </div>
             </div>
+
+            {/* Separator */}
+            <div className="my-3 h-px bg-white/10" />
+
+            {/* ── GHI CHÚ (Note) ── */}
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-wide text-white mb-1.5">
+                Ghi chú
+              </p>
+              <input
+                type="text"
+                placeholder="Nhấp để thêm ghi chú"
+                className="w-full rounded-[4px] bg-transparent px-1 py-1 text-[13px] text-[#dbdee1] placeholder:text-[#b5bac1]/50 outline-none border border-transparent focus:border-white/20 transition-colors"
+              />
+            </div>
           </div>
         </ScrollArea>
 
-        {/* View full profile button */}
-        <div className="p-3 border-t border-border">
+        {/* ─── Bottom: View Full Profile ─── */}
+        <div className="p-3 border-t border-white/10">
           <button
             onClick={() => setShowProfile(true)}
-            className="w-full rounded-md bg-secondary px-3 py-2 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/80 transition-colors cursor-pointer"
+            className="w-full rounded-[4px] bg-[#4e5058]/50 px-3 py-2 text-[13px] font-medium text-[#dbdee1] hover:bg-[#4e5058]/70 hover:text-white transition-colors cursor-pointer"
           >
             Xem hồ sơ đầy đủ
           </button>

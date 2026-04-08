@@ -114,7 +114,7 @@ export function ChannelList() {
 
   return (
     <div
-      className="flex h-full flex-col bg-background-secondary"
+      className="flex h-full flex-col bg-[#2b2d31]"
       style={{ width: sidebarWidth }}
     >
       {/* Server Name Header */}

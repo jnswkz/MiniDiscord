@@ -1,34 +1,54 @@
 "use client";
 
-import { useI18nStore, type Locale } from "@/lib/i18n";
+import { useTranslation, type Locale } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
+import { Globe } from "lucide-react";
 
-const LANGUAGES: { key: Locale; label: string; flag: string }[] = [
-  { key: "en", label: "English", flag: "🇺🇸" },
-  { key: "vi", label: "Tiếng Việt", flag: "🇻🇳" },
+const LANGUAGES: { code: Locale; label: string; flag: string }[] = [
+  { code: "en", label: "English", flag: "🇺🇸" },
+  { code: "vi", label: "Tiếng Việt", flag: "🇻🇳" },
 ];
 
-export function LanguageSwitcher({ className }: { className?: string }) {
-  const locale = useI18nStore((s) => s.locale);
-  const setLocale = useI18nStore((s) => s.setLocale);
+export function LanguageSwitcher() {
+  const { locale, setLocale } = useTranslation();
 
   return (
-    <div className={cn("flex items-center gap-1", className)}>
-      {LANGUAGES.map((lang) => (
+    <div className="flex items-center gap-1">
+      {LANGUAGES.map(({ code, label, flag }) => (
         <button
-          key={lang.key}
-          onClick={() => setLocale(lang.key)}
+          key={code}
+          onClick={() => setLocale(code)}
           className={cn(
-            "flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition-colors cursor-pointer",
-            locale === lang.key
+            "flex items-center gap-1.5 rounded-md px-3 py-1.5 text-[13px] font-medium transition-colors cursor-pointer",
+            locale === code
               ? "bg-accent text-white"
               : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
           )}
         >
-          <span>{lang.flag}</span>
-          <span>{lang.label}</span>
+          <span>{flag}</span>
+          <span>{label}</span>
         </button>
       ))}
     </div>
+  );
+}
+
+/** Compact toggle version for tight spaces */
+export function LanguageToggle() {
+  const { locale, setLocale } = useTranslation();
+
+  function toggle() {
+    setLocale(locale === "en" ? "vi" : "en");
+  }
+
+  return (
+    <button
+      onClick={toggle}
+      className="flex items-center gap-1 rounded-md px-2 py-1 text-[12px] font-semibold text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-colors cursor-pointer"
+      aria-label="Switch language"
+    >
+      <Globe className="h-3.5 w-3.5" />
+      <span className="uppercase">{locale}</span>
+    </button>
   );
 }

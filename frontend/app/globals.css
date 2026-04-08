@@ -102,6 +102,13 @@
   --server-list-width: 72px;
   --channel-sidebar-width: 300px;
   --member-list-width: 240px;
+
+  /* Floating bottom bars */
+  --floating-bar-gap: 12px;
+  --floating-bar-radius: 12px;
+  --floating-user-panel-height: 58px;
+  --floating-user-panel-offset: 82px;
+  --floating-message-input-offset: 132px;
 }
 
 /* =====================
@@ -188,4 +195,10 @@ body {
   outline: 2px solid var(--ring);
   outline-offset: 2px;
   border-radius: var(--radius-sm);
+}
+
+/* Remove focus ring from message input area */
+.message-input-wrapper:focus-within,
+.message-input-wrapper *:focus-visible {
+  outline: none !important;
 }

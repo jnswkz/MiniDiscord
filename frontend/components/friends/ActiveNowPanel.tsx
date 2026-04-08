@@ -7,7 +7,7 @@ export function ActiveNowPanel() {
   const { t } = useTranslation();
 
   return (
-    <div className="flex h-full w-[340px] flex-col border-l border-border bg-background-secondary">
+    <div className="flex h-full w-[340px] flex-col border-l border-border bg-[#2b2d31]">
       <ScrollArea className="flex-1 px-4 pt-4">
         <h2 className="text-[20px] font-bold text-foreground">
           {t("activeNow.title")}

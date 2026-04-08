@@ -18,10 +18,12 @@ import {
   UserX,
 } from "lucide-react";
 import { MOCK_USERS, MOCK_FRIENDSHIPS, CURRENT_USER } from "@/lib/mock-data";
+import type { Friendship } from "@/types";
+import { useFriendStore } from "@/stores/friendStore";
 import { useTranslation } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
-type FriendsTab = "all" | "pending" | "add";
+type FriendsTab = "online" | "all" | "pending" | "add";
 
 /* ─── Context menu for friend "three dots" ─────────────────────────── */
 function FriendContextMenu({
@@ -94,16 +96,16 @@ function FriendContextMenu({
 function FriendsHeader({
   activeTab,
   onTabChange,
+  pendingCount,
 }: {
   activeTab: FriendsTab;
   onTabChange: (tab: FriendsTab) => void;
+  pendingCount: number;
 }) {
   const { t } = useTranslation();
-  const pendingCount = MOCK_FRIENDSHIPS.filter(
-    (f) => f.status === "PENDING"
-  ).length;
 
   const TABS: { key: FriendsTab; label: string; highlight?: boolean }[] = [
+    { key: "online", label: t("friends.online") },
     { key: "all", label: t("friends.all") },
     { key: "pending", label: t("friends.pending") },
     { key: "add", label: t("friends.addFriend"), highlight: true },
@@ -150,10 +152,14 @@ function FriendItem({
   user,
   isPending,
   isIncoming,
+  onAccept,
+  onDecline,
 }: {
   user: (typeof MOCK_USERS)[0];
   isPending?: boolean;
   isIncoming?: boolean;
+  onAccept?: (userId: string) => void;
+  onDecline?: (userId: string) => void;
 }) {
   const { t } = useTranslation();
   const router = useRouter();
@@ -213,6 +219,7 @@ function FriendItem({
           <>
             {isIncoming && (
               <button
+                onClick={() => onAccept?.(user.id)}
                 className="flex h-9 w-9 items-center justify-center rounded-full bg-secondary text-muted-foreground hover:text-success transition-colors cursor-pointer"
                 aria-label="Accept"
               >
@@ -220,6 +227,7 @@ function FriendItem({
               </button>
             )}
             <button
+              onClick={() => onDecline?.(user.id)}
               className="flex h-9 w-9 items-center justify-center rounded-full bg-secondary text-muted-foreground hover:text-destructive transition-colors cursor-pointer"
               aria-label="Reject"
             >
@@ -257,10 +265,50 @@ function FriendItem({
   );
 }
 
-/* ─── All friends tab ──────────────────────────────────────────────── */
-function AllFriends() {
+/* ─── Online friends tab ───────────────────────────────────────────── */
+function OnlineFriends({ friendships }: { friendships: Friendship[] }) {
   const { t } = useTranslation();
-  const acceptedIds = MOCK_FRIENDSHIPS.filter(
+  const acceptedIds = friendships.filter(
+    (f) => f.status === "ACCEPTED"
+  ).map((f) => (f.userId === CURRENT_USER.id ? f.friendId : f.userId));
+
+  const onlineFriends = MOCK_USERS.filter(
+    (u) => acceptedIds.includes(u.id) && u.status !== "OFFLINE"
+  );
+
+  return (
+    <div>
+      <div className="px-6 py-4">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+          <input
+            type="text"
+            placeholder={t("friends.search")}
+            className="h-8 w-full rounded-md bg-background-tertiary pl-9 pr-3 text-[13px] text-foreground placeholder:text-muted-foreground outline-none"
+          />
+        </div>
+      </div>
+      <div className="px-6 mt-4">
+        <h3 className="mb-2 px-3 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+          {t("friends.onlineCount")} — {onlineFriends.length}
+        </h3>
+        {onlineFriends.map((user) => (
+          <FriendItem key={user.id} user={user} />
+        ))}
+        {onlineFriends.length === 0 && (
+          <p className="py-8 text-center text-[14px] text-muted-foreground">
+            {t("friends.noOnline")}
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ─── All friends tab ──────────────────────────────────────────────── */
+function AllFriends({ friendships }: { friendships: Friendship[] }) {
+  const { t } = useTranslation();
+  const acceptedIds = friendships.filter(
     (f) => f.status === "ACCEPTED"
   ).map((f) => (f.userId === CURRENT_USER.id ? f.friendId : f.userId));
 
@@ -279,7 +327,7 @@ function AllFriends() {
         </div>
       </div>
       <div className="px-6 mt-4">
-        <h3 className="mb-2 px-3 text-[12px] font-semibold uppercase tracking-wide text-muted-foreground">
+        <h3 className="mb-2 px-3 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
           {t("friends.allCount")} — {friends.length}
         </h3>
         {friends.map((user) => (
@@ -291,9 +339,17 @@ function AllFriends() {
 }
 
 /* ─── Pending friends tab ──────────────────────────────────────────── */
-function PendingFriends() {
+function PendingFriends({
+  friendships,
+  onAccept,
+  onDecline,
+}: {
+  friendships: Friendship[];
+  onAccept: (userId: string) => void;
+  onDecline: (userId: string) => void;
+}) {
   const { t } = useTranslation();
-  const pending = MOCK_FRIENDSHIPS.filter((f) => f.status === "PENDING");
+  const pending = friendships.filter((f) => f.status === "PENDING");
 
   const pendingUsers = pending.map((f) => {
     const isIncoming = f.friendId === CURRENT_USER.id;
@@ -313,6 +369,8 @@ function PendingFriends() {
           user={user}
           isPending
           isIncoming={isIncoming}
+          onAccept={onAccept}
+          onDecline={onDecline}
         />
       ))}
       {pendingUsers.length === 0 && (
@@ -360,15 +418,26 @@ function AddFriend() {
 
 /* ─── Main component ───────────────────────────────────────────────── */
 export function FriendsPage() {
-  const [activeTab, setActiveTab] = useState<FriendsTab>("all");
+  const [activeTab, setActiveTab] = useState<FriendsTab>("online");
+  const friendships = useFriendStore((s) => s.friendships);
+  const acceptFriend = useFriendStore((s) => s.acceptFriend);
+  const declineFriend = useFriendStore((s) => s.declineFriend);
+  const pendingCount = useFriendStore((s) => s.getPendingCount());
 
   return (
     <div className="flex h-full flex-col">
-      <FriendsHeader activeTab={activeTab} onTabChange={setActiveTab} />
+      <FriendsHeader activeTab={activeTab} onTabChange={setActiveTab} pendingCount={pendingCount} />
 
       <ScrollArea className="flex-1">
-        {activeTab === "all" && <AllFriends />}
-        {activeTab === "pending" && <PendingFriends />}
+        {activeTab === "online" && <OnlineFriends friendships={friendships} />}
+        {activeTab === "all" && <AllFriends friendships={friendships} />}
+        {activeTab === "pending" && (
+          <PendingFriends
+            friendships={friendships}
+            onAccept={acceptFriend}
+            onDecline={declineFriend}
+          />
+        )}
         {activeTab === "add" && <AddFriend />}
       </ScrollArea>
     </div>

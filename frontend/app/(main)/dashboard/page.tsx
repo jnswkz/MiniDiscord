@@ -20,8 +20,11 @@ export default function DashboardPage() {
 
   return (
     <>
-      {/* Left section: Column 1 + Column 2 + UserPanel */}
-      <div className="flex shrink-0 flex-col">
+      {/* Reserve room so the floating user panel stays above the bottom edge without covering the sidebars. */}
+      <div
+        className="relative flex shrink-0 flex-col bg-background-tertiary border-r border-border"
+        style={{ paddingBottom: "var(--floating-user-panel-offset)" }}
+      >
         <div className="flex flex-1 min-h-0 overflow-hidden">
           {/* Column 1: Server List */}
           <ServerList />
@@ -36,7 +39,7 @@ export default function DashboardPage() {
       <ResizeHandle onResize={handleResize} />
 
       {/* Column 3: Friends view */}
-      <main className="flex flex-1 flex-col min-w-0 bg-background">
+      <main className="flex flex-1 flex-col min-w-0 bg-[#313338]">
         <FriendsPage />
       </main>
 

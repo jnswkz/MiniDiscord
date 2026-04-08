@@ -1,72 +1,119 @@
 "use client";
 
+import { useState } from "react";
 import { StatusAvatar } from "@/components/ui/StatusAvatar";
-import { Mic, Headphones, Settings } from "lucide-react";
+import { Mic, MicOff, Headphones, HeadphoneOff, Settings } from "lucide-react";
 import { CURRENT_USER } from "@/lib/mock-data";
 import { useTranslation } from "@/lib/i18n";
 import { useUIStore } from "@/stores/uiStore";
 import { cn } from "@/lib/utils";
 
-function IconButton({
-  children,
-  label,
-  onClick,
-}: {
-  children: React.ReactNode;
-  label: string;
-  onClick?: () => void;
-}) {
-  return (
-    <button
-      aria-label={label}
-      onClick={onClick}
-      className={cn(
-        "flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors duration-150 cursor-pointer",
-        "hover:bg-secondary hover:text-foreground"
-      )}
-    >
-      {children}
-    </button>
-  );
-}
-
 export function UserPanel() {
   const { t } = useTranslation();
   const openSettings = useUIStore((s) => s.openSettings);
+  const [isMuted, setIsMuted] = useState(false);
+  const [isDeafened, setIsDeafened] = useState(false);
+
   const statusKey = CURRENT_USER.status.toLowerCase() as
     | "online"
     | "offline"
     | "idle"
     | "dnd";
 
+  function toggleMute() {
+    setIsMuted((prev) => !prev);
+  }
+
+  function toggleDeafen() {
+    setIsDeafened((prev) => {
+      const next = !prev;
+      // Discord logic: deafen ON → force mute ON
+      if (next) {
+        setIsMuted(true);
+      }
+      return next;
+    });
+  }
+
+  // Mic is visually muted if either isMuted or isDeafened
+  const micActive = !isMuted;
+  const headphoneActive = !isDeafened;
+
   return (
-    <div className="flex h-[58px] shrink-0 items-center gap-2 rounded-lg bg-background-tertiary px-2 mx-2 mb-2">
-      <StatusAvatar
-        src={CURRENT_USER.avatarUrl}
-        fallback={CURRENT_USER.username}
-        status={CURRENT_USER.status}
-        size="md"
-      />
+    <div
+      className="absolute inset-x-0 z-20 px-3"
+      style={{ bottom: "var(--floating-bar-gap)" }}
+    >
+      <div
+        className="flex items-center gap-2 px-3 shadow-[0_12px_30px_rgba(0,0,0,0.28)]"
+        style={{
+          minHeight: "var(--floating-user-panel-height)",
+          borderRadius: "var(--floating-bar-radius)",
+          backgroundColor: "#232428",
+        }}
+      >
+        <StatusAvatar
+          src={CURRENT_USER.avatarUrl}
+          fallback={CURRENT_USER.username}
+          status={CURRENT_USER.status}
+          size="md"
+        />
 
-      <div className="flex-1 min-w-0">
-        <p className="truncate text-[14px] font-semibold text-foreground leading-tight">
-          {CURRENT_USER.username}
-        </p>
-        <p className="truncate text-[12px] text-muted-foreground leading-tight">
-          {t(`status.${statusKey}`)}
-        </p>
-      </div>
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-[14px] font-semibold text-foreground leading-tight">
+            {CURRENT_USER.username}
+          </p>
+          <p className="truncate text-[12px] text-muted-foreground leading-tight">
+            {t(`status.${statusKey}`)}
+          </p>
+        </div>
 
-      <div className="flex items-center gap-0.5">
-        <IconButton label={t("userPanel.muteMic")}>
-          <Mic className="h-[18px] w-[18px]" />
-        </IconButton>
-        <IconButton label={t("userPanel.deafen")}>
-          <Headphones className="h-[18px] w-[18px]" />
-        </IconButton>
-        <IconButton label={t("userPanel.settings")} onClick={openSettings}>
-          <Settings className="h-[18px] w-[18px]" />
-        </IconButton>
+        <div className="flex items-center gap-0.5">
+          {/* Microphone */}
+          <button
+            aria-label={t("userPanel.muteMic")}
+            onClick={toggleMute}
+            className={cn(
+              "flex h-8 w-8 items-center justify-center rounded-md transition-colors duration-150 cursor-pointer",
+              micActive
+                ? "text-[#b5bac1] hover:bg-[#3f4147] hover:text-[#dbdee1]"
+                : "text-[#ed4245] bg-[#ed4245]/15 hover:bg-[#ed4245]/25"
+            )}
+          >
+            {micActive ? (
+              <Mic className="h-[18px] w-[18px]" />
+            ) : (
+              <MicOff className="h-[18px] w-[18px]" />
+            )}
+          </button>
+
+          {/* Headphones */}
+          <button
+            aria-label={t("userPanel.deafen")}
+            onClick={toggleDeafen}
+            className={cn(
+              "flex h-8 w-8 items-center justify-center rounded-md transition-colors duration-150 cursor-pointer",
+              headphoneActive
+                ? "text-[#b5bac1] hover:bg-[#3f4147] hover:text-[#dbdee1]"
+                : "text-[#ed4245] bg-[#ed4245]/15 hover:bg-[#ed4245]/25"
+            )}
+          >
+            {headphoneActive ? (
+              <Headphones className="h-[18px] w-[18px]" />
+            ) : (
+              <HeadphoneOff className="h-[18px] w-[18px]" />
+            )}
+          </button>
+
+          {/* Settings */}
+          <button
+            aria-label={t("userPanel.settings")}
+            onClick={openSettings}
+            className="flex h-8 w-8 items-center justify-center rounded-md text-[#b5bac1] hover:bg-[#3f4147] hover:text-[#dbdee1] transition-colors duration-150 cursor-pointer"
+          >
+            <Settings className="h-[18px] w-[18px]" />
+          </button>
+        </div>
       </div>
     </div>
   );

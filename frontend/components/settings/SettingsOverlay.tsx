@@ -27,15 +27,9 @@ const LANGUAGES: { key: Locale; label: string; nativeLabel: string }[] = [
   { key: "vi", label: "Tiếng Việt", nativeLabel: "Vietnamese" },
 ];
 
-const TIME_FORMATS = [
-  { key: "auto", label: { en: "Auto", vi: "Tự động" } },
-  { key: "12h", label: { en: "12 hour", vi: "12 giờ" } },
-  { key: "24h", label: { en: "24 hour", vi: "24 giờ" } },
-] as const;
-
 /* ─── Avatar with popup ────────────────────────────────────────────── */
 function AvatarWithPopup() {
-  const { locale } = useTranslation();
+  const { t } = useTranslation();
   const [showPopup, setShowPopup] = useState(false);
   const popupRef = useRef<HTMLDivElement>(null);
 
@@ -72,11 +66,11 @@ function AvatarWithPopup() {
         <div className="absolute left-1/2 top-full z-10 mt-2 -translate-x-1/2 rounded-lg bg-background-tertiary p-2 shadow-xl border border-border min-w-[180px]">
           <button className="flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-xs text-foreground hover:bg-accent hover:text-white transition-colors cursor-pointer">
             <Camera className="h-3.5 w-3.5" />
-            {locale === "vi" ? "Đổi Ảnh Đại Diện" : "Change Avatar"}
+            {t("settings.changeAvatar")}
           </button>
           <button className="flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-xs text-foreground hover:bg-accent hover:text-white transition-colors cursor-pointer">
             <Sparkles className="h-3.5 w-3.5" />
-            {locale === "vi" ? "Thay Đổi Trang Trí" : "Change Decoration"}
+            {t("settings.changeDecoration")}
           </button>
         </div>
       )}
@@ -84,11 +78,11 @@ function AvatarWithPopup() {
   );
 }
 
-/* ─── My Account tab (with Bảo mật / Trạng thái sub-tabs) ──────────── */
+/* ─── My Account tab (with Security / Standing sub-tabs) ──────────── */
 type AccountSubTab = "security" | "standing";
 
 function SecurityContent() {
-  const { locale } = useTranslation();
+  const { t } = useTranslation();
 
   return (
     <div className="mt-4">
@@ -102,20 +96,18 @@ function SecurityContent() {
             <AvatarWithPopup />
             <Button variant="outline" size="sm" className="text-xs h-8">
               <Edit2 className="mr-1.5 h-3 w-3" />
-              {locale === "vi"
-                ? "Chỉnh Sửa Hồ Sơ Người Dùng"
-                : "Edit User Profile"}
+              {t("settings.editUserProfile")}
             </Button>
           </div>
 
           {/* Info fields */}
           <div className="space-y-3 rounded-lg bg-background-tertiary p-4">
             <InfoRow
-              label={locale === "vi" ? "Tên hiển thị" : "Display Name"}
+              label={t("settings.displayName")}
               value={CURRENT_USER.username}
             />
             <InfoRow
-              label={locale === "vi" ? "Tên đăng nhập" : "Username"}
+              label={t("settings.username")}
               value={CURRENT_USER.username.toLowerCase()}
             />
             <InfoRow label="Email" value={CURRENT_USER.email} />
@@ -127,13 +119,17 @@ function SecurityContent() {
 }
 
 function StandingContent() {
-  const { locale } = useTranslation();
+  const { t } = useTranslation();
 
-  const STEPS = locale === "vi"
-    ? ["Hoàn toàn ổn!", "Bị giới hạn", "Giới hạn ở\nmức độ\nnghiêm trọng", "Rủi ro cao", "Bị đình chỉ"]
-    : ["All good!", "Limited", "Severely\nLimited", "At Risk", "Suspended"];
+  const STEPS = [
+    t("settings.stepGood"),
+    t("settings.stepLimited"),
+    t("settings.stepSevere"),
+    t("settings.stepRisk"),
+    t("settings.stepSuspended"),
+  ];
 
-  const activeStep = 0; // Account is in good standing
+  const activeStep = 0;
 
   return (
     <div className="mt-6">
@@ -147,15 +143,13 @@ function StandingContent() {
         />
         <div className="flex-1 min-w-0 pt-1">
           <p className="text-base text-foreground">
-            {locale === "vi" ? "Tài khoản của bạn " : "Your account is "}
+            {t("settings.accountGoodIntro")}
             <span className="font-bold text-success">
-              {locale === "vi" ? "hoàn toàn ổn" : "in good standing"}
+              {t("settings.accountGood")}
             </span>
           </p>
           <p className="mt-1.5 text-[13px] text-muted-foreground leading-relaxed">
-            {locale === "vi"
-              ? <>Cảm ơn vì đã tuân thủ <span className="text-accent hover:underline cursor-pointer">Điều Khoản Dịch Vụ</span> và <span className="text-accent hover:underline cursor-pointer">Nguyên Tắc Cộng Đồng</span> của Discord. Nếu bạn vi phạm các quy tắc, quy tắc bị vi phạm sẽ hiện thị tại đây.</>
-              : <>Thanks for following Discord&apos;s <span className="text-accent hover:underline cursor-pointer">Terms of Service</span> and <span className="text-accent hover:underline cursor-pointer">Community Guidelines</span>. If you break any rules, violations will appear here.</>}
+            {t("settings.accountGoodDesc")}
           </p>
         </div>
       </div>
@@ -206,12 +200,12 @@ function StandingContent() {
 }
 
 function AccountTab() {
-  const { locale } = useTranslation();
+  const { t } = useTranslation();
   const [subTab, setSubTab] = useState<AccountSubTab>("security");
 
   const SUB_TABS: { key: AccountSubTab; label: string }[] = [
-    { key: "security", label: locale === "vi" ? "Bảo mật" : "Security" },
-    { key: "standing", label: locale === "vi" ? "Trạng thái" : "Standing" },
+    { key: "security", label: t("settings.security") },
+    { key: "standing", label: t("settings.standing") },
   ];
 
   return (
@@ -241,7 +235,7 @@ function AccountTab() {
 }
 
 function InfoRow({ label, value }: { label: string; value: string }) {
-  const { locale } = useTranslation();
+  const { t } = useTranslation();
 
   return (
     <div className="flex items-center justify-between">
@@ -252,7 +246,7 @@ function InfoRow({ label, value }: { label: string; value: string }) {
         <p className="text-sm text-foreground">{value}</p>
       </div>
       <Button variant="outline" size="sm" className="text-xs h-7">
-        {locale === "vi" ? "Chỉnh sửa" : "Edit"}
+        {t("settings.edit")}
       </Button>
     </div>
   );
@@ -260,25 +254,30 @@ function InfoRow({ label, value }: { label: string; value: string }) {
 
 /* ─── Language & Time tab ──────────────────────────────────────────── */
 function LanguageTab() {
-  const { locale } = useTranslation();
+  const { t } = useTranslation();
+  const locale = useI18nStore((s) => s.locale);
   const setLocale = useI18nStore((s) => s.setLocale);
   const [timeFormat, setTimeFormat] = useState<string>("auto");
+
+  const TIME_FORMATS = [
+    { key: "auto", label: t("settings.timeAuto") },
+    { key: "12h", label: t("settings.time12h") },
+    { key: "24h", label: t("settings.time24h") },
+  ];
 
   return (
     <div>
       <h2 className="text-base font-semibold text-foreground mb-4">
-        {locale === "vi" ? "Ngôn Ngữ & Thời Gian" : "Language & Time"}
+        {t("settings.languageTime")}
       </h2>
 
       {/* Language */}
       <div>
         <h3 className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
-          {locale === "vi" ? "Chọn Ngôn ngữ" : "Select Language"}
+          {t("settings.selectLanguage")}
         </h3>
         <p className="mt-1 text-xs text-muted-foreground">
-          {locale === "vi"
-            ? "Chọn ngôn ngữ bạn muốn MiniDiscord hiển thị."
-            : "Choose the language you want MiniDiscord to display."}
+          {t("settings.selectLanguageDesc")}
         </p>
 
         <div className="mt-3 space-y-1.5">
@@ -307,7 +306,7 @@ function LanguageTab() {
       {/* Time format */}
       <div className="mt-6">
         <h3 className="text-xs font-bold uppercase tracking-wide text-muted-foreground">
-          {locale === "vi" ? "Định dạng thời gian" : "Time Format"}
+          {t("settings.timeFormat")}
         </h3>
 
         <div className="mt-3 space-y-2.5">
@@ -330,7 +329,7 @@ function LanguageTab() {
                 )}
               </div>
               <span className="text-sm text-foreground">
-                {fmt.label[locale]}
+                {fmt.label}
               </span>
             </label>
           ))}
@@ -343,18 +342,18 @@ function LanguageTab() {
 /* ─── Main Settings Overlay ────────────────────────────────────────── */
 export function SettingsOverlay({ onClose }: { onClose: () => void }) {
   const [activeTab, setActiveTab] = useState<SettingsTab>("account");
-  const { locale } = useTranslation();
+  const { t } = useTranslation();
   const router = useRouter();
 
   const TABS: { key: SettingsTab; label: string; icon: React.ElementType }[] = [
     {
       key: "account",
-      label: locale === "vi" ? "Tài Khoản Của Tôi" : "My Account",
+      label: t("settings.myAccount"),
       icon: User,
     },
     {
       key: "language",
-      label: locale === "vi" ? "Ngôn Ngữ & Thời Gian" : "Language & Time",
+      label: t("settings.languageTime"),
       icon: Globe,
     },
   ];
@@ -398,9 +397,7 @@ export function SettingsOverlay({ onClose }: { onClose: () => void }) {
                 {CURRENT_USER.username}
               </p>
               <button className="flex items-center gap-1 text-[11px] text-muted-foreground hover:text-accent transition-colors cursor-pointer">
-                <span>
-                  {locale === "vi" ? "Chỉnh sửa hồ sơ" : "Edit Profile"}
-                </span>
+                <span>{t("settings.editProfile")}</span>
                 <Pencil className="h-2.5 w-2.5" />
               </button>
             </div>
@@ -410,14 +407,14 @@ export function SettingsOverlay({ onClose }: { onClose: () => void }) {
           <div className="px-2.5 pb-2">
             <div className="flex h-7 items-center rounded bg-background-tertiary px-2">
               <span className="text-[11px] text-muted-foreground">
-                {locale === "vi" ? "Tìm kiếm" : "Search"}
+                {t("settings.search")}
               </span>
             </div>
           </div>
 
           {/* Section title */}
           <p className="mb-1 px-3 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-            {locale === "vi" ? "Cài đặt người dùng" : "User Settings"}
+            {t("settings.userSettings")}
           </p>
 
           {/* Tabs */}
@@ -450,7 +447,7 @@ export function SettingsOverlay({ onClose }: { onClose: () => void }) {
               className="flex w-full items-center gap-2 rounded px-2 py-[5px] text-[13px] text-destructive hover:bg-destructive/10 transition-colors cursor-pointer"
             >
               <LogOut className="h-4 w-4 shrink-0" />
-              <span>{locale === "vi" ? "Đăng Xuất" : "Log Out"}</span>
+              <span>{t("settings.logOut")}</span>
             </button>
           </ScrollArea>
         </div>
@@ -461,12 +458,8 @@ export function SettingsOverlay({ onClose }: { onClose: () => void }) {
           <div className="flex items-center justify-between px-6 pt-4 pb-2">
             <h1 className="text-sm font-bold text-foreground uppercase tracking-wide">
               {activeTab === "account"
-                ? locale === "vi"
-                  ? "Tài Khoản Của Tôi"
-                  : "My Account"
-                : locale === "vi"
-                  ? "Ngôn Ngữ & Thời Gian"
-                  : "Language & Time"}
+                ? t("settings.myAccount")
+                : t("settings.languageTime")}
             </h1>
 
             <div className="flex items-center gap-1">
