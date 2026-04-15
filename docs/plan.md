@@ -2,6 +2,7 @@
 
 > **Đề tài:** Xây dựng Chat Server đa người dùng (Mini Discord Clone)
 > **Backend:** Java Spring Boot (Microservices) | **Frontend:** Next.js | **DB:** PostgreSQL + MongoDB + Redis
+> **Infrastructure:** 100% Cloud — Supabase · MongoDB Atlas · Upstash · CloudAMQP · Backblaze B2
 
 ---
 
@@ -20,37 +21,41 @@ graph TD
     GW --> CHS[Chat History Service]
     GW --> FS[File Service]
 
-    MS --> RMQ[RabbitMQ<br/>Message Broker]
+    MS --> RMQ[CloudAMQP<br/>RabbitMQ TLS]
     CHS --> RMQ
+    GCS --> RMQ
     
-    US --> PG[(PostgreSQL)]
-    GCS --> PG
-    CHS --> MDB[(MongoDB)]
-    MS --> RD[(Redis)]
+    US --> PG1[(Supabase PostgreSQL<br/>ap-southeast-2)]
+    GCS --> PG2[(Supabase PostgreSQL<br/>ap-northeast-1)]
+    CHS --> MDB[(MongoDB Atlas)]
+    MS --> RD[(Upstash Redis<br/>TLS)]
+    FS --> B2[(Backblaze B2<br/>S3-compatible)]
 
     SD[Service Discovery<br/>Eureka] -.-> US
     SD -.-> GCS
     SD -.-> MS
     SD -.-> CHS
+    SD -.-> FS
     
     CFG[Config Server<br/>Spring Cloud Config] -.-> US
     CFG -.-> GCS
     CFG -.-> MS
     CFG -.-> CHS
+    CFG -.-> FS
 ```
 
 ### 1.2 Mô tả các Microservices
 
-| Service | Mô tả | Database | Port |
-|---------|--------|----------|------|
-| **API Gateway** | Định tuyến request, xác thực JWT, Rate Limiting | — | 8080 |
-| **Service Discovery** | Eureka Server — quản lý đăng ký/tìm kiếm service | — | 8761 |
-| **Config Server** | Quản lý cấu hình tập trung | — | 8888 |
-| **User Service** | Đăng ký, đăng nhập, quản lý hồ sơ, JWT token | PostgreSQL | 8081 |
-| **Groups & Channels Service** | CRUD Room/Channel, quản lý thành viên, phân quyền | PostgreSQL | 8082 |
-| **Chat History Service** | Đọc/Ghi lịch sử tin nhắn, tìm kiếm | MongoDB | 8083 |
-| **Messaging Service** | WebSocket handler, STOMP, duy trì kết nối real-time | Redis | 8084 |
-| **File Service** | Upload/Download file, ảnh lên MinIO/S3 | PostgreSQL (metadata) | 8085 |
+| Service | Mô tả | Database / Infra | Cloud Provider | Port |
+|---------|--------|------------------|----------------|------|
+| **API Gateway** | Định tuyến request, xác thực JWT, Rate Limiting | — | — | 8080 |
+| **Service Discovery** | Eureka Server — quản lý đăng ký/tìm kiếm service | — | — | 8761 |
+| **Config Server** | Quản lý cấu hình tập trung | — | — | 8888 |
+| **User Service** | Đăng ký, đăng nhập, quản lý hồ sơ, JWT token | PostgreSQL | **Supabase** (ap-southeast-2) | 8081 |
+| **Groups & Channels Service** | CRUD Room/Channel, quản lý thành viên, phân quyền | PostgreSQL + RabbitMQ | **Supabase** (ap-northeast-1) + **CloudAMQP** | 8082 |
+| **Chat History Service** | Đọc/Ghi lịch sử tin nhắn, tìm kiếm | MongoDB + RabbitMQ | **MongoDB Atlas** + **CloudAMQP** | 8083 |
+| **Messaging Service** | WebSocket handler, STOMP, duy trì kết nối real-time | Redis + RabbitMQ | **Upstash** + **CloudAMQP** | 8084 |
+| **File Service** | Upload/Download file, ảnh lên Backblaze B2 | Object Storage | **Backblaze B2** (S3-compatible) | 8085 |
 
 ---
 
@@ -88,6 +93,7 @@ discord-mini-backend/
 │       └── application.yml
 │
 ├── user-service/
+│   ├── .env                             # Supabase PG + JWT credentials (git-ignored)
 │   ├── src/main/java/.../
 │   │   ├── UserServiceApplication.java
 │   │   ├── controller/
@@ -118,6 +124,7 @@ discord-mini-backend/
 │       └── application.yml
 │
 ├── group-channel-service/
+│   ├── .env                             # Supabase PG + CloudAMQP credentials (git-ignored)
 │   ├── src/main/java/.../
 │   │   ├── GroupChannelApplication.java
 │   │   ├── controller/
@@ -143,6 +150,7 @@ discord-mini-backend/
 │       └── application.yml
 │
 ├── chat-history-service/
+│   ├── .env                             # MongoDB Atlas + CloudAMQP credentials (git-ignored)
 │   ├── src/main/java/.../
 │   │   ├── ChatHistoryApplication.java
 │   │   ├── controller/
@@ -162,6 +170,7 @@ discord-mini-backend/
 │       └── application.yml
 │
 ├── messaging-service/
+│   ├── .env                             # Upstash Redis + CloudAMQP credentials (git-ignored)
 │   ├── src/main/java/.../
 │   │   ├── MessagingApplication.java
 │   │   ├── config/
@@ -185,14 +194,15 @@ discord-mini-backend/
 │       └── application.yml
 │
 ├── file-service/
+│   ├── .env                             # Backblaze B2 credentials (git-ignored)
 │   ├── src/main/java/.../
 │   │   ├── FileServiceApplication.java
 │   │   ├── controller/
 │   │   │   └── FileController.java
 │   │   ├── service/
-│   │   │   └── StorageService.java      # MinIO/S3 integration
+│   │   │   └── StorageService.java      # Backblaze B2 (S3-compatible) integration
 │   │   └── config/
-│   │       └── MinioConfig.java
+│   │       └── B2Config.java            # Backblaze B2 config (MinIO SDK)
 │   └── src/main/resources/
 │       └── application.yml
 │
@@ -208,9 +218,7 @@ discord-mini-backend/
 │   │       └── MessageEvent.java        # Shared event classes
 │   └── pom.xml
 │
-└── docker/
-    ├── docker-compose.yml               # PostgreSQL, MongoDB, Redis, RabbitMQ
-    └── .env.example
+└── .env.example                          # Template — không chứa credentials thực
 ```
 
 ### 2.2 Frontend — Next.js
@@ -609,9 +617,9 @@ db.read_receipts.createIndex(
 
 ---
 
-### 4.3 Redis — Connection & Cache Layer
+### 4.3 Redis (Upstash) — Connection & Cache Layer
 
-> **Lý do chọn Redis:** In-memory, ultra-low latency cho connection mapping, presence tracking, cache, và pub/sub giữa các messaging server instances.
+> **Lý do chọn Redis:** In-memory, ultra-low latency cho connection mapping, presence tracking, cache, và pub/sub giữa các messaging server instances. Sử dụng **Upstash Redis** (TLS) — serverless, global edge, zero maintenance.
 
 | Key Pattern | Value | TTL | Mục đích |
 |-------------|-------|-----|----------|
@@ -1006,7 +1014,7 @@ User A gửi tin vào Room X (có User B, C online):
 |---------|---------|---------|
 | **Typing Indicator** | Ephemeral event qua WebSocket, Redis key TTL 3s, KHÔNG lưu DB | Bắn trực tiếp, bypass RabbitMQ |
 | **Edit/Delete Message** | MongoDB: set `isEdited=true`, `isDeleted=true` + emit `MESSAGE_UPDATED` event | Soft delete, TTL auto-cleanup 30 ngày |
-| **File Upload** | MinIO/S3 → chỉ lưu URL trong MongoDB message | Presigned URL cho direct upload |
+| **File Upload** | Backblaze B2 → chỉ lưu URL trong MongoDB message | Presigned URL cho direct upload |
 | **Voice/Video Call** | WebRTC peer-to-peer, Server làm Signaling Server qua WebSocket hiện có | TURN/STUN server cho NAT traversal |
 | **AI Chatbot** | Microservice độc lập, lắng nghe RabbitMQ, RAG pipeline | Bot là 1 "User" đặc biệt |
 | **Message Search** | MongoDB text index + Elasticsearch cho full-text search nâng cao | Tách search service riêng |
@@ -1023,11 +1031,10 @@ User A gửi tin vào Room X (có User B, C online):
 | **Service Discovery** | Eureka | Simple, well-documented |
 | **Config** | Spring Cloud Config | Centralized config management |
 | **WebSocket** | Spring WebSocket + STOMP | Bi-directional, topic-based pub/sub |
-| **Message Broker** | RabbitMQ | Reliable delivery, flexible routing |
-| **Relational DB** | PostgreSQL 15+ | ACID, complex queries, constraints |
-| **Document DB** | MongoDB 7+ | Write-heavy, flexible schema, sharding |
-| **Cache/Session** | Redis 7+ | In-memory, pub/sub, distributed lock |
-| **Object Storage** | MinIO (self-hosted S3) | Free, S3-compatible |
+| **Message Broker** | CloudAMQP (RabbitMQ TLS) | Managed RabbitMQ, reliable delivery, TLS encrypted |
+| **Relational DB** | Supabase (PostgreSQL 15+) | Managed PostgreSQL, ACID, multi-region |
+| **Document DB** | MongoDB Atlas (7+) | Managed MongoDB, write-heavy, auto-sharding |
+| **Cache/Session** | Upstash Redis (TLS) | Serverless Redis, ultra-low latency, global |
+| **Object Storage** | Backblaze B2 (S3-compatible) | Cost-effective, S3 API compatible |
 | **Frontend** | Next.js 14+ (App Router) | SSR, file-based routing, React ecosystem |
 | **State Management** | Zustand | Lightweight, no boilerplate |
-| **Containerization** | Docker + Docker Compose | Reproducible dev environment |

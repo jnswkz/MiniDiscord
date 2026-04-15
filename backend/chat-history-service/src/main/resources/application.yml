@@ -6,15 +6,18 @@ spring:
     name: chat-history-service
   data:
     mongodb:
-      uri: mongodb://localhost:27017/discord_mini_chat
+      uri: ${MONGODB_URI:mongodb://localhost:27017/discord_mini_chat}
       auto-index-creation: true
   rabbitmq:
-    host: localhost
-    port: 5672
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
     username: ${RABBITMQ_USER:guest}
     password: ${RABBITMQ_PASS:guest}
+    virtual-host: ${RABBITMQ_VHOST:/}
+    ssl:
+      enabled: ${RABBITMQ_SSL:false}
 
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka/
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}
