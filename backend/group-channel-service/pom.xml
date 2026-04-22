@@ -12,7 +12,7 @@
     </parent>
 
     <artifactId>group-channel-service</artifactId>
-    <name>Discord Mini - Groups & Channels Service</name>
+    <name>Discord Mini - Groups and Channels Service</name>
 
     <dependencies>
         <dependency>

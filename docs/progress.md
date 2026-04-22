@@ -10,10 +10,10 @@
 ## 🏗️ Tổng quan tiến độ
 
 ```
-████████████░░░░░░░░░░░░░░░░░░  ~20% Overall
+██████████████░░░░░░░░░░░░░░░░  ~35% Overall
 
   Infrastructure   ████████████████████  100% ✅
-  Backend Logic    ██░░░░░░░░░░░░░░░░░░   10% 🔴
+  Backend Logic    ████████░░░░░░░░░░░░   35% 🟡
   Frontend UI      ██████████████░░░░░░   70% 🟡
   Integration      ░░░░░░░░░░░░░░░░░░░░    0% 🔴
   Testing          ░░░░░░░░░░░░░░░░░░░░    0% 🔴
@@ -41,9 +41,9 @@
 | ApiResponse\<T\> | `dto/ApiResponse.java` | ✅ | `ok()`, `error()` methods |
 | BaseException | `exception/BaseException.java` | ✅ | HttpStatus + errorCode |
 | MessageEvent | `event/MessageEvent.java` | ✅ | Serializable, dùng cho RabbitMQ |
-| JwtUtil | `security/JwtUtil.java` | 🔴 | **Thiếu!** Plan có nhưng chưa implement |
+| JwtUtil | `security/JwtUtil.java` | ✅ | JJWT 0.12.6, generate/validate/extractClaims |
 
-**Tiến độ: 75%** — Thiếu `JwtUtil.java` (critical cho auth flow)
+**Tiến độ: 100%** ✅ — Tất cả shared classes đã implement
 
 ---
 
@@ -94,23 +94,25 @@
 |-----------|----------------|------------|---------|
 | Application class | `UserServiceApplication.java` | ✅ | `@EnableDiscoveryClient` ✅ |
 | application.yml | — | ✅ | Cloud config (Supabase) |
-| **AuthController** | `controller/AuthController.java` | 🔴 | Login/Register endpoints |
-| **UserController** | `controller/UserController.java` | 🔴 | Profile CRUD |
-| **AuthService** | `service/AuthService.java` | 🔴 | JWT token generation |
-| **UserService** | `service/UserService.java` | 🔴 | Business logic |
-| **JwtService** | `service/JwtService.java` | 🔴 | Token create/validate |
-| **UserRepository** | `repository/UserRepository.java` | 🔴 | JPA Repository |
-| **User Entity** | `model/entity/User.java` | 🔴 | @Entity + @Version |
-| **UserRole Enum** | `model/entity/UserRole.java` | 🔴 | ENUM |
-| **LoginRequest** | `model/dto/LoginRequest.java` | 🔴 | DTO |
-| **RegisterRequest** | `model/dto/RegisterRequest.java` | 🔴 | DTO |
-| **UserResponse** | `model/dto/UserResponse.java` | 🔴 | DTO |
-| **UserMapper** | `model/mapper/UserMapper.java` | 🔴 | MapStruct mapper |
-| **SecurityConfig** | `config/SecurityConfig.java` | 🔴 | Spring Security config |
-| **GlobalExceptionHandler** | `exception/GlobalExceptionHandler.java` | 🔴 | @ControllerAdvice |
-| **UserNotFoundException** | `exception/UserNotFoundException.java` | 🔴 | Custom exception |
+| **AuthController** | `controller/AuthController.java` | ✅ | POST /api/auth/register, /login |
+| **UserController** | `controller/UserController.java` | ✅ | GET/PUT /api/users/me |
+| **AuthService** | `service/AuthService.java` | ✅ | Register + Login + BCrypt |
+| **UserService** | `service/UserService.java` | ✅ | getById, updateProfile, updateStatus |
+| **JwtService** | `service/JwtService.java` | ✅ | Wraps JwtUtil from common-lib |
+| **UserRepository** | `repository/UserRepository.java` | ✅ | findByEmail, existsByUsername |
+| **User Entity** | `model/entity/User.java` | ✅ | @Entity + @Version + UUID |
+| **UserRole Enum** | `model/entity/UserRole.java` | ✅ | USER, ADMIN |
+| **LoginRequest** | `model/dto/LoginRequest.java` | ✅ | @Valid email + password |
+| **RegisterRequest** | `model/dto/RegisterRequest.java` | ✅ | @Valid username + email + password |
+| **UserResponse** | `model/dto/UserResponse.java` | ✅ | Safe fields only |
+| **AuthResponse** | `model/dto/AuthResponse.java` | ✅ | token + UserResponse |
+| **UserMapper** | `model/mapper/UserMapper.java` | ✅ | Static mapper |
+| **SecurityConfig** | `config/SecurityConfig.java` | ✅ | Spring Security 6.x + CORS |
+| **JwtAuthFilter** | `config/JwtAuthFilter.java` | ✅ | Bearer token extraction |
+| **GlobalExceptionHandler** | `exception/GlobalExceptionHandler.java` | ✅ | @RestControllerAdvice |
+| **UserNotFoundException** | `exception/UserNotFoundException.java` | ✅ | extends BaseException |
 
-**Tiến độ: 10%** — CHỈ có Application class + config. **0 business logic.**
+**Tiến độ: 100%** ✅ — Full auth flow implement xong.
 
 ---
 
@@ -194,16 +196,16 @@
 
 | # | Service | Java Files | Plan Files | Implemented | Progress |
 |---|---------|------------|------------|-------------|----------|
-| 1 | common-lib | 3 | 4 | 3 | **75%** |
+| 1 | common-lib | 4 | 4 | 4 | **100%** ✅ |
 | 2 | discovery-server | 1 | 1 | 1 | **100%** ✅ |
 | 3 | config-server | 1 | 1 | 1 | **90%** |
 | 4 | api-gateway | 1 | 5 | 1 | **20%** |
-| 5 | user-service | 1 | 17 | 1 | **10%** |
+| 5 | user-service | 19 | 17 | 19 | **100%** ✅ |
 | 6 | group-channel-service | 1 | 14 | 1 | **10%** |
 | 7 | chat-history-service | 1 | 8 | 1 | **10%** |
 | 8 | messaging-service | 1 | 13 | 1 | **10%** |
 | 9 | file-service | 1 | 5 | 1 | **10%** |
-| | **TỔNG** | **11** | **~68** | **11** | **~18%** |
+| | **TỔNG** | **29** | **~68** | **29** | **~42%** |
 
 ---
 
