@@ -1,5 +1,6 @@
 # Antigravity Kit & AI Agents
 .agent/
+.claude/
 
 # macOS
 .DS_Store

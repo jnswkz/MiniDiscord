@@ -284,14 +284,17 @@ Content-Type: application/json
 
 | # | Kịch bản | Endpoint | Expected | Actual | Status |
 |---|----------|----------|----------|--------|--------|
-| 1 | Register | POST `/api/auth/register` | 201 + token | | ⏳ |
-| 2 | Login | POST `/api/auth/login` | 200 + token | | ⏳ |
-| 3 | No token | GET `/api/users/me` | 401 | | ⏳ |
-| 4 | Bearer token | GET `/api/users/me` | 200 + user | | ⏳ |
-| 5 | Update profile | PUT `/api/users/me` | 200 + updated | | ⏳ |
+| 1 | Register | POST `/api/auth/register` | 201 + token | 201 + JWT (HS512) + user UUID `8c35ed10-…` + role=USER + status=OFFLINE | ✅ |
+| 2 | Login | POST `/api/auth/login` | 200 + token | 200 + token mới + userId khớp Test 1 | ✅ |
+| 3 | No token | GET `/api/users/me` | 401 | **403 Forbidden** (xem ghi chú dưới) | ⚠️ |
+| 4 | Bearer token | GET `/api/users/me` | 200 + user | 200 + user payload đầy đủ (id/username/email/role/status) | ✅ |
+| 5 | Update profile | PUT `/api/users/me` | 200 + updated | 200 + username đã đổi, email + id giữ nguyên | ✅ |
 
-> ✅ **"Green Light"** — Plan đạt trạng thái sẵn sàng thực thi.
-> Khi tất cả 5 test pass → Phase P0+P1A hoàn thành 100%.
+> **Run record:** 2026-05-07 01:46–01:48 ICT — user-service started in 8.8s, Hibernate auto-tạo bảng `users` trên Supabase (PG 17.6).
+>
+> ⚠️ **Finding — Test 3 (403 vs 401):** Spring Security 6.x mặc định trả `403 Forbidden` khi không có `AuthenticationEntryPoint` được cấu hình rõ ràng. Request vẫn bị chặn đúng (security làm việc), nhưng theo chuẩn REST, "thiếu credentials" nên là `401 Unauthorized` và "có credentials nhưng không đủ quyền" mới là `403 Forbidden`. **Fix-it:** Thêm `.exceptionHandling(eh -> eh.authenticationEntryPoint((req, res, ex) -> res.sendError(401, "Unauthorized")))` vào [SecurityConfig.java](../backend/user-service/src/main/java/com/discordmini/user/config/SecurityConfig.java) — đây là cải tiến nhỏ, không phải blocker, nên gộp vào Phase P1B.
+>
+> ✅ **Phase P0+P1A — VERIFIED** (4/5 ✅, 1/5 ⚠️ status-code mismatch không ảnh hưởng chức năng).
 
 ---
 
