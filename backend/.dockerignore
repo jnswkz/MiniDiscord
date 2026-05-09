@@ -1,0 +1,9 @@
+**/target/
+**/.env
+**/.git
+**/.idea
+**/.vscode
+**/node_modules/
+*.log
+*.md
+!pom.xml

@@ -16,6 +16,9 @@ Thumbs.db
 !.env.example
 !**/.env.example
 
+# Docker
+docker-compose.override.yml
+
 # IDEs and Editors
 .idea/
 .vscode/
