@@ -21,15 +21,8 @@ public class CorsConfig {
     public CorsWebFilter corsWebFilter() {
         CorsConfiguration corsConfig = new CorsConfiguration();
         
-        // Allowed origins
-        if (allowedOrigins != null && allowedOrigins.length > 0 && !allowedOrigins[0].isEmpty()) {
-            corsConfig.setAllowedOrigins(List.of(allowedOrigins));
-        }
-
-        // Allowed origin patterns (for Vercel preview environments)
-        if (allowedOriginPatterns != null && allowedOriginPatterns.length > 0 && !allowedOriginPatterns[0].isEmpty()) {
-            corsConfig.setAllowedOriginPatterns(List.of(allowedOriginPatterns));
-        }
+        // Allowed origin patterns - allow any domain but support credentials
+        corsConfig.setAllowedOriginPatterns(List.of("*"));
         
         // Allowed methods
         corsConfig.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
