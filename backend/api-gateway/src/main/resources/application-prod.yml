@@ -13,11 +13,6 @@ spring:
           uri: ${USER_SERVICE_URL:https://minidiscord-user-9b155a4891e0.herokuapp.com}
           predicates:
             - Path=/api/auth/**, /api/users/**
-          filters:
-            - name: RequestRateLimiter
-              args:
-                redis-rate-limiter.replenishRate: 10
-                redis-rate-limiter.burstCapacity: 20
   data:
     redis:
       host: ${SPRING_DATA_REDIS_HOST}      # Upstash Redis
