@@ -198,7 +198,7 @@ export default function LoginPage() {
           </p>
 
           <div className="mt-4 w-full flex justify-center">
-            <GoogleOAuthProvider clientId="905392681989-uun3otevkfu4mi3i11meckemp9gh2udp.apps.googleusercontent.com">
+            <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "905392681989-uun3otevkfu4mi3i11meckemp9gh2udp.apps.googleusercontent.com"}>
               <GoogleLogin
                 onSuccess={handleGoogleLoginSuccess}
                 onError={() => console.log('Google Login Failed')}

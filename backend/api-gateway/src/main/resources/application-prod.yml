@@ -1,0 +1,37 @@
+# === PRODUCTION PROFILE ===
+# Eureka disabled — Direct URL routing to Heroku apps
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: user-service
+          uri: ${USER_SERVICE_URL:https://minidiscord-user.herokuapp.com}
+          predicates:
+            - Path=/api/auth/**, /api/users/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 10
+                redis-rate-limiter.burstCapacity: 20
+    discovery:
+      enabled: false  # Tắt Eureka discovery
+  data:
+    redis:
+      host: ${SPRING_DATA_REDIS_HOST}      # Upstash Redis
+      port: ${SPRING_DATA_REDIS_PORT:6379}
+      password: ${SPRING_DATA_REDIS_PASSWORD}
+      ssl:
+        enabled: true  # Upstash yêu cầu TLS
+
+eureka:
+  client:
+    enabled: false   # Không đăng ký với Eureka
+
+server:
+  port: ${PORT:8080}  # Heroku cấp PORT động
+
+# CORS cho production frontend (hỗ trợ Vercel Preview URLs)
+app:
+  cors:
+    allowed-origins: ${CORS_ORIGINS:https://minidiscord.vercel.app}
+    allowed-origin-patterns: ${CORS_ORIGIN_PATTERNS:https://*.vercel.app}

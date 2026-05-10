@@ -1,0 +1,16 @@
+# === PRODUCTION PROFILE ===
+spring:
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}  # Inject từ Heroku Config Vars
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: update # Tự động update schema (khởi tạo bảng trên Supabase lần đầu)
+
+eureka:
+  client:
+    enabled: false  # Không cần Eureka trên production
+
+server:
+  port: ${PORT:8081}  # Heroku cấp PORT động
