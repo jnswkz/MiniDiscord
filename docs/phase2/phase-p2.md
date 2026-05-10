@@ -210,7 +210,7 @@ service/
 ```
 
 **Logic nghiệp vụ quan trọng (theo Review):**
-- `RoomService.createRoom()` → Sau khi save Room → auto insert OWNER role → auto create Channel("general", TEXT) → publish `room.created` event
+- `RoomService.createRoom()` → Phải được bọc bằng `@Transactional`. Sau khi save Room → auto insert OWNER role → auto create Channel("general", TEXT) → publish `room.created` event. Đảm bảo rollback toàn bộ nếu có lỗi xảy ra.
 - `MembershipService.leaveRoom()` → Chỉ áp dụng cho room type GROUP. DM room sẽ xử lý logic "hide" ở phase sau
 - Mọi event publishing dùng `@TransactionalEventListener(phase = AFTER_COMMIT)` để đảm bảo DB đã commit trước khi gửi
 
