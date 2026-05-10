@@ -2,7 +2,12 @@
 # Eureka disabled — Direct URL routing to Heroku apps
 spring:
   cloud:
+    discovery:
+      enabled: false  # Tắt Eureka discovery
     gateway:
+      discovery:
+        locator:
+          enabled: false # Tắt locator để không đòi hỏi ReactiveDiscoveryClient
       routes:
         - id: user-service
           uri: ${USER_SERVICE_URL:https://minidiscord-user.herokuapp.com}
@@ -13,8 +18,6 @@ spring:
               args:
                 redis-rate-limiter.replenishRate: 10
                 redis-rate-limiter.burstCapacity: 20
-    discovery:
-      enabled: false  # Tắt Eureka discovery
   data:
     redis:
       host: ${SPRING_DATA_REDIS_HOST}      # Upstash Redis
