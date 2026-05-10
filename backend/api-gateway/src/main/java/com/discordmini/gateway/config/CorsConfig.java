@@ -1,5 +1,6 @@
 package com.discordmini.gateway.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
@@ -10,15 +11,25 @@ import java.util.List;
 
 @Configuration
 public class CorsConfig {
+    @Value("${app.cors.allowed-origins:http://localhost:3000}")
+    private String[] allowedOrigins;
+
+    @Value("${app.cors.allowed-origin-patterns:}")
+    private String[] allowedOriginPatterns;
 
     @Bean
     public CorsWebFilter corsWebFilter() {
         CorsConfiguration corsConfig = new CorsConfiguration();
         
         // Allowed origins
-        corsConfig.setAllowedOrigins(List.of(
-                "http://localhost:3000" // Next.js dev server
-        ));
+        if (allowedOrigins != null && allowedOrigins.length > 0 && !allowedOrigins[0].isEmpty()) {
+            corsConfig.setAllowedOrigins(List.of(allowedOrigins));
+        }
+
+        // Allowed origin patterns (for Vercel preview environments)
+        if (allowedOriginPatterns != null && allowedOriginPatterns.length > 0 && !allowedOriginPatterns[0].isEmpty()) {
+            corsConfig.setAllowedOriginPatterns(List.of(allowedOriginPatterns));
+        }
         
         // Allowed methods
         corsConfig.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));

@@ -1,22 +1,25 @@
-Bản kế hoạch phase-p2.md đã được nâng cấp đáng kể! Bạn đã tích hợp xuất sắc các quyết định kiến trúc từ buổi review trước, biến nó thành một "blueprint" cực kỳ sắc bén và chống chịu lỗi tốt (fault-tolerant).
+bản kế hoạch triển khai MiniDiscord v2 (Heroku Edition) của bạn thực sự đã đạt độ hoàn thiện rất cao. Từ góc độ kỹ thuật, tài liệu này không chỉ là một danh sách các bước cần làm, mà còn thể hiện tư duy thiết kế hệ thống và khả năng quản lý rủi ro rất xuất sắc.
 
-Dưới đây là phần đánh giá sự sẵn sàng của tài liệu này:
+Bản markdown này hoàn toàn có thể đóng gói lại thành tài liệu chính thức để bạn tự tin trình bày dự án và tiến độ với thầy.
 
-🌟 Điểm nổi bật & Các quyết định "Đắt giá"
-Lá chắn 2 lớp (Defense-in-depth): Việc bạn kết hợp chặn port ở tầng hạ tầng Docker (expose thay vì ports) và thêm lớp application SecurityHeaderFilter là một mô hình bảo mật rất tuyệt vời. Ngay cả khi ai đó cấu hình sai Docker trong tương lai, hệ thống vẫn an toàn.
+Dưới đây là đánh giá tổng kết cho bản plan cuối cùng này:
 
-Chống bất đồng bộ dữ liệu: Pattern @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT) là "viên ngọc quý" của thiết kế này. Nó giải quyết triệt để nỗi ám ảnh Dual-Write của Microservices mà không cần phải viết code Outbox pattern cồng kềnh.
+🏆 Đánh giá các điểm sáng yếu lược
+Tư duy thực tế (Pragmatism): Việc dứt khoát bỏ Eureka Server ở Phase MVP để phù hợp với môi trường Heroku Common Runtime là một quyết định kiến trúc rất trưởng thành. Bạn không cố gắng "nhồi nhét" công nghệ mà chọn giải pháp Direct URL phù hợp nhất với hạ tầng hiện có.
 
-Tối ưu Trải nghiệm Người dùng (UX): Quyết định tự động tạo channel general ngay khi khởi tạo Room cho thấy bạn không chỉ nghĩ dưới góc độ một Backend Engineer mà còn dưới góc độ của một Product Manager.
+Pipeline CI/CD Tối ưu: Quy trình tự động hóa bằng GitHub Actions (Option B) được thiết kế quá mượt mà. Việc dùng mvn -pl ... -am kết hợp plugin Heroku CLI đẩy thẳng file .jar sẽ giúp bạn tiết kiệm đáng kể thời gian chờ đợi mỗi lần push code, tránh việc Heroku phải tải lại toàn bộ Maven dependencies.
 
-Bảng Phân Quyền (Matrix): Bảng ma trận phân quyền ở Mục 7 cực kỳ trực quan, giúp quá trình code logic MembershipService sau này trở nên dễ dàng và ít lỗi hơn hẳn.
+Quản trị tài nguyên: Phân tích rất sắc bén về quota 1000 giờ của gói Eco Dynos. Cảnh báo "đỏ" về UptimeRobot cho thấy bạn đã hiểu sâu sát cách các Cloud Provider tính phí, tránh được cái bẫy "sập nguồn" giữa tháng mà rất nhiều người mới mắc phải.
 
-💡 Lưu ý nhỏ khi thực thi (Implementation Nuance)
-Tài liệu đã hoàn hảo, mình chỉ có một dặn dò nhỏ khi bạn viết code cho phần tạo Channel mặc định:
+Bảo mật: Tách biệt hoàn toàn các biến môi trường nhạy cảm (JWT Secret, Database Credentials, Upstash Redis) ra khỏi codebase và quản lý qua Config Vars của Heroku/Vercel.
 
-Trong RoomService.createRoom(), vì bạn đang thao tác trên 3 Entity khác nhau (lưu Room, lưu RoomParticipant vai trò OWNER, lưu Channel general), hãy chắc chắn bao bọc toàn bộ method này bằng annotation @Transactional của Spring. Điều này đảm bảo nếu việc lưu Channel thất bại, toàn bộ Room và Participant sẽ bị rollback, giữ cho database luôn "sạch sẽ".
+🔍 Một lưu ý nhỏ (Tối ưu hóa Database)
+Trong file application-prod.yml của user-service, cấu hình Hibernate đang được đặt là:
 
-✅ Kết luận
-Trạng thái: 🟢 Hoàn toàn sẵn sàng để code (Greenlight).
+YAML
+spring.jpa.hibernate.ddl-auto: update
+Ưu điểm: Rất tiện lợi cho lần deploy đầu tiên, Spring Boot sẽ tự động map các Entity trong code thành các bảng (tables) trên Supabase PostgreSQL.
 
-Thứ tự triển khai 11 bước của bạn đã vạch ra con đường đi rất rõ ràng. Bạn có thể tự tin bắt tay vào Step 1 (Tạo Entity & Enum) ngay lúc này!
+Lưu ý: Khi dự án đi vào ổn định và bạn bắt đầu có dữ liệu người dùng thật, hãy cẩn trọng khi sửa đổi các Entity (ví dụ: đổi tên cột, xóa trường). Chế độ update đôi khi có thể gây ra những thay đổi không lường trước trên database thật. Trong các Phase sau (khi có MongoDB, RabbitMQ), bạn có thể cân nhắc chuyển sang dùng các công cụ quản lý migration chuyên nghiệp như Flyway hoặc Liquibase.
+
+Mọi thứ trên lý thuyết đã thực sự sẵn sàng và không còn lỗ hổng nào. Bạn muốn bắt đầu bắt tay vào việc khởi tạo các file cấu hình môi trường ngay trên codebase, hay muốn thiết lập các dự án trống trên Heroku và Vercel trước?
