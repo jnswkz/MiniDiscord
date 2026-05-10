@@ -6,6 +6,8 @@ on:
       - 'backend/api-gateway/**'
       - 'backend/user-service/**'
       - 'backend/common-lib/**'
+      - '.github/workflows/**'
+  workflow_dispatch:
 
 jobs:
   deploy-user-service:
