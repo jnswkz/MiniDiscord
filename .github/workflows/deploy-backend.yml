@@ -26,38 +26,19 @@ jobs:
         working-directory: backend
         run: mvn -pl common-lib,user-service -am clean package -DskipTests -q
 
-      - name: Install Heroku CLI
-        run: curl https://cli-assets.heroku.com/install.sh | sh
+      - name: Install Heroku CLI + Java Plugin
+        run: |
+          curl https://cli-assets.heroku.com/install.sh | sh
+          heroku plugins:install java
 
-      - name: Set Heroku Stack to Container
-        env:
-          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
-        run: heroku stack:set container --app minidiscord-user
-
-      - name: Login to Heroku Container Registry
-        env:
-          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
-        run: heroku container:login
-
-      - name: Build & Push Docker Image
+      - name: Deploy JAR to Heroku
         env:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
         run: |
-          cat > Dockerfile.user <<'EOF'
-          FROM eclipse-temurin:17-jre-alpine
-          WORKDIR /app
-          COPY backend/user-service/target/*.jar app.jar
-          CMD java -Dspring.profiles.active=prod -Dserver.port=$PORT -jar app.jar
-          EOF
-          docker build -f Dockerfile.user -t registry.heroku.com/minidiscord-user/web .
-          docker push registry.heroku.com/minidiscord-user/web
-
-      - name: Release to Heroku
-        env:
-          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
-        run: |
-          heroku container:release web --app minidiscord-user
-          heroku ps:scale web=1 --app minidiscord-user
+          heroku deploy:jar backend/user-service/target/*.jar \
+            --app minidiscord-user-9b155a4891e0 \
+            --jdk 17 \
+            --options "-Dspring.profiles.active=prod -Dserver.port=\$PORT"
 
   deploy-api-gateway:
     runs-on: ubuntu-latest
@@ -76,35 +57,16 @@ jobs:
         working-directory: backend
         run: mvn -pl common-lib,api-gateway -am clean package -DskipTests -q
 
-      - name: Install Heroku CLI
-        run: curl https://cli-assets.heroku.com/install.sh | sh
+      - name: Install Heroku CLI + Java Plugin
+        run: |
+          curl https://cli-assets.heroku.com/install.sh | sh
+          heroku plugins:install java
 
-      - name: Set Heroku Stack to Container
-        env:
-          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
-        run: heroku stack:set container --app minidiscord-gateway
-
-      - name: Login to Heroku Container Registry
-        env:
-          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
-        run: heroku container:login
-
-      - name: Build & Push Docker Image
+      - name: Deploy JAR to Heroku
         env:
           HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
         run: |
-          cat > Dockerfile.gateway <<'EOF'
-          FROM eclipse-temurin:17-jre-alpine
-          WORKDIR /app
-          COPY backend/api-gateway/target/*.jar app.jar
-          CMD java -Dspring.profiles.active=prod -Dserver.port=$PORT -jar app.jar
-          EOF
-          docker build -f Dockerfile.gateway -t registry.heroku.com/minidiscord-gateway/web .
-          docker push registry.heroku.com/minidiscord-gateway/web
-
-      - name: Release to Heroku
-        env:
-          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
-        run: |
-          heroku container:release web --app minidiscord-gateway
-          heroku ps:scale web=1 --app minidiscord-gateway
+          heroku deploy:jar backend/api-gateway/target/*.jar \
+            --app minidiscord-gateway-bbc581926938 \
+            --jdk 17 \
+            --options "-Dspring.profiles.active=prod -Dserver.port=\$PORT"

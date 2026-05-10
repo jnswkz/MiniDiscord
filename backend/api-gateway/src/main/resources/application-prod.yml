@@ -10,7 +10,7 @@ spring:
           enabled: false # Tắt locator để không đòi hỏi ReactiveDiscoveryClient
       routes:
         - id: user-service
-          uri: ${USER_SERVICE_URL:https://minidiscord-user.herokuapp.com}
+          uri: ${USER_SERVICE_URL:https://minidiscord-user-9b155a4891e0.herokuapp.com}
           predicates:
             - Path=/api/auth/**, /api/users/**
           filters:

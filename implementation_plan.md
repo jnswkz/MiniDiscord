@@ -44,7 +44,7 @@ Gateway → Eureka → lb://USER-SERVICE → user-service container
 
 **Sau (Heroku Production):**
 ```
-Gateway → https://minidiscord-user.herokuapp.com (Direct URL)
+Gateway → https://minidiscord-user-9b155a4891e0.herokuapp.com (Direct URL)
 ```
 
 **Lợi ích:** Tiết kiệm 1 Dyno (Eureka), giảm nguy cơ cạn 1000h quota.
@@ -104,7 +104,7 @@ spring:
     gateway:
       routes:
         - id: user-service
-          uri: ${USER_SERVICE_URL:https://minidiscord-user.herokuapp.com}
+          uri: ${USER_SERVICE_URL:https://minidiscord-user-9b155a4891e0.herokuapp.com}
           predicates:
             - Path=/api/auth/**, /api/users/**
           filters:
@@ -192,7 +192,7 @@ web: java -Dspring.profiles.active=prod -Dserver.port=$PORT -jar target/*.jar
 | 1 | Vercel Dashboard → Import Git Repository → chọn `MiniDiscord` |
 | 2 | Root Directory: `frontend/` |
 | 3 | Framework Preset: `Next.js` (auto-detect) |
-| 4 | Environment Variables: `NEXT_PUBLIC_API_URL=https://minidiscord-gateway.herokuapp.com/api` |
+| 4 | Environment Variables: `NEXT_PUBLIC_API_URL=https://minidiscord-gateway-bbc581926938.herokuapp.com/api` |
 | 5 | Environment Variables: `NEXT_PUBLIC_GOOGLE_CLIENT_ID=905392681989-...` |
 | 6 | Deploy → Kiểm tra URL |
 | 7 | Google Cloud Console → thêm Vercel domain vào Authorized Origins |
@@ -233,7 +233,7 @@ heroku buildpacks:set heroku/java -a minidiscord-gateway
 
 heroku config:set \
   SPRING_PROFILES_ACTIVE=prod \
-  USER_SERVICE_URL=https://minidiscord-user.herokuapp.com \
+  USER_SERVICE_URL=https://minidiscord-user-9b155a4891e0.herokuapp.com \
   JWT_SECRET=... \
   CORS_ORIGINS=https://minidiscord.vercel.app \
   CORS_ORIGIN_PATTERNS=https://*.vercel.app \
@@ -474,5 +474,5 @@ cd frontend && npm run build
 4. ✅ Logout → Redirect về login
 5. ✅ Google OAuth → Hoạt động (cần update Google Console)
 6. ✅ Refresh page → Session persist
-7. ✅ Gateway health: `https://minidiscord-gateway.herokuapp.com/actuator/health`
+7. ✅ Gateway health: `https://minidiscord-gateway-bbc581926938.herokuapp.com/actuator/health`
 8. ✅ Cold start test: Đợi 35 phút → gửi request → verify wakeup < 20s
