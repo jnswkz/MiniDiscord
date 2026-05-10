@@ -22,6 +22,17 @@ docker-compose.override.yml
 # IDEs and Editors
 .idea/
 .vscode/
+*.iml
+
+# Java & Maven
+**/target/
+**/.m2/
+**/build/
+*.class
+*.jar
+*.war
+*.ear
+
 *.swp
 *.swo
 

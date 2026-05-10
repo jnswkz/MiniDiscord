@@ -33,7 +33,7 @@ function FriendContextMenu({
   userId: string;
   onClose: () => void;
 }) {
-  const { locale } = useTranslation();
+  const { t } = useTranslation();
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -49,17 +49,17 @@ function FriendContextMenu({
   const items = [
     {
       icon: Video,
-      label: locale === "vi" ? "Bắt Đầu Cuộc Gọi Video" : "Start Video Call",
+      label: t("friends.startVideoCall"),
       onClick: () => onClose(),
     },
     {
       icon: Phone,
-      label: locale === "vi" ? "Bắt Đầu Cuộc Gọi Thoại" : "Start Voice Call",
+      label: t("friends.startVoiceCall"),
       onClick: () => onClose(),
     },
     {
       icon: UserX,
-      label: locale === "vi" ? "Xóa Bạn" : "Remove Friend",
+      label: t("friends.removeFriendAction"),
       danger: true,
       onClick: () => onClose(),
     },

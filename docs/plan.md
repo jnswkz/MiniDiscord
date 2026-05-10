@@ -48,7 +48,7 @@ graph TD
 
 | Service | Mô tả | Database / Infra | Cloud Provider | Port |
 |---------|--------|------------------|----------------|------|
-| **API Gateway** | Định tuyến request, xác thực JWT, Rate Limiting | — | — | 8080 |
+| **API Gateway** | Định tuyến request, xác thực JWT, Google OAuth, Rate Limiting | — | — | 8080 |
 | **Service Discovery** | Eureka Server — quản lý đăng ký/tìm kiếm service | — | — | 8761 |
 | **Config Server** | Quản lý cấu hình tập trung | — | — | 8888 |
 | **User Service** | Đăng ký, đăng nhập, quản lý hồ sơ, JWT token | PostgreSQL | **Supabase** (ap-southeast-2) | 8081 |
@@ -56,6 +56,19 @@ graph TD
 | **Chat History Service** | Đọc/Ghi lịch sử tin nhắn, tìm kiếm | MongoDB + RabbitMQ | **MongoDB Atlas** + **CloudAMQP** | 8083 |
 | **Messaging Service** | WebSocket handler, STOMP, duy trì kết nối real-time | Redis + RabbitMQ | **Upstash** + **CloudAMQP** | 8084 |
 | **File Service** | Upload/Download file, ảnh lên Backblaze B2 | Object Storage | **Backblaze B2** (S3-compatible) | 8085 |
+
+### 1.3 Lộ trình phát triển (Phase Priority)
+
+| Phase | Service | Scope | Effort | Testing |
+|-------|---------|-------|--------|---------|
+| **P0** | common-lib + infra fixes | ~3 files | 1-2 giờ | Unit Testing |
+| **P1A** | user-service (full auth) | ~16 files | 6-8 giờ | Unit/Integration Testing |
+| **P1B** | api-gateway (JWT + CORS + OAuth) | ~4 files | 2-3 giờ | E2E + Gateway Testing |
+| **P2** | group-channel-service | ~13 files | 6-8 giờ | API + Logic Testing |
+| **P3** | chat-history-service | ~7 files | 4-5 giờ | DB + Integration Testing |
+| **P4** | messaging-service | ~12 files | 8-10 giờ | WebSocket Load Testing |
+| **P5** | file-service | ~4 files | 2-3 giờ | Upload/Download Testing |
+| | **TỔNG** | **~59 files** | **~30-40 giờ** | **Full System E2E Testing** |
 
 ---
 
@@ -299,8 +312,9 @@ frontend/
 
 | Method | Endpoint | Service | Mô tả |
 |--------|----------|---------|--------|
-| `POST` | `/api/auth/login` | User | Đăng nhập → JWT Token |
+| `POST` | `/api/auth/login` | User | Đăng nhập bằng Email/Password → JWT Token |
 | `POST` | `/api/auth/register` | User | Đăng ký tài khoản |
+| `POST` | `/api/auth/google` | User | Đăng nhập bằng Google OAuth → JWT Token |
 | `GET` | `/api/users/me` | User | Lấy thông tin user hiện tại |
 | `PUT` | `/api/users/me` | User | Cập nhật hồ sơ |
 | `POST` | `/api/rooms` | Groups & Channels | Tạo phòng chat mới |

@@ -1,0 +1,19 @@
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: minidiscord-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8080/api
+      - WATCHPACK_POLLING=true  # Fix hot-reload on Windows/WSL
+    volumes:
+      - .:/app                    # Bind-mount source code → hot-reload
+      - /app/node_modules         # Anonymous volume → keep node_modules in container
+      - /app/.next                # Anonymous volume → keep .next cache in container
+    deploy:
+      resources:
+        limits:
+          memory: 512M

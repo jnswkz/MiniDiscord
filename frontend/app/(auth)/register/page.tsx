@@ -10,11 +10,14 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Loader2 } from "lucide-react";
 import { useTranslation } from "@/lib/i18n";
+import { useAuthStore } from "@/stores/authStore";
 
 export default function RegisterPage() {
-  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const { t } = useTranslation();
+  const registerAction = useAuthStore((state) => state.register);
+  const isLoading = useAuthStore((state) => state.isLoading);
+  const error = useAuthStore((state) => state.error);
 
   const registerSchema = z
     .object({
@@ -42,12 +45,19 @@ export default function RegisterPage() {
   });
 
   async function onSubmit(data: RegisterFormData) {
-    setIsLoading(true);
-    console.log("Register:", data);
-    setTimeout(() => {
-      setIsLoading(false);
+    await registerAction({
+      username: data.username,
+      email: data.email,
+      password: data.password,
+    });
+    
+    // Check if auth was successful by checking the store state
+    // Note: In Zustand, the state is updated synchronously after await
+    const { isAuthenticated, error } = useAuthStore.getState();
+    
+    if (isAuthenticated && !error) {
       router.push("/dashboard");
-    }, 800);
+    }
   }
 
   return (
@@ -57,6 +67,12 @@ export default function RegisterPage() {
           {t("auth.createAccount")}
         </h1>
       </div>
+
+      {error && (
+        <div className="mb-4 rounded-md bg-destructive/15 p-3 text-sm text-destructive border border-destructive/30">
+          {error}
+        </div>
+      )}
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
         <div className="space-y-2">

@@ -13,10 +13,24 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.beans.factory.annotation.Value;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.gson.GsonFactory;
+import com.discordmini.user.model.dto.OAuthRequest;
+import com.discordmini.user.model.entity.UserRole;
+
+import java.util.Collections;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class AuthService {
+
+    @Value("${google.client.id}")
+    private String googleClientId;
 
     private final UserRepository userRepository;
     private final JwtService jwtService;
@@ -59,8 +73,50 @@ public class AuthService {
             throw new BaseException("Account is deactivated", HttpStatus.FORBIDDEN, "ACCOUNT_INACTIVE");
         }
 
-        if (!passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
+        if (user.getPasswordHash() == null || user.getPasswordHash().isEmpty() || !passwordEncoder.matches(request.getPassword(), user.getPasswordHash())) {
             throw new BadCredentialsException("Invalid email or password");
+        }
+
+        String token = jwtService.generateToken(
+                user.getId().toString(),
+                user.getEmail(),
+                user.getRole().name()
+        );
+
+        return AuthResponse.builder()
+                .token(token)
+                .user(UserMapper.toResponse(user))
+                .build();
+    }
+
+    public AuthResponse loginWithGoogle(OAuthRequest request) throws Exception {
+        GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(), new GsonFactory())
+                .setAudience(Collections.singletonList(googleClientId))
+                .build();
+
+        GoogleIdToken idToken = verifier.verify(request.getIdToken());
+        if (idToken == null) {
+            throw new BaseException("Invalid Google Token", HttpStatus.UNAUTHORIZED, "INVALID_GOOGLE_TOKEN");
+        }
+
+        GoogleIdToken.Payload payload = idToken.getPayload();
+        String email = payload.getEmail();
+        String name = (String) payload.get("name");
+        String pictureUrl = (String) payload.get("picture");
+
+        User user = userRepository.findByEmail(email).orElse(null);
+
+        if (user == null) {
+            user = User.builder()
+                    .email(email)
+                    .username(name.replaceAll("\\s+", "").toLowerCase() + "_" + UUID.randomUUID().toString().substring(0, 5))
+                    .passwordHash("") // OAuth user doesn't have a system password
+                    .avatarUrl(pictureUrl)
+                    .role(UserRole.USER)
+                    .status("ONLINE")
+                    .isActive(true)
+                    .build();
+            user = userRepository.save(user);
         }
 
         String token = jwtService.generateToken(

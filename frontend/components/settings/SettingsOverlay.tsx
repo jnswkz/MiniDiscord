@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useAuthStore } from "@/stores/authStore";
 import { StatusAvatar } from "@/components/ui/StatusAvatar";
 import { Button } from "@/components/ui/Button";
 import { ScrollArea } from "@/components/ui/ScrollArea";
@@ -32,6 +33,7 @@ function AvatarWithPopup() {
   const { t } = useTranslation();
   const [showPopup, setShowPopup] = useState(false);
   const popupRef = useRef<HTMLDivElement>(null);
+  const user = useAuthStore((s) => s.user) || CURRENT_USER;
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -52,9 +54,9 @@ function AvatarWithPopup() {
         className="group relative cursor-pointer"
       >
         <StatusAvatar
-          src={CURRENT_USER.avatarUrl}
-          fallback={CURRENT_USER.username}
-          status={CURRENT_USER.status}
+          src={user.avatarUrl}
+          fallback={user.username}
+          status={user.status}
           size="xl"
         />
         <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -83,6 +85,7 @@ type AccountSubTab = "security" | "standing";
 
 function SecurityContent() {
   const { t } = useTranslation();
+  const user = useAuthStore((s) => s.user) || CURRENT_USER;
 
   return (
     <div className="mt-4">
@@ -104,13 +107,13 @@ function SecurityContent() {
           <div className="space-y-3 rounded-lg bg-background-tertiary p-4">
             <InfoRow
               label={t("settings.displayName")}
-              value={CURRENT_USER.username}
+              value={user.username}
             />
             <InfoRow
               label={t("settings.username")}
-              value={CURRENT_USER.username.toLowerCase()}
+              value={user.username.toLowerCase()}
             />
-            <InfoRow label="Email" value={CURRENT_USER.email} />
+            <InfoRow label="Email" value={user.email} />
           </div>
         </div>
       </div>
@@ -120,6 +123,7 @@ function SecurityContent() {
 
 function StandingContent() {
   const { t } = useTranslation();
+  const user = useAuthStore((s) => s.user) || CURRENT_USER;
 
   const STEPS = [
     t("settings.stepGood"),
@@ -136,9 +140,9 @@ function StandingContent() {
       {/* Status card */}
       <div className="flex items-start gap-4">
         <StatusAvatar
-          src={CURRENT_USER.avatarUrl}
-          fallback={CURRENT_USER.username}
-          status={CURRENT_USER.status}
+          src={user.avatarUrl}
+          fallback={user.username}
+          status={user.status}
           size="xl"
         />
         <div className="flex-1 min-w-0 pt-1">
@@ -344,6 +348,7 @@ export function SettingsOverlay({ onClose }: { onClose: () => void }) {
   const [activeTab, setActiveTab] = useState<SettingsTab>("account");
   const { t } = useTranslation();
   const router = useRouter();
+  const user = useAuthStore((s) => s.user) || CURRENT_USER;
 
   const TABS: { key: SettingsTab; label: string; icon: React.ElementType }[] = [
     {
@@ -358,7 +363,10 @@ export function SettingsOverlay({ onClose }: { onClose: () => void }) {
     },
   ];
 
+  const logout = useAuthStore((s) => s.logout);
+
   function handleLogout() {
+    logout();
     onClose();
     router.push("/login");
   }
@@ -387,14 +395,14 @@ export function SettingsOverlay({ onClose }: { onClose: () => void }) {
           {/* User header */}
           <div className="flex items-center gap-2.5 px-3 pt-4 pb-3">
             <StatusAvatar
-              src={CURRENT_USER.avatarUrl}
-              fallback={CURRENT_USER.username}
-              status={CURRENT_USER.status}
+              src={user.avatarUrl}
+              fallback={user.username}
+              status={user.status}
               size="md"
             />
             <div className="min-w-0">
               <p className="truncate text-sm font-semibold text-foreground leading-tight">
-                {CURRENT_USER.username}
+                {user.username}
               </p>
               <button className="flex items-center gap-1 text-[11px] text-muted-foreground hover:text-accent transition-colors cursor-pointer">
                 <span>{t("settings.editProfile")}</span>

@@ -6,11 +6,14 @@ interface BlockConfirmModalProps {
   onConfirm: () => void;
 }
 
+import { useTranslation } from "@/lib/i18n";
+
 export function BlockConfirmModal({
   username,
   onClose,
   onConfirm,
 }: BlockConfirmModalProps) {
+  const { t } = useTranslation();
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Backdrop */}
@@ -21,13 +24,12 @@ export function BlockConfirmModal({
         {/* Body */}
         <div className="p-6">
           <h2 className="text-xl font-bold text-white">
-            Chặn {username}
+            {t("dm.blockUser").replace("{username}", username)}
           </h2>
           <p className="mt-4 text-base leading-relaxed text-[#dbdee1]">
-            Bạn có chắc chắn muốn chặn{" "}
-            <strong className="font-semibold text-white">{username}</strong>{" "}
-            không? Hành động này sẽ xóa họ khỏi danh sách bạn bè của bạn và
-            họ sẽ không thể nhắn tin cho bạn nữa.
+            {t("dm.blockConfirmPrompt1")}
+            <strong className="font-semibold text-white">{username}</strong>
+            {t("dm.blockConfirmPrompt2")}
           </p>
         </div>
 
@@ -37,7 +39,7 @@ export function BlockConfirmModal({
             onClick={onClose}
             className="px-4 py-2 text-sm font-medium text-[#dbdee1] hover:text-white hover:underline bg-transparent transition-colors cursor-pointer"
           >
-            Hủy
+            {t("dm.cancelAction")}
           </button>
           <button
             onClick={() => {
@@ -46,7 +48,7 @@ export function BlockConfirmModal({
             }}
             className="rounded-md bg-[#da373c] px-6 py-2 text-sm font-medium text-white hover:bg-[#a12828] transition-colors cursor-pointer"
           >
-            Chặn
+            {t("dm.blockAction")}
           </button>
         </div>
       </div>

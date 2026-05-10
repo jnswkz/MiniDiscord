@@ -6,15 +6,17 @@ import { Mic, MicOff, Headphones, HeadphoneOff, Settings } from "lucide-react";
 import { CURRENT_USER } from "@/lib/mock-data";
 import { useTranslation } from "@/lib/i18n";
 import { useUIStore } from "@/stores/uiStore";
+import { useAuthStore } from "@/stores/authStore";
 import { cn } from "@/lib/utils";
 
 export function UserPanel() {
   const { t } = useTranslation();
   const openSettings = useUIStore((s) => s.openSettings);
+  const user = useAuthStore((s) => s.user) || CURRENT_USER;
   const [isMuted, setIsMuted] = useState(false);
   const [isDeafened, setIsDeafened] = useState(false);
 
-  const statusKey = CURRENT_USER.status.toLowerCase() as
+  const statusKey = user.status.toLowerCase() as
     | "online"
     | "offline"
     | "idle"
@@ -53,15 +55,15 @@ export function UserPanel() {
         }}
       >
         <StatusAvatar
-          src={CURRENT_USER.avatarUrl}
-          fallback={CURRENT_USER.username}
-          status={CURRENT_USER.status}
+          src={user.avatarUrl}
+          fallback={user.username}
+          status={user.status}
           size="md"
         />
 
         <div className="min-w-0 flex-1">
           <p className="truncate text-[14px] font-semibold text-foreground leading-tight">
-            {CURRENT_USER.username}
+            {user.username}
           </p>
           <p className="truncate text-[12px] text-muted-foreground leading-tight">
             {t(`status.${statusKey}`)}

@@ -178,25 +178,6 @@ services:
   #   networks:
   #     - minidiscord-net
 
-  # ─── Frontend ──────────────────────────────────────
-  frontend:
-    build:
-      context: ../frontend
-      dockerfile: Dockerfile
-    container_name: minidiscord-frontend
-    ports:
-      - "3000:3000"
-    environment:
-      - NEXT_PUBLIC_API_URL=http://localhost:8080/api
-      - WATCHPACK_POLLING=true  # Fix hot-reload trên Windows/WSL
-    volumes:
-      - ../frontend:/app          # Bind-mount source code → hot-reload
-      - /app/node_modules         # Anonymous volume → giữ node_modules trong container
-      - /app/.next                # Anonymous volume → giữ .next cache trong container
-    depends_on:
-      - api-gateway
-    networks:
-      - minidiscord-net
 
 networks:
   minidiscord-net:

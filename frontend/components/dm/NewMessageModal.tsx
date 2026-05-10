@@ -9,6 +9,7 @@ import {
   CURRENT_USER,
 } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n";
 
 interface NewMessageModalProps {
   onClose: () => void;
@@ -18,6 +19,7 @@ interface NewMessageModalProps {
 const MAX_FRIENDS = 9;
 
 export function NewMessageModal({ onClose, onCreateDM }: NewMessageModalProps) {
+  const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [friendsExpanded, setFriendsExpanded] = useState(true);
@@ -78,16 +80,16 @@ export function NewMessageModal({ onClose, onCreateDM }: NewMessageModalProps) {
           <div className="flex items-start justify-between">
             <div>
               <h2 className="text-2xl font-bold text-white mb-1">
-                Tin Nhắn Mới
+                {t("dm.newMessage")}
               </h2>
               <p className="text-sm text-[#b5bac1]/80">
-                Bạn có thể thêm {remaining} người bạn nữa.
+                {t("dm.addRemaining").replace("{remaining}", remaining.toString())}
               </p>
             </div>
             <button
               onClick={onClose}
               className="flex h-8 w-8 items-center justify-center rounded-full text-[#b5bac1] hover:text-white transition-colors cursor-pointer -mt-1 -mr-1"
-              aria-label="Đóng"
+              aria-label={t("dm.close")}
             >
               <X className="h-5 w-5" />
             </button>
@@ -99,7 +101,7 @@ export function NewMessageModal({ onClose, onCreateDM }: NewMessageModalProps) {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Tìm kiếm bạn bè hoặc thành viên máy chủ"
+              placeholder={t("dm.searchFriendsOrServers")}
               className="message-input-wrapper w-full rounded-md bg-[#1e1f22] px-4 py-3 text-[14px] text-white placeholder:text-[#6d6f78] outline-none focus-visible:outline-none border border-transparent transition-colors"
               autoFocus
             />
@@ -135,7 +137,7 @@ export function NewMessageModal({ onClose, onCreateDM }: NewMessageModalProps) {
             className="flex items-center gap-1 px-3 mt-3 mb-2 cursor-pointer group"
           >
             <span className="text-[11px] font-bold uppercase tracking-wide text-[#949ba4] group-hover:text-[#dbdee1] transition-colors">
-              Bạn bè
+              {t("dm.friendsSection")}
             </span>
             <ChevronDown
               className={cn(
@@ -150,7 +152,7 @@ export function NewMessageModal({ onClose, onCreateDM }: NewMessageModalProps) {
               {filteredFriends.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-6">
                   <p className="text-[13px] text-[#949ba4]">
-                    Không tìm thấy kết quả nào
+                    {t("dm.noResults")}
                   </p>
                 </div>
               ) : (
@@ -212,7 +214,7 @@ export function NewMessageModal({ onClose, onCreateDM }: NewMessageModalProps) {
             className="flex items-center gap-1 px-3 mt-4 mb-2 cursor-pointer group"
           >
             <span className="text-[11px] font-bold uppercase tracking-wide text-[#949ba4] group-hover:text-[#dbdee1] transition-colors">
-              Thành Viên Máy Chủ
+              {t("dm.serverMembersSection")}
             </span>
             <ChevronDown
               className={cn(
@@ -225,7 +227,7 @@ export function NewMessageModal({ onClose, onCreateDM }: NewMessageModalProps) {
           {serversExpanded && (
             <div className="flex flex-col items-center justify-center py-4 px-3">
               <p className="text-[13px] text-[#949ba4] text-center leading-relaxed">
-                Sử dụng thanh tìm kiếm để tìm người cụ thể từ các máy chủ chung.
+                {t("dm.searchServerDesc")}
               </p>
             </div>
           )}
@@ -240,7 +242,7 @@ export function NewMessageModal({ onClose, onCreateDM }: NewMessageModalProps) {
             onClick={onClose}
             className="flex-1 rounded-[3px] px-6 py-2.5 text-[14px] font-medium text-[#dbdee1] hover:text-white hover:underline bg-transparent transition-colors cursor-pointer"
           >
-            Hủy bỏ
+            {t("dm.cancel")}
           </button>
           <button
             onClick={handleCreate}
@@ -252,7 +254,7 @@ export function NewMessageModal({ onClose, onCreateDM }: NewMessageModalProps) {
                 : "bg-[#5865F2]/50 cursor-not-allowed"
             )}
           >
-            Tạo Tin Nhắn
+            {t("dm.createMessage")}
           </button>
         </div>
       </div>

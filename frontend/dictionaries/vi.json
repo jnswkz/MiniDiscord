@@ -12,7 +12,11 @@
     "username": "Tên người dùng",
     "confirmPassword": "Xác nhận mật khẩu",
     "signUp": "Đăng ký",
-    "haveAccount": "Đã có tài khoản?"
+    "haveAccount": "Đã có tài khoản?",
+    "googleLoginTitle": "Đăng nhập bằng Google",
+    "googleLoginDesc": "Sử dụng tài khoản Google của bạn để đăng nhập nhanh chóng và an toàn.",
+    "googleLoginFallback": "Hoặc, đăng nhập bằng mã bảo mật.",
+    "or": "HOẶC"
   },
   "validation": {
     "emailInvalid": "Email không hợp lệ",
@@ -56,7 +60,10 @@
     "addTitle": "Thêm bạn",
     "addDescription": "Bạn có thể thêm bạn bè bằng tên người dùng.",
     "addPlaceholder": "Nhập tên người dùng",
-    "sendRequest": "Gửi lời mời kết bạn"
+    "sendRequest": "Gửi lời mời kết bạn",
+    "startVideoCall": "Bắt Đầu Cuộc Gọi Video",
+    "startVoiceCall": "Bắt Đầu Cuộc Gọi Thoại",
+    "removeFriendAction": "Xóa Bạn"
   },
   "activeNow": {
     "title": "Đang Hoạt Động",
@@ -91,7 +98,8 @@
     "markAsRead": "Đánh Dấu Đã Đọc",
     "newLabel": "MỚI",
     "viewingOldMessages": "Bạn Đang Xem Các Tin Nhắn Cũ",
-    "jumpToPresent": "Nhảy đến hiện tại"
+    "jumpToPresent": "Nhảy đến hiện tại",
+    "edited": "(đã sửa)"
   },
   "members": {
     "online": "Trực tuyến",
@@ -106,7 +114,40 @@
     "addFriend": "Thêm bạn bè",
     "unblock": "Bỏ chặn",
     "blockedMessage": "Bạn không thể gửi tin nhắn cho người dùng đã chặn.",
-    "reportSpam": "Báo Cáo Spam"
+    "reportSpam": "Báo Cáo Spam",
+    "newMessage": "Tin Nhắn Mới",
+    "addRemaining": "Bạn có thể thêm {remaining} người bạn nữa.",
+    "close": "Đóng",
+    "searchFriendsOrServers": "Tìm kiếm bạn bè hoặc thành viên máy chủ",
+    "friendsSection": "Bạn bè",
+    "noResults": "Không tìm thấy kết quả nào",
+    "serverMembersSection": "Thành Viên Máy Chủ",
+    "searchServerDesc": "Sử dụng thanh tìm kiếm để tìm người cụ thể từ các máy chủ chung.",
+    "cancel": "Hủy bỏ",
+    "createMessage": "Tạo Tin Nhắn",
+    "blockUser": "Chặn {username}",
+    "blockConfirmPrompt1": "Bạn có chắc chắn muốn chặn ",
+    "blockConfirmPrompt2": " không? Hành động này sẽ xóa họ khỏi danh sách bạn bè của bạn và họ sẽ không thể nhắn tin cho bạn nữa.",
+    "blockAction": "Chặn",
+    "cancelAction": "Hủy",
+    "activity": "Hoạt động",
+    "noMutualFriends": "Không có bạn chung",
+    "mutualServersCount": "{count} Máy Chủ Chung",
+    "messageAction": "Nhắn tin",
+    "addFriendAction": "Thêm Bạn",
+    "memberSince": "Gia Nhập Từ",
+    "note": "Ghi chú",
+    "notePlaceholder": "Nhấp để thêm ghi chú",
+    "noActivity": "{username} không có hoạt động nào để chia sẻ ở đây",
+    "noActivityDesc": "Chưa có hoạt động chung nào - hãy gửi một lời chào thân thiện để bắt đầu trò chuyện",
+    "noMutualFriendsDesc": "Các bạn không có bạn chung nào",
+    "noMutualFriendsDetail": "Mạng lưới bạn bè của bạn giống như các thiên hà riêng biệt vậy - đã đến lúc va chạm vào nhau rồi!",
+    "serverOf": "Máy chủ của {serverName}",
+    "noMutualServers": "Không có máy chủ chung",
+    "aboutMeUpper": "GIỚI THIỆU VỀ TÔI",
+    "aboutMeTitle": "Giới thiệu về tôi",
+    "hello": "Xin chào! Tôi là {username} 👋",
+    "viewFullProfile": "Xem hồ sơ đầy đủ"
   },
   "modal": {
     "cancel": "Hủy",

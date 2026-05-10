@@ -1,3 +1,5 @@
+import { ReverseAuthGuard } from "@/components/providers/ReverseAuthGuard";
+
 export default function AuthLayout({
   children,
 }: {
@@ -16,7 +18,9 @@ export default function AuthLayout({
 
       {/* Auth card */}
       <div className="relative z-10 mx-4 w-full max-w-[780px]">
-        {children}
+        <ReverseAuthGuard>
+          {children}
+        </ReverseAuthGuard>
       </div>
     </div>
   );

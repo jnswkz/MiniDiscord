@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { useChatStore } from "@/stores/chatStore";
 import { CURRENT_USER } from "@/lib/mock-data";
 import type { Message } from "@/types";
+import { useTranslation } from "@/lib/i18n";
 
 interface MessageItemProps {
   message: Message;
@@ -34,6 +35,7 @@ function formatFullDate(dateStr: string) {
 }
 
 export function MessageItem({ message, isGrouped = false, channelId }: MessageItemProps) {
+  const { t } = useTranslation();
   const replyingTo = useChatStore((s) => s.replyingTo);
   const setReplyingTo = useChatStore((s) => s.setReplyingTo);
   const addReaction = useChatStore((s) => s.addReaction);
@@ -96,7 +98,7 @@ export function MessageItem({ message, isGrouped = false, channelId }: MessageIt
               {formatFullDate(message.createdAt)}
             </time>
             {message.isEdited && (
-              <span className="text-[10px] text-muted-foreground">(đã sửa)</span>
+              <span className="text-[10px] text-muted-foreground">{t("chat.edited")}</span>
             )}
           </div>
         )}

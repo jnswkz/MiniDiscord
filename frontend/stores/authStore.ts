@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { User, LoginRequest, RegisterRequest, AuthResponse } from "@/types";
+import type { User, LoginRequest, RegisterRequest, AuthResponse, ApiResponse } from "@/types";
 import { api } from "@/lib/api";
 
 interface AuthState {
@@ -10,10 +10,11 @@ interface AuthState {
   error: string | null;
 
   login: (data: LoginRequest) => Promise<void>;
+  loginWithGoogle: (idToken: string) => Promise<void>;
   register: (data: RegisterRequest) => Promise<void>;
   logout: () => void;
   setUser: (user: User) => void;
-  hydrate: () => void;
+  hydrate: () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
@@ -26,13 +27,25 @@ export const useAuthStore = create<AuthState>((set) => ({
   login: async (data) => {
     set({ isLoading: true, error: null });
     try {
-      const res = await api.post<AuthResponse>("/auth/login", data);
-      const { token, user } = res.data;
+      const res = await api.post<ApiResponse<AuthResponse>>("/auth/login", data);
+      const { token, user } = res.data.data;
       localStorage.setItem("token", token);
       set({ user, token, isAuthenticated: true, isLoading: false });
-    } catch (err: unknown) {
-      const message =
-        err instanceof Error ? err.message : "Đăng nhập thất bại";
+    } catch (err: any) {
+      const message = err.response?.data?.message || err.message || "Login failed";
+      set({ error: message, isLoading: false });
+    }
+  },
+
+  loginWithGoogle: async (idToken) => {
+    set({ isLoading: true, error: null });
+    try {
+      const res = await api.post<ApiResponse<AuthResponse>>("/auth/google", { idToken });
+      const { token, user } = res.data.data;
+      localStorage.setItem("token", token);
+      set({ user, token, isAuthenticated: true, isLoading: false });
+    } catch (err: any) {
+      const message = err.response?.data?.message || err.message || "Google login failed";
       set({ error: message, isLoading: false });
     }
   },
@@ -40,13 +53,12 @@ export const useAuthStore = create<AuthState>((set) => ({
   register: async (data) => {
     set({ isLoading: true, error: null });
     try {
-      const res = await api.post<AuthResponse>("/auth/register", data);
-      const { token, user } = res.data;
+      const res = await api.post<ApiResponse<AuthResponse>>("/auth/register", data);
+      const { token, user } = res.data.data;
       localStorage.setItem("token", token);
       set({ user, token, isAuthenticated: true, isLoading: false });
-    } catch (err: unknown) {
-      const message =
-        err instanceof Error ? err.message : "Đăng ký thất bại";
+    } catch (err: any) {
+      const message = err.response?.data?.message || err.message || "Registration failed";
       set({ error: message, isLoading: false });
     }
   },
@@ -58,11 +70,16 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   setUser: (user) => set({ user }),
 
-  hydrate: () => {
+  hydrate: async () => {
     const token = localStorage.getItem("token");
     if (token) {
       set({ token, isAuthenticated: true });
-      // TODO: fetch /users/me to get user data
+      try {
+        const res = await api.get<ApiResponse<User>>("/users/me");
+        set({ user: res.data.data });
+      } catch (err) {
+        console.error("Failed to fetch user data on hydrate", err);
+      }
     }
   },
 }));

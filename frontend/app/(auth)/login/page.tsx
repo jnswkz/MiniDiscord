@@ -10,6 +10,8 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Loader2 } from "lucide-react";
 import { useTranslation } from "@/lib/i18n";
+import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
+import { useAuthStore } from "@/stores/authStore";
 
 function GoogleIcon({ className }: { className?: string }) {
   return (
@@ -35,10 +37,12 @@ function GoogleIcon({ className }: { className?: string }) {
 }
 
 export default function LoginPage() {
-  const [isLoading, setIsLoading] = useState(false);
-  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const router = useRouter();
   const { t } = useTranslation();
+  const loginAction = useAuthStore((state) => state.login);
+  const loginWithGoogle = useAuthStore((state) => state.loginWithGoogle);
+  const isLoading = useAuthStore((state) => state.isLoading);
+  const error = useAuthStore((state) => state.error);
 
   const loginSchema = z.object({
     email: z.string().email(t("validation.emailInvalid")),
@@ -56,21 +60,23 @@ export default function LoginPage() {
   });
 
   async function onSubmit(data: LoginFormData) {
-    setIsLoading(true);
-    console.log("Login:", data);
-    setTimeout(() => {
-      setIsLoading(false);
+    await loginAction(data);
+    
+    const { isAuthenticated, error } = useAuthStore.getState();
+    if (isAuthenticated && !error) {
       router.push("/dashboard");
-    }, 800);
+    }
   }
 
-  function handleGoogleLogin() {
-    setIsGoogleLoading(true);
-    console.log("Google login");
-    setTimeout(() => {
-      setIsGoogleLoading(false);
-      router.push("/dashboard");
-    }, 1200);
+  async function handleGoogleLoginSuccess(credentialResponse: any) {
+    if (credentialResponse.credential) {
+      await loginWithGoogle(credentialResponse.credential);
+      
+      const { isAuthenticated, error } = useAuthStore.getState();
+      if (isAuthenticated && !error) {
+        router.push("/dashboard");
+      }
+    }
   }
 
   return (
@@ -86,6 +92,12 @@ export default function LoginPage() {
               {t("auth.gladToSeeYou")}
             </p>
           </div>
+
+          {error && (
+            <div className="mb-4 rounded-md bg-destructive/15 p-3 text-sm text-destructive border border-destructive/30">
+              {error}
+            </div>
+          )}
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="space-y-1.5">
@@ -166,8 +178,8 @@ export default function LoginPage() {
         {/* ─── Vertical Divider ─── */}
         <div className="flex flex-col items-center gap-3 py-8">
           <div className="w-px flex-1 bg-border" />
-          <span className="text-xs font-medium text-muted-foreground shrink-0">
-            HOẶC
+          <span className="text-xs font-medium text-muted-foreground shrink-0 uppercase">
+            {t("auth.or")}
           </span>
           <div className="w-px flex-1 bg-border" />
         </div>
@@ -179,30 +191,24 @@ export default function LoginPage() {
           </div>
 
           <h3 className="text-lg font-bold text-foreground text-center">
-            Đăng nhập bằng Google
+            {t("auth.googleLoginTitle")}
           </h3>
           <p className="mt-2 text-center text-xs text-muted-foreground leading-relaxed">
-            Sử dụng tài khoản Google của bạn để đăng nhập nhanh chóng và an
-            toàn.
+            {t("auth.googleLoginDesc")}
           </p>
 
-          <Button
-            type="button"
-            variant="outline"
-            className="mt-4 h-10 w-full gap-2 text-sm font-medium"
-            onClick={handleGoogleLogin}
-            disabled={isGoogleLoading}
-          >
-            {isGoogleLoading ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <GoogleIcon className="h-4 w-4" />
-            )}
-            Tiếp tục với Google
-          </Button>
+          <div className="mt-4 w-full flex justify-center">
+            <GoogleOAuthProvider clientId="905392681989-uun3otevkfu4mi3i11meckemp9gh2udp.apps.googleusercontent.com">
+              <GoogleLogin
+                onSuccess={handleGoogleLoginSuccess}
+                onError={() => console.log('Google Login Failed')}
+                useOneTap
+              />
+            </GoogleOAuthProvider>
+          </div>
 
           <p className="mt-3 text-center text-[11px] text-muted-foreground/60 leading-relaxed">
-            Hoặc, đăng nhập bằng mã bảo mật.
+            {t("auth.googleLoginFallback")}
           </p>
         </div>
       </div>

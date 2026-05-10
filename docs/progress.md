@@ -13,10 +13,10 @@
 ██████████████░░░░░░░░░░░░░░░░  ~35% Overall
 
   Infrastructure   ████████████████████  100% ✅
-  Backend Logic    ████████░░░░░░░░░░░░   35% 🟡
+  Backend Logic    ██████████░░░░░░░░░░   45% 🟡
   Frontend UI      ██████████████░░░░░░   70% 🟡
-  Integration      ░░░░░░░░░░░░░░░░░░░░    0% 🔴
-  Testing          ░░░░░░░░░░░░░░░░░░░░    0% 🔴
+  Integration      ████░░░░░░░░░░░░░░░░   20% 🟡
+  Testing          ██░░░░░░░░░░░░░░░░░░   10% 🟡
 ```
 
 ---
@@ -76,15 +76,15 @@
 
 | Component | Trạng thái | Ghi chú |
 |-----------|------------|---------|
-| Application class | ✅ | Chỉ `@SpringBootApplication` |
-| application.yml | ✅ | 5 routes (user/group/chat/ws/file) |
-| GatewayConfig.java | 🔴 | Plan có, chưa implement |
-| CorsConfig.java | 🔴 | Critical cho frontend CORS |
-| RateLimitConfig.java | 🔴 | Redis-based rate limiting |
-| JwtAuthFilter.java | 🔴 | **Critical!** JWT validation filter |
-| @EnableDiscoveryClient | 🔴 | **Thiếu annotation!** |
+| Application class | ✅ | Chỉ `@SpringBootApplication` + `@EnableDiscoveryClient` |
+| application.yml | ✅ | 5 routes (user/group/chat/ws/file) + Redis rate limit |
+| GatewayConfig.java | ✅ | Đã implement route fallback |
+| CorsConfig.java | ✅ | Đã implement cho frontend |
+| RateLimitConfig.java | ✅ | Redis-based rate limiting với fallback |
+| JwtAuthFilter.java | ✅ | JWT validation filter + X-User-Id header |
+| FilterErrorHandler.java | ✅ | Xử lý lỗi Gateway chung |
 
-**Tiến độ: 20%** — Framework chạy nhưng KHÔNG có security/CORS
+**Tiến độ: 100%** ✅ — Gateway đã hoàn thiện security, rate limit và auth filter.
 
 ---
 
@@ -199,13 +199,13 @@
 | 1 | common-lib | 4 | 4 | 4 | **100%** ✅ |
 | 2 | discovery-server | 1 | 1 | 1 | **100%** ✅ |
 | 3 | config-server | 1 | 1 | 1 | **90%** |
-| 4 | api-gateway | 1 | 5 | 1 | **20%** |
+| 4 | api-gateway | 5 | 5 | 5 | **100%** ✅ |
 | 5 | user-service | 19 | 17 | 19 | **100%** ✅ |
 | 6 | group-channel-service | 1 | 14 | 1 | **10%** |
 | 7 | chat-history-service | 1 | 8 | 1 | **10%** |
 | 8 | messaging-service | 1 | 13 | 1 | **10%** |
 | 9 | file-service | 1 | 5 | 1 | **10%** |
-| | **TỔNG** | **29** | **~68** | **29** | **~42%** |
+| | **TỔNG** | **33** | **~68** | **33** | **~48%** |
 
 ---
 
@@ -251,11 +251,9 @@ graph TD
 
 ## 🔴 Critical Blockers
 
-1. **`JwtUtil.java`** thiếu trong `common-lib` → Không service nào xác thực được JWT
-2. **`SecurityConfig.java`** thiếu trong `user-service` → Spring Security block tất cả requests
-3. **User Entity + Repository** thiếu → Không thể đăng ký/đăng nhập
-4. **API Gateway** thiếu JWT filter + CORS config → Frontend không gọi được API
-5. **0/68 files** business logic đã implement → Backend chưa xử lý bất kỳ request nào
+1. **User Entity + Repository** thiếu → Không thể đăng ký/đăng nhập (Đã fix)
+2. **0/68 files** business logic đã implement → Đang xử lý
+3. Chờ test E2E cho phase 1B.
 
 ---
 
@@ -269,3 +267,6 @@ graph TD
 - [x] .gitignore hardened cho `.env` patterns
 - [x] common-lib: ApiResponse, BaseException, MessageEvent
 - [x] Frontend UI: 65 files TSX/TS (Zustand + i18n + Discord-accurate layout)
+- [x] Phase P1A: Hoàn thành `user-service` Auth flow.
+- [x] Phase P1B: Hoàn thành `api-gateway` JWT Auth filter, CORS, Rate Limit, Error Handling.
+- [x] Đã cấu hình độc lập `docker-compose.yml` cho backend và frontend để tối ưu tài nguyên.

@@ -3,6 +3,7 @@ package com.discordmini.user.controller;
 import com.discordmini.common.dto.ApiResponse;
 import com.discordmini.user.model.dto.AuthResponse;
 import com.discordmini.user.model.dto.LoginRequest;
+import com.discordmini.user.model.dto.OAuthRequest;
 import com.discordmini.user.model.dto.RegisterRequest;
 import com.discordmini.user.service.AuthService;
 import jakarta.validation.Valid;
@@ -35,5 +36,12 @@ public class AuthController {
             @Valid @RequestBody LoginRequest request) {
         AuthResponse result = authService.login(request);
         return ResponseEntity.ok(ApiResponse.ok("Login successful", result));
+    }
+
+    @PostMapping("/google")
+    public ResponseEntity<ApiResponse<AuthResponse>> googleLogin(
+            @Valid @RequestBody OAuthRequest request) throws Exception {
+        AuthResponse result = authService.loginWithGoogle(request);
+        return ResponseEntity.ok(ApiResponse.ok("Google login successful", result));
     }
 }

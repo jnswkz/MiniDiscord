@@ -19,6 +19,7 @@ import {
 } from "@/lib/mock-data";
 import { cn } from "@/lib/utils";
 import type { User } from "@/types";
+import { useTranslation } from "@/lib/i18n";
 
 function formatDate(dateStr: string, locale: string = "vi-VN") {
   return new Date(dateStr).toLocaleDateString(locale, {
@@ -55,13 +56,14 @@ function UserProfileModal({
   const [note, setNote] = useState("");
   const mutualServers = getMutualServers(user.id);
   const isFriend = true;
+  const { t } = useTranslation();
 
   const TABS = [
-    { key: "activity" as const, label: "Hoạt động" },
-    { key: "mutual" as const, label: "Không có bạn chung" },
+    { key: "activity" as const, label: t("dm.activity") },
+    { key: "mutual" as const, label: t("dm.noMutualFriends") },
     {
       key: "servers" as const,
-      label: `${mutualServers.length} Máy Chủ Chung`,
+      label: t("dm.mutualServersCount").replace("{count}", mutualServers.length.toString()),
     },
   ];
 
@@ -98,12 +100,12 @@ function UserProfileModal({
               {isFriend ? (
                 <Button size="sm" className="text-xs h-8 gap-1.5 bg-success hover:bg-success/80">
                   <MessageCircle className="h-3.5 w-3.5" />
-                  Nhắn tin
+                  {t("dm.messageAction")}
                 </Button>
               ) : (
                 <Button size="sm" className="text-xs h-8 gap-1.5">
                   <UserPlus className="h-3.5 w-3.5" />
-                  Thêm Bạn
+                  {t("dm.addFriendAction")}
                 </Button>
               )}
               <button className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
@@ -117,7 +119,7 @@ function UserProfileModal({
             <div className="my-3 border-t border-border" />
 
             <div className="mb-3">
-              <p className="text-xs font-bold text-foreground">Gia Nhập Từ</p>
+              <p className="text-xs font-bold text-foreground">{t("dm.memberSince")}</p>
               <p className="mt-0.5 text-xs text-muted-foreground">
                 {formatDate(user.createdAt)}
               </p>
@@ -125,13 +127,13 @@ function UserProfileModal({
 
             <div className="mb-4">
               <p className="text-xs font-bold text-foreground">
-                Ghi chú (chỉ hiển thị cho bạn)
+                {t("dm.note")}
               </p>
               <input
                 type="text"
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
-                placeholder="Nhấp để thêm ghi chú"
+                placeholder={t("dm.notePlaceholder")}
                 className="mt-1 w-full rounded-md bg-background-tertiary px-2.5 py-1.5 text-xs text-foreground placeholder:text-muted-foreground/60 outline-none border border-transparent focus:border-accent transition-colors"
               />
             </div>
@@ -169,10 +171,10 @@ function UserProfileModal({
               {activeTab === "activity" && (
                 <div className="flex flex-col items-center justify-center py-12 text-center">
                   <p className="text-sm font-medium text-foreground">
-                    {user.username} không có hoạt động nào để chia sẻ ở đây
+                    {t("dm.noActivity").replace("{username}", user.username)}
                   </p>
                   <p className="mt-2 max-w-[280px] text-xs text-muted-foreground leading-relaxed">
-                    Chưa có hoạt động chung nào - hãy gửi một lời chào thân thiện để bắt đầu trò chuyện
+                    {t("dm.noActivityDesc")}
                   </p>
                 </div>
               )}
@@ -180,10 +182,10 @@ function UserProfileModal({
               {activeTab === "mutual" && (
                 <div className="flex flex-col items-center justify-center py-12 text-center">
                   <p className="text-sm font-medium text-foreground">
-                    Các bạn không có bạn chung nào
+                    {t("dm.noMutualFriendsDesc")}
                   </p>
                   <p className="mt-2 max-w-[280px] text-xs text-muted-foreground leading-relaxed">
-                    Mạng lưới bạn bè của bạn giống như các thiên hà riêng biệt vậy - đã đến lúc va chạm vào nhau rồi!
+                    {t("dm.noMutualFriendsDetail")}
                   </p>
                 </div>
               )}
@@ -205,7 +207,7 @@ function UserProfileModal({
                       </div>
                       <div className="min-w-0">
                         <p className="text-sm font-medium text-foreground truncate">
-                          Máy chủ của {server.name}
+                          {t("dm.serverOf").replace("{serverName}", server.name)}
                         </p>
                         <p className="text-xs text-muted-foreground truncate">
                           {server.description}
@@ -216,7 +218,7 @@ function UserProfileModal({
                   {mutualServers.length === 0 && (
                     <div className="flex flex-col items-center justify-center py-12 text-center">
                       <p className="text-sm text-muted-foreground">
-                        Không có máy chủ chung
+                        {t("dm.noMutualServers")}
                       </p>
                     </div>
                   )}
@@ -232,6 +234,7 @@ function UserProfileModal({
 
 /* ─── Column 4: DM User Info Panel (Discord-accurate) ──────────────── */
 export function DmUserPanel({ userId }: { userId: string }) {
+  const { t } = useTranslation();
   const [showProfile, setShowProfile] = useState(false);
   const user = MOCK_USERS.find((u) => u.id === userId);
   if (!user) return null;
@@ -280,10 +283,10 @@ export function DmUserPanel({ userId }: { userId: string }) {
             {/* ── GIỚI THIỆU VỀ TÔI (About Me) ── */}
             <div className="mb-3">
               <p className="text-[11px] font-bold uppercase tracking-wide text-white mb-1">
-                Giới thiệu về tôi
+                {t("dm.aboutMeUpper")}
               </p>
               <p className="text-[13px] text-[#dbdee1] leading-relaxed">
-                Xin chào! Tôi là {user.username} 👋
+                {t("dm.hello").replace("{username}", user.username)}
               </p>
             </div>
 
@@ -293,7 +296,7 @@ export function DmUserPanel({ userId }: { userId: string }) {
             {/* ── GIA NHẬP TỪ (Member Since) ── */}
             <div className="mb-3">
               <p className="text-[11px] font-bold uppercase tracking-wide text-white mb-1.5">
-                Gia Nhập Từ
+                {t("dm.memberSince")}
               </p>
               <p className="flex items-center gap-1.5 text-[13px] text-[#b5bac1]">
                 <Calendar className="h-3.5 w-3.5 text-[#b5bac1]" />
@@ -307,7 +310,7 @@ export function DmUserPanel({ userId }: { userId: string }) {
             {/* ── MÁY CHỦ CHUNG (Mutual Servers) ── */}
             <div>
               <p className="text-[11px] font-bold uppercase tracking-wide text-white mb-2">
-                Máy Chủ Chung — {mutualServers.length}
+                {t("dm.mutualServersCount").replace("{count}", mutualServers.length.toString())}
               </p>
               <div className="space-y-1">
                 {mutualServers.map((server) => (
@@ -330,7 +333,7 @@ export function DmUserPanel({ userId }: { userId: string }) {
                 ))}
                 {mutualServers.length === 0 && (
                   <p className="text-[13px] text-[#b5bac1] py-2">
-                    Không có máy chủ chung
+                    {t("dm.noMutualServers")}
                   </p>
                 )}
               </div>
@@ -342,11 +345,11 @@ export function DmUserPanel({ userId }: { userId: string }) {
             {/* ── GHI CHÚ (Note) ── */}
             <div>
               <p className="text-[11px] font-bold uppercase tracking-wide text-white mb-1.5">
-                Ghi chú
+                {t("dm.note")}
               </p>
               <input
                 type="text"
-                placeholder="Nhấp để thêm ghi chú"
+                placeholder={t("dm.notePlaceholder")}
                 className="w-full rounded-[4px] bg-transparent px-1 py-1 text-[13px] text-[#dbdee1] placeholder:text-[#b5bac1]/50 outline-none border border-transparent focus:border-white/20 transition-colors"
               />
             </div>
@@ -359,7 +362,7 @@ export function DmUserPanel({ userId }: { userId: string }) {
             onClick={() => setShowProfile(true)}
             className="w-full rounded-[4px] bg-[#4e5058]/50 px-3 py-2 text-[13px] font-medium text-[#dbdee1] hover:bg-[#4e5058]/70 hover:text-white transition-colors cursor-pointer"
           >
-            Xem hồ sơ đầy đủ
+            {t("dm.viewFullProfile")}
           </button>
         </div>
       </aside>
