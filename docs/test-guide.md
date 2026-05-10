@@ -89,3 +89,44 @@ Nếu kết quả terminal hiển thị `BUILD SUCCESS`, codebase của bạn đ
 1. **AAA Pattern**: Tất cả testcase đều viết theo cấu trúc Arrange - Act - Assert.
 2. **Không kết nối DB thật**: Trong Unit Test, luôn luôn dùng `@Mock` và `@InjectMocks` (Mockito) để giả lập Repository (như `UserRepository`). Không yêu cầu bật DB Docker khi chạy `mvn test`.
 3. **Cập nhật Test**: Nếu trong tương lai thêm tính năng như Two-Factor Authentication, hãy viết test cho tính năng đó trước (Test-Driven Development) rồi mới viết logic nghiệp vụ.
+
+---
+
+## 7. Hướng Dẫn Chạy Test Cho Group & Channel Service (Phase 2)
+
+Group & Channel Service chịu trách nhiệm quản lý phòng chat, phân quyền thành viên và tạo kênh nội bộ.
+
+### 7.1 Chạy Unit Tests
+
+Chạy lệnh sau tại thư mục `backend/group-channel-service`:
+```bash
+mvn clean test
+```
+
+### 7.2 Các kịch bản Test Chính
+
+**1. `SecurityHeaderFilterTest`**: Đảm bảo an ninh tại tầng API nội bộ.
+- **`doFilter_WithoutUserIdHeader_ShouldReturn401()`**: Chặn các request giả mạo (spoofing) không đi qua API Gateway, tức là thiếu `X-User-Id`. Test phải trả về HTTP Status 401.
+- **`doFilter_WithUserIdHeader_ShouldProceed()`**: Request có header hợp lệ thì được bypass tới Controller.
+- **`doFilter_WithActuatorPath_ShouldSkipFilter()`**: Cho phép các đường dẫn health check (actuator) đi qua mà không cần xác thực để Docker Swarm / Kubernetes có thể monitor được trạng thái container.
+
+**2. `RoomServiceTest`**: Test logic cốt lõi với `@Transactional`.
+- **`createRoom_Success_ShouldCreateRoomOwnerAndDefaultChannelAndPublishEvent()`**: Đảm bảo 4 thao tác đồng thời diễn ra thành công:
+  - Lưu `Room` vào Database.
+  - Tự động gán quyền `OWNER` cho người tạo (Lưu vào bảng `RoomParticipant`).
+  - Tự động tạo một channel mặc định tên `general`.
+  - Bắn sự kiện `RoomCreatedEvent` ra ngoài thông qua `ApplicationEventPublisher`. Kịch bản test sử dụng `ArgumentCaptor` của Mockito để bắt các parameter được lưu vào DB.
+
+### 7.3 Hướng dẫn chạy End-to-End (E2E) Test cho Phase 2
+Đứng ở thư mục `backend`, chạy lệnh:
+```bash
+docker compose up -d --build
+```
+Dùng Postman / cURL gọi API tới cổng của Gateway (8080):
+```bash
+curl -X POST http://localhost:8080/api/rooms \
+  -H "Authorization: Bearer <YOUR_JWT_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Phòng Test","type":"GROUP","description":"Test E2E"}'
+```
+Xác nhận trả về mã `201 Created` và lưu đầy đủ thông tin Room trong CSDL.

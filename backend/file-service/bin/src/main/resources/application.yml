@@ -1,0 +1,22 @@
+server:
+  port: 8085
+
+spring:
+  application:
+    name: file-service
+  servlet:
+    multipart:
+      max-file-size: 25MB
+      max-request-size: 25MB
+
+# Backblaze B2 (S3-compatible, uses MinIO SDK)
+b2:
+  endpoint: ${B2_ENDPOINT:http://localhost:9000}
+  key-id: ${B2_KEY_ID:minioadmin}
+  app-key: ${B2_APP_KEY:minioadmin}
+  bucket-name: ${B2_BUCKET_NAME:discord-mini-files}
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}
