@@ -12,14 +12,6 @@ spring:
           uri: lb://user-service
           predicates:
             - Path=/api/auth/**, /api/users/**
-
-eureka:
-  client:
-    enabled: true
-    service-url:
-      defaultZone: ${EUREKA_URL:http://discovery-server:8761/eureka/}
-
-spring:
   data:
     redis:
       host: ${REDIS_HOST:redis}
@@ -27,6 +19,12 @@ spring:
       password: ${REDIS_PASSWORD:}
       ssl:
         enabled: false  # Redis container cùng mạng Docker, không cần TLS
+
+eureka:
+  client:
+    enabled: true
+    service-url:
+      defaultZone: ${EUREKA_URL:http://discovery-server:8761/eureka/}
 
 server:
   port: ${PORT:8080}
