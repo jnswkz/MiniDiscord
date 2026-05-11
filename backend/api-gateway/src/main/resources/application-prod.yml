@@ -1,34 +1,36 @@
-# === PRODUCTION PROFILE ===
-# Eureka disabled — Direct URL routing to Heroku apps
+# === PRODUCTION PROFILE (DigitalOcean) ===
+# Eureka enabled — Load-balanced routing via Service Discovery
 spring:
   cloud:
-    discovery:
-      enabled: false  # Tắt Eureka discovery
     gateway:
       discovery:
         locator:
-          enabled: false # Tắt locator để không đòi hỏi ReactiveDiscoveryClient
+          enabled: true
+          lower-case-service-id: true
       routes:
         - id: user-service
-          uri: ${USER_SERVICE_URL:https://minidiscord-user-9b155a4891e0.herokuapp.com}
+          uri: lb://user-service
           predicates:
             - Path=/api/auth/**, /api/users/**
-  data:
-    redis:
-      host: ${SPRING_DATA_REDIS_HOST}      # Upstash Redis
-      port: ${SPRING_DATA_REDIS_PORT:6379}
-      password: ${SPRING_DATA_REDIS_PASSWORD}
-      ssl:
-        enabled: true  # Upstash yêu cầu TLS
 
 eureka:
   client:
-    enabled: false   # Không đăng ký với Eureka
+    enabled: true
+    service-url:
+      defaultZone: ${EUREKA_URL:http://discovery-server:8761/eureka/}
+
+spring:
+  data:
+    redis:
+      host: ${REDIS_HOST:redis}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      ssl:
+        enabled: false  # Redis container cùng mạng Docker, không cần TLS
 
 server:
-  port: ${PORT:8080}  # Heroku cấp PORT động
+  port: ${PORT:8080}
 
-# CORS cho production frontend (hỗ trợ Vercel Preview URLs)
 app:
   cors:
     allowed-origins: ${CORS_ORIGINS:https://minidiscord.vercel.app}

@@ -25,7 +25,7 @@ public class CorsConfig {
         CorsConfiguration corsConfig = new CorsConfiguration();
         
         // Set dynamic allowed origins
-        if (allowedOrigins != null && allowedOrigins.length > 0) {
+        if (allowedOrigins != null && allowedOrigins.length > 0 && !allowedOrigins[0].isEmpty()) {
             corsConfig.setAllowedOrigins(List.of(allowedOrigins));
         }
         
