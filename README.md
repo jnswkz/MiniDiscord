@@ -20,26 +20,30 @@ MiniDiscord is a **multi-user chat server** inspired by Discord, designed as a m
 
 ### Architecture at a Glance
 
-```
-┌──────────────────────────────────────────────────────────────────┐
-│                        PRODUCTION FLOW                           │
-│                                                                  │
-│  Browser → Vercel CDN (Next.js SSR)                             │
-│               │                                                  │
-│               ▼  HTTPS                                           │
-│  ┌─── DigitalOcean Droplet (2GB RAM) ──────────────────────┐    │
-│  │                                                          │    │
-│  │  Nginx (SSL Termination via Let's Encrypt)              │    │
-│  │    └──→ Docker Compose Network                          │    │
-│  │           ├── Eureka Server (Service Discovery)         │    │
-│  │           ├── API Gateway (CORS, JWT, Rate Limiting)    │    │
-│  │           ├── User Service (Auth, Profile CRUD)         │    │
-│  │           └── Redis (Rate Limit Cache)                  │    │
-│  └──────────────────────────────────────────────────────────┘    │
-│               │                                                  │
-│               ▼                                                  │
-│  Supabase PostgreSQL (Managed Database)                         │
-└──────────────────────────────────────────────────────────────────┘
+```mermaid
+graph TD
+    Browser[Browser] -->|HTTPS| Vercel[Vercel CDN<br/>Next.js SSR]
+    
+    Vercel -->|HTTPS| Nginx
+    
+    subgraph Droplet [DigitalOcean Droplet - 2GB RAM]
+        Nginx[Nginx<br/>SSL Let's Encrypt]
+        
+        subgraph Docker [Docker Compose Network]
+            GW[API Gateway<br/>CORS, JWT, Rate Limiting]
+            ES[Eureka Server<br/>Service Discovery]
+            US[User Service<br/>Auth, Profile CRUD]
+            Redis[(Redis<br/>Rate Limit Cache)]
+            
+            GW -.->|Lookup| ES
+            GW -->|Forward| US
+            GW -.->|Cache| Redis
+        end
+        
+        Nginx -->|Proxy Pass 8080| GW
+    end
+
+    US -->|JDBC| DB[(Supabase PostgreSQL<br/>Managed Database)]
 ```
 
 ---
