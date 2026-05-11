@@ -10,7 +10,8 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_PREFIX: ghcr.io/${{ github.repository_owner }}
+  # Docker tags must be lowercase. Using hardcoded lowercase username to match docker-compose.prod.yml
+  IMAGE_PREFIX: ghcr.io/phatnguyentt2
 
 jobs:
   build-and-push:
