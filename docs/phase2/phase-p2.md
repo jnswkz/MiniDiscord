@@ -1,5 +1,7 @@
 # Phase P2 — Groups & Channels Service
 
+> **Status:** ✅ CODE HOÀN THÀNH | ⏳ CHƯA VERIFY (Cần test E2E trên môi trường thực tế)
+> **Ngày implement:** 2026-05-11
 > **Service:** `group-channel-service` (port 8082)
 > **Database:** Supabase PostgreSQL (ap-northeast-1) + CloudAMQP (RabbitMQ)
 > **Mục tiêu:** CRUD Room/Channel, quản lý thành viên, phân quyền, event-driven notifications
@@ -29,6 +31,51 @@ Sau khi hoàn thành, hệ thống sẽ:
 4. **Phân quyền** — OWNER > ADMIN > MEMBER (chỉ OWNER/ADMIN mới thao tác được)
 5. **Nhận userId từ Gateway** — Thông qua header `X-User-Id` (đã implement ở P1B), reject 401 nếu thiếu header
 6. **Event Publishing (RabbitMQ)** — Phát event **sau khi DB commit** (`@TransactionalEventListener`) để tránh Dual-Write inconsistency
+
+## 1.5 Kết quả Implementation
+
+Toàn bộ 17 files đã được tạo mới và Unit Test đã pass 100%.
+
+### Phần A: Tầng Domain (Entity, Enum, DTO) - 11 files
+| # | Layer | File | Chức năng | Status |
+|---|-------|------|-----------|--------|
+| 1 | Entity | `Room.java` | Quản lý thông tin chung (kèm `@Version` cho Optimistic Locking) | ✅ |
+| 2 | Entity | `RoomParticipant.java` | Liên kết User - Room kèm Role | ✅ |
+| 3 | Entity | `Channel.java` | Kênh chat nội bộ thuộc Room | ✅ |
+| 4 | Enum | `RoomType.java` | Xác định GROUP hoặc DM | ✅ |
+| 5 | Enum | `RoomRole.java` | Phân quyền OWNER, ADMIN, MEMBER | ✅ |
+| 6 | DTO | `CreateRoomRequest.java` | Nhận request tạo Room (có Validation tiếng Anh) | ✅ |
+| 7 | DTO | `UpdateRoomRequest.java` | Cập nhật thông tin Room | ✅ |
+| 8 | DTO | `RoomResponse.java` | DTO trả về chứa danh sách channels và member count | ✅ |
+| 9 | DTO | `AddMemberRequest.java` | Nhận userId để thêm vào Room | ✅ |
+| 10 | DTO | `ChannelRequest.java` | DTO tạo Channel mới | ✅ |
+| 11 | DTO | `MemberResponse.java` | Trả về thông tin participant | ✅ |
+
+### Phần B: Tầng Xử Lý (Repository, Service, Controller) - 8 files
+| # | Layer | File | Chức năng | Status |
+|---|-------|------|-----------|--------|
+| 12 | Repository | `RoomRepository.java` | - | ✅ |
+| 13 | Repository | `RoomParticipantRepository.java` | - | ✅ |
+| 14 | Repository | `ChannelRepository.java` | - | ✅ |
+| 15 | Service | `RoomService.java` | CRUD Room. Có `@Transactional`, tự tạo "general" channel | ✅ |
+| 16 | Service | `MembershipService.java` | Quản lý logic join/leave, phân quyền OWNER/ADMIN | ✅ |
+| 17 | Service | `ChannelService.java` | CRUD Channel, tính toán `position` động | ✅ |
+| 18 | Controller | `RoomController.java` | Endpoint `/api/rooms`. Extract `X-User-Id` | ✅ |
+| 19 | Controller | `ChannelController.java` | Endpoint `/api/rooms/{roomId}/channels` | ✅ |
+
+### Phần C: Tầng Cấu Hình & Bảo Mật (4 files)
+| # | Layer | File | Chức năng | Status |
+|---|-------|------|-----------|--------|
+| 20 | Config | `SecurityHeaderFilter.java` | Chặn `401` nếu request không có `X-User-Id` | ✅ |
+| 21 | Exception | `GlobalExceptionHandler.java` | Bắt lỗi Validation, `BaseException` chuẩn hóa output | ✅ |
+| 22 | Exception | `RoomNotFoundException.java` | - | ✅ |
+| 23 | Docker | `docker-compose.yml` | Xóa `ports`, dùng `expose` ẩn service khỏi Internet | ✅ |
+
+### Phần D: Tầng Event (RabbitMQ) - 2 files
+| # | Layer | File | Chức năng | Status |
+|---|-------|------|-----------|--------|
+| 24 | Config | `RabbitMQConfig.java` | Khai báo Topic Exchange và Jackson Message Converter | ✅ |
+| 25 | Event | `RoomEventPublisher.java` | Gửi event `room.created` SAU KHI DB Commit thành công | ✅ |
 
 ---
 

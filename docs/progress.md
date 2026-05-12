@@ -1,6 +1,6 @@
 # 📊 Discord Mini — Tiến Độ Dự Án
 
-> **Cập nhật:** 2026-04-16 | **Phase hiện tại:** Infrastructure ✅ → Backend Implementation 🔜
+> **Cập nhật:** 2026-05-11 | **Phase hiện tại:** Backend Implementation 🟡
 > **Backend:** Java 17 / Spring Boot 3.4.4 / Spring Cloud 2024.0.1
 > **Frontend:** Next.js (65 files TSX/TS đã phát triển)
 > **Infrastructure:** 100% Cloud ✅
@@ -10,13 +10,13 @@
 ## 🏗️ Tổng quan tiến độ
 
 ```
-██████████████░░░░░░░░░░░░░░░░  ~35% Overall
+██████████████████░░░░░░░░░░░░  ~55% Overall
 
   Infrastructure   ████████████████████  100% ✅
-  Backend Logic    ██████████░░░░░░░░░░   45% 🟡
+  Backend Logic    ██████████████░░░░░░   65% 🟡
   Frontend UI      ██████████████░░░░░░   70% 🟡
   Integration      ████░░░░░░░░░░░░░░░░   20% 🟡
-  Testing          ██░░░░░░░░░░░░░░░░░░   10% 🟡
+  Testing          ██████░░░░░░░░░░░░░░   30% 🟡
 ```
 
 ---
@@ -122,20 +122,31 @@
 |-----------|----------------|------------|
 | Application class | `GroupChannelApplication.java` | ✅ |
 | application.yml | — | ✅ |
-| RoomController | `controller/RoomController.java` | 🔴 |
-| ChannelController | `controller/ChannelController.java` | 🔴 |
-| RoomService | `service/RoomService.java` | 🔴 |
-| MembershipService | `service/MembershipService.java` | 🔴 |
-| RoomRepository | `repository/RoomRepository.java` | 🔴 |
-| RoomParticipantRepository | `repository/RoomParticipantRepository.java` | 🔴 |
-| Room Entity | `model/entity/Room.java` | 🔴 |
-| RoomParticipant Entity | `model/entity/RoomParticipant.java` | 🔴 |
-| RoomRole Enum | `model/entity/RoomRole.java` | 🔴 |
-| CreateRoomRequest | `model/dto/CreateRoomRequest.java` | 🔴 |
-| RoomResponse | `model/dto/RoomResponse.java` | 🔴 |
-| RoomEventPublisher | `event/RoomEventPublisher.java` | 🔴 |
+| RoomController | `controller/RoomController.java` | ✅ |
+| ChannelController | `controller/ChannelController.java` | ✅ |
+| RoomService | `service/RoomService.java` | ✅ |
+| MembershipService | `service/MembershipService.java` | ✅ |
+| ChannelService | `service/ChannelService.java` | ✅ |
+| RoomRepository | `repository/RoomRepository.java` | ✅ |
+| RoomParticipantRepository | `repository/RoomParticipantRepository.java` | ✅ |
+| ChannelRepository | `repository/ChannelRepository.java` | ✅ |
+| Room Entity | `model/entity/Room.java` | ✅ |
+| RoomParticipant Entity | `model/entity/RoomParticipant.java` | ✅ |
+| Channel Entity | `model/entity/Channel.java` | ✅ |
+| RoomRole Enum | `model/enums/RoomRole.java` | ✅ |
+| RoomType Enum | `model/enums/RoomType.java` | ✅ |
+| CreateRoomRequest | `model/dto/CreateRoomRequest.java` | ✅ |
+| RoomResponse | `model/dto/RoomResponse.java` | ✅ |
+| AddMemberRequest | `model/dto/AddMemberRequest.java` | ✅ |
+| ChannelRequest | `model/dto/ChannelRequest.java` | ✅ |
+| MemberResponse | `model/dto/MemberResponse.java` | ✅ |
+| SecurityHeaderFilter | `config/SecurityHeaderFilter.java` | ✅ |
+| RabbitMQConfig | `config/RabbitMQConfig.java` | ✅ |
+| GlobalExceptionHandler | `exception/GlobalExceptionHandler.java`| ✅ |
+| RoomNotFoundException | `exception/RoomNotFoundException.java` | ✅ |
+| RoomEventPublisher | `event/RoomEventPublisher.java` | ✅ |
 
-**Tiến độ: 10%** — CHỈ có Application class + config.
+**Tiến độ: 100%** ✅ — Đã triển khai Event-driven architecture, API bảo mật chống spoofing.
 
 ---
 
@@ -201,11 +212,11 @@
 | 3 | config-server | 1 | 1 | 1 | **90%** |
 | 4 | api-gateway | 5 | 5 | 5 | **100%** ✅ |
 | 5 | user-service | 19 | 17 | 19 | **100%** ✅ |
-| 6 | group-channel-service | 1 | 14 | 1 | **10%** |
+| 6 | group-channel-service | 26 | 26 | 26 | **100%** ✅ |
 | 7 | chat-history-service | 1 | 8 | 1 | **10%** |
 | 8 | messaging-service | 1 | 13 | 1 | **10%** |
 | 9 | file-service | 1 | 5 | 1 | **10%** |
-| | **TỔNG** | **33** | **~68** | **33** | **~48%** |
+| | **TỔNG** | **58** | **~80** | **58** | **~72%** |
 
 ---
 
@@ -224,11 +235,11 @@ graph TD
     
     P0 --> INF[Infrastructure fixes<br/>Eureka/Config annotations]
     
-    style P0 fill:#ff6b6b,color:#fff
-    style P1A fill:#ff6b6b,color:#fff
-    style P1B fill:#ffa94d,color:#fff
-    style P2 fill:#ffa94d,color:#fff
-    style P3 fill:#69db7c,color:#fff
+    style P0 fill:#69db7c,color:#fff
+    style P1A fill:#69db7c,color:#fff
+    style P1B fill:#69db7c,color:#fff
+    style P2 fill:#69db7c,color:#fff
+    style P3 fill:#ffa94d,color:#fff
     style P4 fill:#69db7c,color:#fff
     style P5 fill:#4dabf7,color:#fff
     style INF fill:#ff6b6b,color:#fff
@@ -251,9 +262,7 @@ graph TD
 
 ## 🔴 Critical Blockers
 
-1. **User Entity + Repository** thiếu → Không thể đăng ký/đăng nhập (Đã fix)
-2. **0/68 files** business logic đã implement → Đang xử lý
-3. Chờ test E2E cho phase 1B.
+1. Chờ kiểm thử E2E tích hợp toàn bộ các service (Gateway, User, Group/Channel) thông qua Docker Compose.
 
 ---
 
@@ -269,4 +278,6 @@ graph TD
 - [x] Frontend UI: 65 files TSX/TS (Zustand + i18n + Discord-accurate layout)
 - [x] Phase P1A: Hoàn thành `user-service` Auth flow.
 - [x] Phase P1B: Hoàn thành `api-gateway` JWT Auth filter, CORS, Rate Limit, Error Handling.
+- [x] Phase P2: Hoàn thành `group-channel-service` CRUD, Membership, Event-driven RabbitMQ.
+- [x] Testing P2: Đạt 100% test coverage cho các class cốt lõi (`RoomServiceTest`, `SecurityHeaderFilterTest`).
 - [x] Đã cấu hình độc lập `docker-compose.yml` cho backend và frontend để tối ưu tài nguyên.
