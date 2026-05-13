@@ -94,8 +94,8 @@ services:
       context: .
       dockerfile: chat-history-service/Dockerfile
     container_name: minidiscord-chat-history
-    ports:
-      - "8083:8083"
+    expose:
+      - "8083"
     env_file:
       - ./chat-history-service/.env
     environment:
