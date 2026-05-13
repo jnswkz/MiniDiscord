@@ -1,63 +1,28 @@
-Dưới đây là bản review chi tiết tích hợp toàn bộ các chỉnh sửa, giải pháp cho 6 vấn đề tồn đọng và hoàn thiện spec để bạn sẵn sàng gõ dòng code đầu tiên.
+Dưới đây là phần duyệt chi tiết và câu trả lời cho 3 câu hỏi mở (open questions) của bạn:
 
-1. Phân tích & Tích hợp Góp ý Kiến trúc
-Hai điểm tinh chỉnh kiến trúc đã được chốt hạ hoàn toàn:
+1. Server-side Upload vs Presigned URL cho MVP
+Tôi hoàn toàn đồng ý với lựa chọn Server-side proxy (Phương án A) cho MVP.
 
-RestClient làm tiêu chuẩn: Việc nâng cấp từ RestTemplate/WebClient lên RestClient là chuẩn xác cho Spring Boot 3.4+. Nó mang lại cú pháp fluent, dễ đọc, dễ handle error mà không kéo theo sự cồng kềnh của stack WebFlux. Mục 8.3 trong tài liệu sẽ chính thức sử dụng công cụ này.
+Quyết định này giúp bạn giữ được toàn quyền kiểm soát quy trình xác thực (validation) ngay tại server để loại bỏ file độc hại trước khi chúng chạm đến B2.
 
-Cache Invalidation (P_FINAL): Ghi chú cực kỳ đáng giá. Việc set TTL 1-2 phút cho Caffeine Cache là chưa đủ an toàn nếu user bị kick. Ghi chú R3 sẽ được bổ sung: "TODO (P_FINAL): Lắng nghe event member.removed từ RabbitMQ để evict cache key tương ứng ngay lập tức, ngăn chặn user bị kick tiếp tục đọc tin nhắn mới."
+Việc thiết lập giới hạn max-file-size: 25MB là một ranh giới an toàn tuyệt vời, giúp ngăn chặn rủi ro cạn kiệt bộ nhớ (OOM) khi server phải đệm (buffer) file trong RAM.
 
-2. Giải quyết triệt để 6 Vấn đề còn vướng mắc
-2.1. Inconsistency trong API Path (Mục 5.2 vs 10.3)
-Sự sai lệch này rất dễ gây lỗi routing ở Gateway. Mục 5.2 sẽ được đồng bộ hóa hoàn toàn để bám sát nguyên tắc ESR (mọi path đều bắt đầu bằng roomId rồi mới đến channelId).
+Hướng quy hoạch chuyển sang Presigned URL ở giai đoạn tối ưu hóa cuối cùng (P_FINAL) cũng cho thấy bạn có tầm nhìn mở rộng rất tốt. Ở giai đoạn hiện tại, sự đơn giản và an toàn của Phương án A là ưu tiên hàng đầu.
 
-Update:
+2. Public Bucket URL cho ứng dụng Chat
+Sự đánh đổi này là hoàn toàn chấp nhận được và rất thông minh cho kiến trúc hiện tại.
 
-PUT /api/messages/rooms/{roomId}/channels/{channelId}/read
+Lợi ích lớn nhất của việc dùng Public B2 URL là giải phóng 100% băng thông tải xuống (egress bandwidth) cho server backend của bạn, đồng thời tận dụng được sức mạnh của CDN để phân phối nội dung.
 
-GET /api/messages/rooms/{roomId}/channels/{channelId}/unread
+Dù nhược điểm là bạn không thể dễ dàng thu hồi quyền truy cập (revoke access) qua URL, nhưng cách bạn thiết kế chiến lược đặt tên file chứa UUID ({userId}/{year-month}/{UUID}.{ext}) đã tạo ra một dạng "Capability URL". Nghĩa là, dù file ở trạng thái public, nhưng người ngoài không thể đoán được URL nếu không có link. Ngay cả hệ thống Discord thực tế trong thời gian dài cũng sử dụng các URL public khó đoán tương tự trước khi siết chặt bảo mật gần đây.
 
-2.2. Race Condition khi Update Read Receipt
-Phân tích của bạn về thao tác save() gây overwrite là hoàn toàn chính xác. Trong môi trường Multi-device, concurrent writes sẽ làm sai lệch lastReadMessageId.
+3. Về danh sách MIME Whitelist
+Danh sách hiện tại của bạn (image/*, application/pdf, text/plain, application/zip, video/mp4, audio/*) đã thiết lập một màng lọc an toàn tốt (chặn mặc định theo whitelist). Tuy nhiên, bạn nên cân nhắc một số điểm sau:
 
-Giải pháp (Atomic Update): Sử dụng sức mạnh cấp thấp của MongoDB thay vì load entity lên memory rồi save lại. Do lastReadMessageId được lưu dưới dạng chuỗi hex của ObjectId (có tính chất monotonic - tăng dần theo thời gian), ta có thể tận dụng query điều kiện.
+Bổ sung định dạng tài liệu: Trong môi trường chat nhóm/công việc, người dùng rất thường xuyên gửi tệp văn phòng. Bạn nên bổ sung nhóm application/vnd.openxmlformats-officedocument.* (cho các tệp .docx, .xlsx, .pptx).
 
-Java
-@Query("{ 'userId': ?0, 'channelId': ?1, 'lastReadMessageId': { '$lt': ?2 } }")
-@Update("{ '$set': { 'lastReadMessageId': ?2, 'lastReadAt': ?3 } }")
-void updateLastReadIfNewer(String userId, String channelId, String newReadId, Instant now);
-Test Case Bổ sung: markAsRead_OlderMessageId_DoesNotOverwrite (Mock kết quả trả về của update document count = 0 để verify logic).
+Bổ sung định dạng dữ liệu thô: Nếu nhóm người dùng của bạn có dân IT, application/json hoặc text/csv cũng là những định dạng phổ biến thường được đính kèm.
 
-2.3. Reference Type của replyTo.messageId
-Cần làm rõ ranh giới giữa Internal ID (MongoDB _id) và External ID (Event UUID).
+Lưu ý bảo mật về MIME Spoofing (Quan trọng): Ở mục 4.3 và 6.3, bạn đề cập đến việc kiểm tra Content-Type header và chặn đuôi file thực thi (.exe, .sh, .bat). Một hacker có thể đổi tên tệp malware.exe thành cute_cat.png và đẩy header Content-Type: image/png. Để chống lại điều này, trong lớp StorageService.java, bạn không nên chỉ tin vào thông tin từ client gửi lên. Hãy tích hợp một cơ chế đọc "Magic Bytes" (ví dụ dùng Apache Tika) để xác minh định dạng thực sự của luồng byte trước khi lưu.
 
-Quyết định: replyTo.messageId sẽ lưu UUID (chuỗi String của messageId), tuyệt đối không lưu ObjectId.
-
-Lý do: Frontend chỉ làm việc với hệ quy chiếu UUID sinh ra từ Messaging Service. Việc lookup tin nhắn gốc (nếu cần) vẫn đảm bảo O(1) nhờ vào idx_messageId (UNIQUE). Mục Schema 4.1 sẽ được note rõ: // Lưu ý: Dùng UUID của event, KHÔNG dùng ObjectId của Mongo.
-
-2.4. Phân định rõ Authorization cho DELETE và Read Receipt
-Đặc tả phân quyền cần rạch ròi để code Controller và Service không bị lúng túng:
-
-DELETE /messages/{messageId}: Tin cậy JWT (userId == senderId). Không cần check membership. Giống Discord, user có quyền xóa "dấu vết" (tin nhắn của chính mình) kể cả khi họ đã rời khỏi room.
-
-PUT .../read & GET .../unread: Bắt buộc phải check membership (gọi sang group-channel-service). User đã rời room không được phép cập nhật receipt hay truy vấn số lượng tin chưa đọc.
-
-2.5. Performance của getUnreadCount (Capping 99+)
-Việc đếm (count) chính xác hàng chục ngàn tin nhắn trong MongoDB sẽ lock resource và gây chậm toàn bộ hệ thống.
-
-Giải pháp (Bounded Count): Giới hạn truy vấn ở mức 100 records.
-
-Java
-// Dùng query kết hợp limit để không bao giờ scan quá 100 documents
-long count = mongoTemplate.count(query.limit(100), Message.class);
-// Trả về DTO: count = 99, hasMore = true
-Cập nhật: Sẽ note rõ ở Mục 4.2 và thiết kế DTO ReadReceiptResponse chứa trường String displayCount (hiển thị "99+" nếu chạm limit) để Frontend dễ dàng render mà không cần logic phức tạp.
-
-2.6. Chiến lược Migration cho MongoDB Index
-Việc để MongoIndexConfig chạy lúc startup có rủi ro IndexOptionsConflict khi cấu trúc index thay đổi ở các phase sau.
-
-Cập nhật: Thêm một dòng ghi chú rõ ràng vào file config:
-// TODO (P_FINAL): Tích hợp Mongock để quản lý versioning schema và index migrations an toàn trên production, thay vì chạy script thủ công lúc startup.
-
-Tổng kết
-Bản kế hoạch Phase P3 hiện tại đã đạt tiêu chuẩn Production-Ready Spec. Mọi "lỗ hổng" về luồng dữ liệu, hiệu năng truy vấn, và tranh chấp tài nguyên (concurrency) đều đã có hướng giải quyết cụ thể và được ánh xạ trực tiếp thành các Unit Test Cases.
+Tổng kết: Trạng thái của bản kế hoạch là 🟢 Sẵn sàng triển khai. Bạn đã vạch ra rõ ràng 8 bước thực thi và phân tách hoàn toàn file service khỏi các domain khác. Bạn có thể mở terminal và bắt đầu ngay từ Bước 0 (Cập nhật pom.xml với Lombok). Chúc bạn code trơn tru!

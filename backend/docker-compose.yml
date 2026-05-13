@@ -117,8 +117,8 @@ services:
       context: .
       dockerfile: messaging-service/Dockerfile
     container_name: minidiscord-messaging
-    ports:
-      - "8084:8084"
+    expose:
+      - "8084"
     env_file:
       - ./messaging-service/.env
     environment:
@@ -140,8 +140,8 @@ services:
       context: .
       dockerfile: file-service/Dockerfile
     container_name: minidiscord-file
-    ports:
-      - "8085:8085"
+    expose:
+      - "8085"
     env_file:
       - ./file-service/.env
     environment:

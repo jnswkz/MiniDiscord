@@ -1,6 +1,6 @@
 # 📊 Discord Mini — Tiến Độ Dự Án
 
-> **Cập nhật:** 2026-05-11 | **Phase hiện tại:** Backend Implementation 🟡
+> **Cập nhật:** 2026-05-14 | **Phase hiện tại:** Backend Implementation ✅
 > **Backend:** Java 17 / Spring Boot 3.4.4 / Spring Cloud 2024.0.1
 > **Frontend:** Next.js (65 files TSX/TS đã phát triển)
 > **Infrastructure:** 100% Cloud ✅
@@ -10,13 +10,13 @@
 ## 🏗️ Tổng quan tiến độ
 
 ```
-██████████████████░░░░░░░░░░░░  ~55% Overall
+████████████████████████░░░░░░  ~65% Overall
 
   Infrastructure   ████████████████████  100% ✅
-  Backend Logic    ██████████████░░░░░░   65% 🟡
+  Backend Logic    ████████████████████  100% ✅
   Frontend UI      ██████████████░░░░░░   70% 🟡
   Integration      ████░░░░░░░░░░░░░░░░   20% 🟡
-  Testing          ██████░░░░░░░░░░░░░░   30% 🟡
+  Testing          ████████░░░░░░░░░░░░   40% 🟡
 ```
 
 ---
@@ -156,14 +156,14 @@
 |-----------|----------------|------------|
 | Application class | `ChatHistoryApplication.java` | ✅ |
 | application.yml | — | ✅ |
-| MessageController | `controller/MessageController.java` | 🔴 |
-| MessageService | `service/MessageService.java` | 🔴 |
-| MessageRepository | `repository/MessageRepository.java` | 🔴 |
-| Message Document | `model/document/Message.java` | 🔴 |
-| MessageResponse | `model/dto/MessageResponse.java` | 🔴 |
-| MessageEventListener | `listener/MessageEventListener.java` | 🔴 |
+| MessageController | `controller/MessageController.java` | ✅ |
+| MessageService | `service/MessageService.java` | ✅ |
+| MessageRepository | `repository/MessageRepository.java` | ✅ |
+| Message Document | `model/document/Message.java` | ✅ |
+| MessageResponse | `model/dto/MessageResponse.java` | ✅ |
+| MessageEventListener | `listener/MessageEventListener.java` | ✅ |
 
-**Tiến độ: 10%** — CHỈ có Application class + config.
+**Tiến độ: 100%** ✅ — Đã triển khai đầy đủ API đọc/tìm kiếm tin nhắn, ReadReceipt và Idempotent Consumer.
 
 ---
 
@@ -173,19 +173,19 @@
 |-----------|----------------|------------|
 | Application class | `MessagingApplication.java` | ✅ | `@EnableAsync` ✅ |
 | application.yml | — | ✅ |
-| WebSocketConfig | `config/WebSocketConfig.java` | 🔴 |
-| RabbitMQConfig | `config/RabbitMQConfig.java` | 🔴 |
-| RedisConfig | `config/RedisConfig.java` | 🔴 |
-| ChatWebSocketController | `controller/ChatWebSocketController.java` | 🔴 |
-| ConnectionManager | `service/ConnectionManager.java` | 🔴 |
-| MessageRouter | `service/MessageRouter.java` | 🔴 |
-| PresenceService | `service/PresenceService.java` | 🔴 |
-| WebSocketEventHandler | `handler/WebSocketEventHandler.java` | 🔴 |
-| StompErrorHandler | `handler/StompErrorHandler.java` | 🔴 |
-| ChatMessage DTO | `model/dto/ChatMessage.java` | 🔴 |
-| TypingEvent DTO | `model/dto/TypingEvent.java` | 🔴 |
+| WebSocketConfig | `config/WebSocketConfig.java` | ✅ |
+| RabbitMQConfig | `config/RabbitMQConfig.java` | ✅ |
+| RedisConfig | `config/RedisConfig.java` | ✅ |
+| ChatWebSocketController | `controller/ChatWebSocketController.java` | ✅ |
+| ConnectionManager | `service/ConnectionManager.java` | ✅ |
+| MessageRouter | `service/MessageRouter.java` | ✅ |
+| PresenceService | `service/PresenceService.java` | ✅ |
+| WebSocketEventHandler | `handler/WebSocketEventHandler.java` | ✅ |
+| StompErrorHandler | `handler/StompErrorHandler.java` | ✅ |
+| ChatMessage DTO | `model/dto/ChatMessage.java` | ✅ |
+| TypingEvent DTO | `model/dto/TypingEvent.java` | ✅ |
 
-**Tiến độ: 10%** — CHỈ có Application class + config.
+**Tiến độ: 100%** ✅ — Đã triển khai WebSocket STOMP, Dual-layer Auth, RabbitMQ routing, RateLimiting và Zombie Session cleanup.
 
 ---
 
@@ -194,12 +194,16 @@
 | Component | File theo Plan | Trạng thái |
 |-----------|----------------|------------|
 | Application class | `FileServiceApplication.java` | ✅ |
-| application.yml | — | ✅ | `b2.*` config keys |
-| FileController | `controller/FileController.java` | 🔴 |
-| StorageService | `service/StorageService.java` | 🔴 |
-| B2Config | `config/B2Config.java` | 🔴 |
+| application.yml | — | ✅ |
+| FileController | `controller/FileController.java` | ✅ |
+| StorageService | `service/StorageService.java` | ✅ |
+| B2Config | `config/B2Config.java` | ✅ |
+| SecurityHeaderFilter | `config/SecurityHeaderFilter.java` | ✅ |
+| FileResponse | `model/dto/FileResponse.java` | ✅ |
+| FileValidationException | `exception/FileValidationException.java` | ✅ |
+| GlobalExceptionHandler | `exception/GlobalExceptionHandler.java` | ✅ |
 
-**Tiến độ: 10%** — CHỈ có Application class + config.
+**Tiến độ: 100%** ✅ — Upload/Delete file qua Backblaze B2, Magic Bytes validation (Apache Tika), MIME whitelist, SecurityHeaderFilter.
 
 ---
 
@@ -213,10 +217,10 @@
 | 4 | api-gateway | 5 | 5 | 5 | **100%** ✅ |
 | 5 | user-service | 19 | 17 | 19 | **100%** ✅ |
 | 6 | group-channel-service | 26 | 26 | 26 | **100%** ✅ |
-| 7 | chat-history-service | 1 | 8 | 1 | **10%** |
-| 8 | messaging-service | 1 | 13 | 1 | **10%** |
-| 9 | file-service | 1 | 5 | 1 | **10%** |
-| | **TỔNG** | **58** | **~80** | **58** | **~72%** |
+| 7 | chat-history-service | 13 | 8 | 13 | **100%** ✅ |
+| 8 | messaging-service | 15 | 13 | 15 | **100%** ✅ |
+| 9 | file-service | 9 | 9 | 9 | **100%** ✅ |
+| | **TỔNG** | **92** | **~89** | **92** | **100%** ✅ |
 
 ---
 
@@ -239,9 +243,9 @@ graph TD
     style P1A fill:#69db7c,color:#fff
     style P1B fill:#69db7c,color:#fff
     style P2 fill:#69db7c,color:#fff
-    style P3 fill:#ffa94d,color:#fff
+    style P3 fill:#69db7c,color:#fff
     style P4 fill:#69db7c,color:#fff
-    style P5 fill:#4dabf7,color:#fff
+    style P5 fill:#69db7c,color:#fff
     style INF fill:#ff6b6b,color:#fff
 ```
 
@@ -280,4 +284,7 @@ graph TD
 - [x] Phase P1B: Hoàn thành `api-gateway` JWT Auth filter, CORS, Rate Limit, Error Handling.
 - [x] Phase P2: Hoàn thành `group-channel-service` CRUD, Membership, Event-driven RabbitMQ.
 - [x] Testing P2: Đạt 100% test coverage cho các class cốt lõi (`RoomServiceTest`, `SecurityHeaderFilterTest`).
+- [x] Phase P3: Hoàn thành `chat-history-service` (MongoDB, Message storage, ReadReceipts).
+- [x] Phase P4: Hoàn thành `messaging-service` (WebSocket STOMP, RabbitMQ routing, Redis Pub/Sub).
 - [x] Đã cấu hình độc lập `docker-compose.yml` cho backend và frontend để tối ưu tài nguyên.
+- [x] Phase P5: Hoàn thành `file-service` (B2 upload/delete, Apache Tika magic bytes, MIME whitelist, SecurityHeaderFilter).

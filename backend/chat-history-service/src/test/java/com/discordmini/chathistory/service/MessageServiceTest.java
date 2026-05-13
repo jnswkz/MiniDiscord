@@ -37,7 +37,7 @@ class MessageServiceTest {
         String userId = "user1";
         String roomId = "room1";
         String channelId = "channel1";
-        Message message = Message.builder().id("1").content("test").build();
+        Message message = Message.builder().id("1").messageId("msg-uuid-1").content("test").build();
 
         doNothing().when(membershipClient).verifyMembership(userId, roomId);
         when(messageRepository.findByRoomIdAndChannelIdAndIsDeletedFalseOrderByIdDesc(eq(roomId), eq(channelId), any(PageRequest.class)))
@@ -51,7 +51,24 @@ class MessageServiceTest {
     }
 
     @Test
-    void softDeleteMessage_Success() {
+    void getMessages_WithLimit_RespectsMaxLimit() {
+        String userId = "user1";
+        String roomId = "room1";
+        String channelId = "channel1";
+
+        doNothing().when(membershipClient).verifyMembership(userId, roomId);
+        when(messageRepository.findByRoomIdAndChannelIdAndIsDeletedFalseOrderByIdDesc(eq(roomId), eq(channelId), any(PageRequest.class)))
+                .thenReturn(List.of());
+
+        // limit > 100 should be clamped to 100
+        messageService.getMessages(userId, roomId, channelId, null, 999);
+
+        verify(messageRepository).findByRoomIdAndChannelIdAndIsDeletedFalseOrderByIdDesc(
+                eq(roomId), eq(channelId), argThat(pageable -> pageable.getPageSize() == 100));
+    }
+
+    @Test
+    void softDeleteMessage_BySender_Success() {
         String userId = "user1";
         String messageId = "msg1";
         Message message = Message.builder().messageId(messageId).senderId(userId).build();
@@ -60,19 +77,20 @@ class MessageServiceTest {
 
         messageService.softDeleteMessage(userId, messageId);
 
+        assertTrue(message.isDeleted());
         assertNotNull(message.getDeletedAt());
         verify(messageRepository).save(message);
     }
 
     @Test
-    void softDeleteMessage_NotSender() {
+    void softDeleteMessage_ByOtherUser_ThrowsForbidden() {
         String userId = "user1";
         String messageId = "msg1";
         Message message = Message.builder().messageId(messageId).senderId("user2").build();
 
         when(messageRepository.findByMessageId(messageId)).thenReturn(Optional.of(message));
 
-        assertThrows(RuntimeException.class, () -> messageService.softDeleteMessage(userId, messageId));
+        assertThrows(ForbiddenException.class, () -> messageService.softDeleteMessage(userId, messageId));
         verify(messageRepository, never()).save(any());
     }
 }
