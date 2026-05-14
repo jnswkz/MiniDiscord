@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -27,5 +28,11 @@ public class ChannelController {
         Channel channel = channelService.createChannel(roomId, requesterId, request);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.ok("Channel created successfully", channel));
+    }
+
+    @GetMapping("/rooms/{roomId}/channels")
+    public ResponseEntity<ApiResponse<List<Channel>>> getChannels(@PathVariable UUID roomId) {
+        List<Channel> channels = channelService.getChannels(roomId);
+        return ResponseEntity.ok(ApiResponse.ok("Channels fetched", channels));
     }
 }

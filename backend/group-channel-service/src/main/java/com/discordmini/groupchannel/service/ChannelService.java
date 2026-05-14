@@ -39,4 +39,9 @@ public class ChannelService {
 
         return channelRepository.save(channel);
     }
+
+    @Transactional(readOnly = true)
+    public List<Channel> getChannels(UUID roomId) {
+        return channelRepository.findByRoomIdOrderByPositionAsc(roomId);
+    }
 }

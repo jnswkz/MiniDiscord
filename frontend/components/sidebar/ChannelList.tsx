@@ -3,11 +3,11 @@
 import { useState } from "react";
 import { useRouter, useParams, usePathname } from "next/navigation";
 import { ScrollArea } from "@/components/ui/ScrollArea";
-import { ChevronDown, ChevronRight, Hash, Volume2 } from "lucide-react";
-import { MOCK_ROOMS, MOCK_CHANNELS } from "@/lib/mock-data";
+import { Hash, Volume2, ChevronDown, ChevronRight } from "lucide-react";
 import { useTranslation } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import { useUIStore } from "@/stores/uiStore";
+import { useRoomStore } from "@/stores/roomStore";
 import type { Channel } from "@/types";
 
 function ChannelItem({
@@ -79,32 +79,32 @@ function ChannelCategory({
   );
 }
 
-// Map channelId -> roomId for reverse lookup
-function getRoomIdForChannel(channelId: string): string | null {
-  const channel = MOCK_CHANNELS.find((c) => c.id === channelId);
-  return channel?.roomId ?? null;
-}
-
 export function ChannelList() {
   const { t } = useTranslation();
   const router = useRouter();
   const params = useParams();
   const pathname = usePathname();
   const sidebarWidth = useUIStore((s) => s.sidebarWidth);
+  const { rooms, channels } = useRoomStore();
 
   // Derive active channel from URL params
   const activeChannelId = (params?.channelId as string) || null;
-  // Derive active room from channel, or null if on dashboard
-  const activeRoomId = activeChannelId
-    ? getRoomIdForChannel(activeChannelId)
-    : null;
+  let activeRoomId: string | null = null;
 
-  const isDashboard = pathname?.startsWith("/dashboard");
+  if (activeChannelId) {
+    for (const [rId, cList] of Object.entries(channels)) {
+      if (cList.some((c) => c.id === activeChannelId)) {
+        activeRoomId = rId;
+        break;
+      }
+    }
+  }
 
-  // If on dashboard or no active room, show first room by default
-  const displayRoomId = activeRoomId || "r1";
-  const room = MOCK_ROOMS.find((r) => r.id === displayRoomId);
-  const roomChannels = MOCK_CHANNELS.filter((c) => c.roomId === displayRoomId);
+  // If on dashboard or no active room, fallback to empty or first room
+  const displayRoomId = activeRoomId || (rooms.length > 0 ? rooms[0].id : null);
+  const room = rooms.find((r) => r.id === displayRoomId);
+  const roomChannels = displayRoomId ? (channels[displayRoomId] || []) : [];
+  
   const textChannels = roomChannels.filter((c) => c.type === "TEXT");
   const voiceChannels = roomChannels.filter((c) => c.type === "VOICE");
 

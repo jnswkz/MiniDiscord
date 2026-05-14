@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -53,5 +54,21 @@ public class UserService {
         user.setStatus(status);
         user.setLastSeenAt(LocalDateTime.now());
         userRepository.save(user);
+    }
+
+    @Transactional(readOnly = true)
+    public List<UserResponse> searchUsers(String query) {
+        return userRepository.findByUsernameContainingIgnoreCase(query)
+                .stream()
+                .map(UserMapper::toResponse)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<UserResponse> getUsersByIds(List<UUID> ids) {
+        return userRepository.findByIdIn(ids)
+                .stream()
+                .map(UserMapper::toResponse)
+                .toList();
     }
 }

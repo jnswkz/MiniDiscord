@@ -12,7 +12,7 @@ import { ResizeHandle } from "@/components/ui/ResizeHandle";
 import { SlidingPanel } from "@/components/ui/SlidingPanel";
 import { useUIStore } from "@/stores/uiStore";
 import { useChatStore } from "@/stores/chatStore";
-import { MOCK_CHANNELS } from "@/lib/mock-data";
+import { useRoomStore } from "@/stores/roomStore";
 import { useParams } from "next/navigation";
 import { useCallback, useRef, useState } from "react";
 
@@ -23,9 +23,19 @@ export default function ChannelPage() {
   const sidebarWidth = useUIStore((s) => s.sidebarWidth);
   const setSidebarWidth = useUIStore((s) => s.setSidebarWidth);
 
-  const channel = MOCK_CHANNELS.find((c) => c.id === channelId);
-  const channelName = channel?.name || "general";
-  const roomId = channel?.roomId || "r1";
+  const { channels } = useRoomStore();
+
+  let channelName = "general";
+  let roomId = "r1";
+
+  for (const [rId, cList] of Object.entries(channels)) {
+    const ch = cList.find((c) => c.id === channelId);
+    if (ch) {
+      channelName = ch.name;
+      roomId = rId;
+      break;
+    }
+  }
 
   // Read messages from in-memory store
   const messages = useChatStore((s) => s.getChannelMessages(channelId));

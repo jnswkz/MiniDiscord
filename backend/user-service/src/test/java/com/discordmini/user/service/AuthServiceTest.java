@@ -14,6 +14,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -38,9 +39,12 @@ class AuthServiceTest {
     @Mock
     private PasswordEncoder passwordEncoder;
 
+    @Mock
+    private RabbitTemplate rabbitTemplate;
+
     @BeforeEach
     void setUp() {
-        authService = new AuthService(userRepository, jwtService, passwordEncoder);
+        authService = new AuthService(userRepository, jwtService, passwordEncoder, rabbitTemplate);
     }
 
     @Test

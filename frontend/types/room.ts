@@ -30,3 +30,12 @@ export interface CreateRoomRequest {
   description?: string;
   type: "GROUP" | "DM";
 }
+
+export interface MemberDetailResponse {
+  userId: string;
+  username: string;
+  avatarUrl: string | null;
+  status: string;
+  role: "OWNER" | "ADMIN" | "MEMBER";
+  joinedAt: string;
+}

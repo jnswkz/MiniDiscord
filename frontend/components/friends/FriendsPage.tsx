@@ -17,8 +17,7 @@ import {
   Phone,
   UserX,
 } from "lucide-react";
-import { MOCK_USERS, MOCK_FRIENDSHIPS, CURRENT_USER } from "@/lib/mock-data";
-import type { Friendship } from "@/types";
+import { FriendUser, FriendResponse, PendingFriendResponse } from "@/types/friend";
 import { useFriendStore } from "@/stores/friendStore";
 import { useTranslation } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
@@ -147,19 +146,20 @@ function FriendsHeader({
   );
 }
 
-/* ─── Friend item ──────────────────────────────────────────────────── */
 function FriendItem({
   user,
+  friendshipId,
   isPending,
   isIncoming,
   onAccept,
   onDecline,
 }: {
-  user: (typeof MOCK_USERS)[0];
+  user: FriendUser;
+  friendshipId?: string;
   isPending?: boolean;
   isIncoming?: boolean;
-  onAccept?: (userId: string) => void;
-  onDecline?: (userId: string) => void;
+  onAccept?: (id: string) => void;
+  onDecline?: (id: string) => void;
 }) {
   const { t } = useTranslation();
   const router = useRouter();
@@ -189,7 +189,7 @@ function FriendItem({
       <StatusAvatar
         src={user.avatarUrl}
         fallback={user.username}
-        status={user.status}
+        status={user.status as any}
         size="lg"
       />
 
@@ -219,7 +219,7 @@ function FriendItem({
           <>
             {isIncoming && (
               <button
-                onClick={() => onAccept?.(user.id)}
+                onClick={() => friendshipId && onAccept?.(friendshipId)}
                 className="flex h-9 w-9 items-center justify-center rounded-full bg-secondary text-muted-foreground hover:text-success transition-colors cursor-pointer"
                 aria-label="Accept"
               >
@@ -227,7 +227,7 @@ function FriendItem({
               </button>
             )}
             <button
-              onClick={() => onDecline?.(user.id)}
+              onClick={() => friendshipId && onDecline?.(friendshipId)}
               className="flex h-9 w-9 items-center justify-center rounded-full bg-secondary text-muted-foreground hover:text-destructive transition-colors cursor-pointer"
               aria-label="Reject"
             >
@@ -266,15 +266,9 @@ function FriendItem({
 }
 
 /* ─── Online friends tab ───────────────────────────────────────────── */
-function OnlineFriends({ friendships }: { friendships: Friendship[] }) {
+function OnlineFriends({ friends }: { friends: FriendResponse[] }) {
   const { t } = useTranslation();
-  const acceptedIds = friendships.filter(
-    (f) => f.status === "ACCEPTED"
-  ).map((f) => (f.userId === CURRENT_USER.id ? f.friendId : f.userId));
-
-  const onlineFriends = MOCK_USERS.filter(
-    (u) => acceptedIds.includes(u.id) && u.status !== "OFFLINE"
-  );
+  const onlineFriends = friends.filter((f) => f.user.status !== "OFFLINE");
 
   return (
     <div>
@@ -292,8 +286,8 @@ function OnlineFriends({ friendships }: { friendships: Friendship[] }) {
         <h3 className="mb-2 px-3 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
           {t("friends.onlineCount")} — {onlineFriends.length}
         </h3>
-        {onlineFriends.map((user) => (
-          <FriendItem key={user.id} user={user} />
+        {onlineFriends.map((f) => (
+          <FriendItem key={f.friendshipId} user={f.user} friendshipId={f.friendshipId} />
         ))}
         {onlineFriends.length === 0 && (
           <p className="py-8 text-center text-[14px] text-muted-foreground">
@@ -306,13 +300,8 @@ function OnlineFriends({ friendships }: { friendships: Friendship[] }) {
 }
 
 /* ─── All friends tab ──────────────────────────────────────────────── */
-function AllFriends({ friendships }: { friendships: Friendship[] }) {
+function AllFriends({ friends }: { friends: FriendResponse[] }) {
   const { t } = useTranslation();
-  const acceptedIds = friendships.filter(
-    (f) => f.status === "ACCEPTED"
-  ).map((f) => (f.userId === CURRENT_USER.id ? f.friendId : f.userId));
-
-  const friends = MOCK_USERS.filter((u) => acceptedIds.includes(u.id));
 
   return (
     <div>
@@ -330,8 +319,8 @@ function AllFriends({ friendships }: { friendships: Friendship[] }) {
         <h3 className="mb-2 px-3 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
           {t("friends.allCount")} — {friends.length}
         </h3>
-        {friends.map((user) => (
-          <FriendItem key={user.id} user={user} />
+        {friends.map((f) => (
+          <FriendItem key={f.friendshipId} user={f.user} friendshipId={f.friendshipId} />
         ))}
       </div>
     </div>
@@ -340,40 +329,33 @@ function AllFriends({ friendships }: { friendships: Friendship[] }) {
 
 /* ─── Pending friends tab ──────────────────────────────────────────── */
 function PendingFriends({
-  friendships,
+  pendingRequests,
   onAccept,
   onDecline,
 }: {
-  friendships: Friendship[];
-  onAccept: (userId: string) => void;
-  onDecline: (userId: string) => void;
+  pendingRequests: PendingFriendResponse[];
+  onAccept: (id: string) => void;
+  onDecline: (id: string) => void;
 }) {
   const { t } = useTranslation();
-  const pending = friendships.filter((f) => f.status === "PENDING");
-
-  const pendingUsers = pending.map((f) => {
-    const isIncoming = f.friendId === CURRENT_USER.id;
-    const otherId = isIncoming ? f.userId : f.friendId;
-    const user = MOCK_USERS.find((u) => u.id === otherId)!;
-    return { friendship: f, user, isIncoming };
-  });
 
   return (
     <div className="px-6 pt-8">
       <h3 className="mb-2 px-3 text-[12px] font-semibold uppercase tracking-wide text-muted-foreground">
-        {t("friends.pendingCount")} — {pendingUsers.length}
+        {t("friends.pendingCount")} — {pendingRequests.length}
       </h3>
-      {pendingUsers.map(({ friendship, user, isIncoming }) => (
+      {pendingRequests.map((req) => (
         <FriendItem
-          key={friendship.id}
-          user={user}
+          key={req.friendshipId}
+          user={req.user}
+          friendshipId={req.friendshipId}
           isPending
-          isIncoming={isIncoming}
+          isIncoming={req.incoming}
           onAccept={onAccept}
           onDecline={onDecline}
         />
       ))}
-      {pendingUsers.length === 0 && (
+      {pendingRequests.length === 0 && (
         <p className="py-8 text-center text-[14px] text-muted-foreground">
           {t("friends.noPending")}
         </p>
@@ -385,7 +367,44 @@ function PendingFriends({
 /* ─── Add friend tab ───────────────────────────────────────────────── */
 function AddFriend() {
   const [username, setUsername] = useState("");
+  const { sendRequest } = useFriendStore();
   const { t } = useTranslation();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [feedback, setFeedback] = useState<{
+    type: "success" | "error";
+    message: string;
+  } | null>(null);
+
+  async function handleSend() {
+    if (!username.trim()) return;
+    const name = username.trim();
+    setFeedback(null);
+    try {
+      setIsSubmitting(true);
+      await sendRequest(name);
+      setFeedback({
+        type: "success",
+        message: t("friends.requestSent").replace("{name}", name),
+      });
+      setUsername("");
+    } catch (err: any) {
+      const serverMsg: string =
+        err?.response?.data?.message || err?.message || "";
+
+      let msg = t("friends.requestError");
+      if (serverMsg.includes("not found")) {
+        msg = t("friends.userNotFound");
+      } else if (serverMsg.includes("already exists")) {
+        msg = t("friends.alreadyExists");
+      } else if (serverMsg.includes("yourself")) {
+        msg = t("friends.cannotSelf");
+      }
+
+      setFeedback({ type: "error", message: msg });
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
 
   return (
     <div className="px-6 pt-4">
@@ -400,18 +419,41 @@ function AddFriend() {
         <div className="relative flex-1">
           <Input
             value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            onChange={(e) => {
+              setUsername(e.target.value);
+              if (feedback) setFeedback(null);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") handleSend();
+            }}
             placeholder={t("friends.addPlaceholder")}
-            className="h-12 bg-background-tertiary border-accent/30 focus-visible:ring-accent"
+            className={cn(
+              "h-12 bg-background-tertiary border-accent/30 focus-visible:ring-accent transition-colors",
+              feedback?.type === "success" && "border-green-500/50",
+              feedback?.type === "error" && "border-red-500/50"
+            )}
           />
         </div>
         <Button
-          disabled={!username.trim()}
-          className="h-12 px-6 text-[14px] font-medium"
+          disabled={!username.trim() || isSubmitting}
+          onClick={handleSend}
+          className="h-12 px-6 text-[14px] font-medium cursor-pointer"
         >
-          {t("friends.sendRequest")}
+          {isSubmitting ? "..." : t("friends.sendRequest")}
         </Button>
       </div>
+
+      {/* Feedback Banner */}
+      {feedback && (
+        <p
+          className={cn(
+            "mt-3 text-[14px] font-medium transition-all animate-in fade-in slide-in-from-top-1 duration-200",
+            feedback.type === "success" ? "text-green-400" : "text-red-400"
+          )}
+        >
+          {feedback.message}
+        </p>
+      )}
     </div>
   );
 }
@@ -419,23 +461,33 @@ function AddFriend() {
 /* ─── Main component ───────────────────────────────────────────────── */
 export function FriendsPage() {
   const [activeTab, setActiveTab] = useState<FriendsTab>("online");
-  const friendships = useFriendStore((s) => s.friendships);
-  const acceptFriend = useFriendStore((s) => s.acceptFriend);
-  const declineFriend = useFriendStore((s) => s.declineFriend);
-  const pendingCount = useFriendStore((s) => s.getPendingCount());
+  const { 
+    friends, 
+    pendingRequests, 
+    fetchFriends, 
+    fetchPending, 
+    acceptFriend, 
+    declineOrRemoveFriend,
+    getPendingCount
+  } = useFriendStore();
+
+  useEffect(() => {
+    fetchFriends();
+    fetchPending();
+  }, [fetchFriends, fetchPending]);
 
   return (
     <div className="flex h-full flex-col">
-      <FriendsHeader activeTab={activeTab} onTabChange={setActiveTab} pendingCount={pendingCount} />
+      <FriendsHeader activeTab={activeTab} onTabChange={setActiveTab} pendingCount={getPendingCount()} />
 
       <ScrollArea className="flex-1">
-        {activeTab === "online" && <OnlineFriends friendships={friendships} />}
-        {activeTab === "all" && <AllFriends friendships={friendships} />}
+        {activeTab === "online" && <OnlineFriends friends={friends} />}
+        {activeTab === "all" && <AllFriends friends={friends} />}
         {activeTab === "pending" && (
           <PendingFriends
-            friendships={friendships}
+            pendingRequests={pendingRequests}
             onAccept={acceptFriend}
-            onDecline={declineFriend}
+            onDecline={declineOrRemoveFriend}
           />
         )}
         {activeTab === "add" && <AddFriend />}

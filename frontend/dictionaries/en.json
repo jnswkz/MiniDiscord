@@ -60,7 +60,12 @@
     "addTitle": "Add Friend",
     "addDescription": "You can add friends with their username.",
     "addPlaceholder": "Enter a username",
-    "sendRequest": "Send Friend Request"
+    "sendRequest": "Send Friend Request",
+    "requestSent": "Friend request sent to {name}!",
+    "requestError": "Failed to send friend request.",
+    "alreadyExists": "Friendship or request already exists.",
+    "userNotFound": "User not found.",
+    "cannotSelf": "You cannot add yourself as a friend."
   },
   "activeNow": {
     "title": "Active Now",

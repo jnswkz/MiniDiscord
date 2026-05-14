@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { StatusAvatar } from "@/components/ui/StatusAvatar";
 import { Mic, MicOff, Headphones, HeadphoneOff, Settings } from "lucide-react";
-import { CURRENT_USER } from "@/lib/mock-data";
 import { useTranslation } from "@/lib/i18n";
 import { useUIStore } from "@/stores/uiStore";
 import { useAuthStore } from "@/stores/authStore";
@@ -12,9 +11,11 @@ import { cn } from "@/lib/utils";
 export function UserPanel() {
   const { t } = useTranslation();
   const openSettings = useUIStore((s) => s.openSettings);
-  const user = useAuthStore((s) => s.user) || CURRENT_USER;
+  const user = useAuthStore((s) => s.user);
   const [isMuted, setIsMuted] = useState(false);
   const [isDeafened, setIsDeafened] = useState(false);
+
+  if (!user) return null;
 
   const statusKey = user.status.toLowerCase() as
     | "online"

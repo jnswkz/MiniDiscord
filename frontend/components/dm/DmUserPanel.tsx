@@ -11,12 +11,7 @@ import {
   UserPlus,
   Calendar,
 } from "lucide-react";
-import {
-  MOCK_USERS,
-  MOCK_ROOMS,
-  MOCK_PARTICIPANTS,
-  CURRENT_USER,
-} from "@/lib/mock-data";
+import { useFriendStore } from "@/stores/friendStore";
 import { cn } from "@/lib/utils";
 import type { User } from "@/types";
 import { useTranslation } from "@/lib/i18n";
@@ -29,17 +24,9 @@ function formatDate(dateStr: string, locale: string = "vi-VN") {
   });
 }
 
-function getMutualServers(userId: string) {
-  const currentUserRooms = MOCK_PARTICIPANTS.filter(
-    (p) => p.userId === CURRENT_USER.id
-  ).map((p) => p.roomId);
-  const friendRooms = MOCK_PARTICIPANTS.filter(
-    (p) => p.userId === userId
-  ).map((p) => p.roomId);
-  const mutualRoomIds = currentUserRooms.filter((id) =>
-    friendRooms.includes(id)
-  );
-  return MOCK_ROOMS.filter((r) => mutualRoomIds.includes(r.id));
+function getMutualServers(userId: string): { id: string; name: string; description: string }[] {
+  // TODO: implement with real API
+  return [];
 }
 
 /* ─── Full Profile Modal (2-column layout) ─────────────────────────── */
@@ -236,8 +223,19 @@ function UserProfileModal({
 export function DmUserPanel({ userId }: { userId: string }) {
   const { t } = useTranslation();
   const [showProfile, setShowProfile] = useState(false);
-  const user = MOCK_USERS.find((u) => u.id === userId);
-  if (!user) return null;
+  
+  const { dmList } = useFriendStore();
+  const dm = dmList.find((u) => u.recipientId === userId);
+  
+  if (!dm) return null;
+
+  const user = {
+    id: dm.recipientId,
+    username: dm.recipientName,
+    avatarUrl: dm.recipientAvatar,
+    status: dm.recipientStatus,
+    createdAt: new Date().toISOString(), // Mocked until we add it to API
+  } as User;
 
   const mutualServers = getMutualServers(userId);
 

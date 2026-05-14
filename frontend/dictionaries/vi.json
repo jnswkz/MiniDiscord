@@ -61,6 +61,11 @@
     "addDescription": "Bạn có thể thêm bạn bè bằng tên người dùng.",
     "addPlaceholder": "Nhập tên người dùng",
     "sendRequest": "Gửi lời mời kết bạn",
+    "requestSent": "Đã gửi lời mời kết bạn đến {name}!",
+    "requestError": "Không thể gửi lời mời kết bạn.",
+    "alreadyExists": "Đã tồn tại lời mời hoặc quan hệ bạn bè.",
+    "userNotFound": "Không tìm thấy người dùng.",
+    "cannotSelf": "Bạn không thể tự kết bạn với chính mình.",
     "startVideoCall": "Bắt Đầu Cuộc Gọi Video",
     "startVoiceCall": "Bắt Đầu Cuộc Gọi Thoại",
     "removeFriendAction": "Xóa Bạn"

@@ -15,22 +15,14 @@ import { ResizeHandle } from "@/components/ui/ResizeHandle";
 import { SlidingPanel } from "@/components/ui/SlidingPanel";
 import { useUIStore } from "@/stores/uiStore";
 import { useChatStore, type DmMessage } from "@/stores/chatStore";
-import {
-  MOCK_USERS,
-  MOCK_PARTICIPANTS,
-  MOCK_ROOMS,
-  CURRENT_USER,
-} from "@/lib/mock-data";
+import { useAuthStore } from "@/stores/authStore";
+import { useFriendStore } from "@/stores/friendStore";
 
 function getMutualServersCount(userId: string) {
-  const myRooms = MOCK_PARTICIPANTS
-    .filter((p) => p.userId === CURRENT_USER.id)
-    .map((p) => p.roomId);
-  const theirRooms = MOCK_PARTICIPANTS
-    .filter((p) => p.userId === userId)
-    .map((p) => p.roomId);
-  return myRooms.filter((id) => theirRooms.includes(id)).length;
+  // TODO: Implement mutual servers logic with real API
+  return 0;
 }
+
 import { cn } from "@/lib/utils";
 import { useTranslation } from "@/lib/i18n";
 import { DateSeparator } from "@/components/chat/DateSeparator";
@@ -42,12 +34,14 @@ function DmMessageItem({
   isBeingReplied,
   onReply,
   onReaction,
+  currentUserId,
 }: {
   message: DmMessage;
   isGrouped: boolean;
   isBeingReplied: boolean;
   onReply: () => void;
   onReaction?: (emoji: string) => void;
+  currentUserId?: string;
 }) {
   const time = new Date(message.createdAt).toLocaleTimeString("vi-VN", {
     hour: "2-digit",
@@ -86,7 +80,7 @@ function DmMessageItem({
           {message.reactions && message.reactions.length > 0 && (
             <div className="flex flex-wrap gap-1 mt-1">
               {message.reactions.map((reaction, i) => {
-                const hasReacted = reaction.userIds.includes(CURRENT_USER.id);
+                const hasReacted = currentUserId ? reaction.userIds.includes(currentUserId) : false;
                 return (
                   <button
                     key={`${reaction.emoji}-${i}`}
@@ -154,7 +148,7 @@ function DmMessageItem({
         {message.reactions && message.reactions.length > 0 && (
           <div className="flex flex-wrap gap-1 mt-1">
             {message.reactions.map((reaction, i) => {
-              const hasReacted = reaction.userIds.includes(CURRENT_USER.id);
+              const hasReacted = currentUserId ? reaction.userIds.includes(currentUserId) : false;
               return (
                 <button
                   key={`${reaction.emoji}-${i}`}
@@ -195,8 +189,11 @@ export default function DmChatPage() {
     [sidebarWidth, setSidebarWidth]
   );
 
-  const friend = MOCK_USERS.find((u) => u.id === userId);
-  const friendName = friend?.username || "User";
+  const { dmList } = useFriendStore();
+  const currentUser = useAuthStore((s) => s.user);
+  
+  const friend = dmList.find((u) => u.recipientId === userId);
+  const friendName = friend?.recipientName || "User";
   const [modalType, setModalType] = useState<"REMOVE_FRIEND" | "BLOCK" | null>(null);
   const [relationship, setRelationship] = useState<"friend" | "none" | "blocked">("friend");
 
@@ -285,9 +282,9 @@ export default function DmChatPage() {
               {/* Large Avatar */}
               <div className="mb-3">
                 <StatusAvatar
-                  src={friend?.avatarUrl ?? null}
+                  src={friend?.recipientAvatar ?? null}
                   fallback={friendName}
-                  status={friend?.status || "OFFLINE"}
+                  status={friend?.recipientStatus || "OFFLINE"}
                   size="xl"
                 />
               </div>
@@ -399,6 +396,7 @@ export default function DmChatPage() {
                     )}
                     <DmMessageItem
                       message={msg}
+                      currentUserId={currentUser?.id}
                       isGrouped={isGrouped}
                       isBeingReplied={replyingTo?.messageId === msg.id}
                       onReply={() =>

@@ -7,11 +7,15 @@ import com.discordmini.groupchannel.model.entity.RoomParticipant;
 import com.discordmini.groupchannel.model.enums.RoomRole;
 import com.discordmini.groupchannel.repository.RoomParticipantRepository;
 import com.discordmini.groupchannel.repository.RoomRepository;
+import com.discordmini.groupchannel.client.UserResponse;
+import com.discordmini.groupchannel.client.UserServiceClient;
+import com.discordmini.groupchannel.model.dto.MemberDetailResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -19,6 +23,7 @@ import java.util.UUID;
 public class MembershipService {
     private final RoomParticipantRepository participantRepository;
     private final RoomRepository roomRepository;
+    private final UserServiceClient userServiceClient;
 
     public void validateAdminOrOwner(UUID roomId, UUID userId) {
         RoomParticipant participant = participantRepository.findByUserIdAndRoomId(userId, roomId)
@@ -56,5 +61,48 @@ public class MembershipService {
                 .build();
 
         participantRepository.save(newMember);
+    }
+
+    @Transactional
+    public void addMemberIfNotExists(UUID roomId, UUID userId) {
+        if (!participantRepository.existsByUserIdAndRoomId(userId, roomId)) {
+            Room room = roomRepository.findById(roomId)
+                    .orElseThrow(() -> new RoomNotFoundException("Room not found"));
+            RoomParticipant newMember = RoomParticipant.builder()
+                    .room(room)
+                    .userId(userId)
+                    .role(RoomRole.MEMBER)
+                    .build();
+            participantRepository.save(newMember);
+        }
+    }
+
+    public List<MemberDetailResponse> getMembers(UUID roomId) {
+        List<RoomParticipant> participants = participantRepository.findByRoomId(roomId);
+        if (participants.isEmpty()) {
+            return List.of();
+        }
+
+        List<UUID> userIds = participants.stream()
+                .map(RoomParticipant::getUserId)
+                .toList();
+
+        List<UserResponse> users = userServiceClient.getUsersByIds(userIds);
+
+        return participants.stream().map(p -> {
+            UserResponse user = users.stream()
+                    .filter(u -> u.getId().equals(p.getUserId()))
+                    .findFirst()
+                    .orElse(null);
+
+            return MemberDetailResponse.builder()
+                    .userId(p.getUserId())
+                    .username(user != null ? user.getUsername() : "Unknown")
+                    .avatarUrl(user != null ? user.getAvatarUrl() : null)
+                    .status(user != null ? user.getStatus() : "OFFLINE")
+                    .role(p.getRole())
+                    .joinedAt(p.getJoinedAt())
+                    .build();
+        }).toList();
     }
 }

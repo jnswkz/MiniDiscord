@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/stores/authStore";
+import { useWebSocket } from "@/hooks/useWebSocket";
 import { Loader2 } from "lucide-react";
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
@@ -10,6 +11,9 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
   const hydrate = useAuthStore((state) => state.hydrate);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const [isHydrating, setIsHydrating] = useState(true);
+
+  // WebSocket connects only when authenticated, disconnects on unmount/logout
+  useWebSocket();
 
   useEffect(() => {
     // Attempt to load token from localStorage

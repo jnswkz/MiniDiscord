@@ -12,25 +12,13 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/Tooltip";
-import { MOCK_ROOMS, MOCK_CHANNELS } from "@/lib/mock-data";
+import { useEffect } from "react";
+
 import { useTranslation } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 import { CreateServerModal } from "@/components/server/CreateServerModal";
 import { useNotificationStore } from "@/stores/notificationStore";
-
-// Map channelId -> roomId for reverse lookup
-function getRoomIdForChannel(channelId: string): string | null {
-  const channel = MOCK_CHANNELS.find((c) => c.id === channelId);
-  return channel?.roomId ?? null;
-}
-
-// Get default channel for a room (first text channel)
-function getDefaultChannelForRoom(roomId: string): string | null {
-  const channel = MOCK_CHANNELS.find(
-    (c) => c.roomId === roomId && c.type === "TEXT"
-  );
-  return channel?.id ?? null;
-}
+import { useRoomStore } from "@/stores/roomStore";
 
 export function ServerList() {
   const router = useRouter();
@@ -41,18 +29,33 @@ export function ServerList() {
   const getUnreadCount = useNotificationStore((s) => s.getUnreadCount);
   const markAsRead = useNotificationStore((s) => s.markAsRead);
 
+  const { rooms, channels, fetchMyRooms } = useRoomStore();
+
+  useEffect(() => {
+    fetchMyRooms();
+  }, [fetchMyRooms]);
+
   // Derive active room from current URL
   const activeChannelId = (params?.channelId as string) || null;
-  const activeRoomId = activeChannelId
-    ? getRoomIdForChannel(activeChannelId)
-    : null;
+  let activeRoomId: string | null = null;
+
+  if (activeChannelId) {
+    for (const [rId, cList] of Object.entries(channels)) {
+      if (cList.some((c) => c.id === activeChannelId)) {
+        activeRoomId = rId;
+        break;
+      }
+    }
+  }
+
   const isDashboard = pathname?.startsWith("/dashboard");
 
   function handleServerClick(roomId: string) {
     markAsRead(roomId);
-    const defaultChannel = getDefaultChannelForRoom(roomId);
-    if (defaultChannel) {
-      router.push(`/channels/${defaultChannel}`);
+    const roomChannels = channels[roomId] || [];
+    if (roomChannels.length > 0) {
+      const defaultChannel = roomChannels.find((c) => c.type === "TEXT") || roomChannels[0];
+      router.push(`/channels/${defaultChannel.id}`);
     }
   }
 
@@ -83,7 +86,7 @@ export function ServerList() {
           <Separator className="mx-auto w-8" />
 
           {/* Server icons */}
-          {MOCK_ROOMS.map((room) => (
+          {rooms.map((room) => (
             <ServerIcon
               key={room.id}
               name={room.name}

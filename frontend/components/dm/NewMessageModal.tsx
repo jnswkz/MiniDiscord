@@ -3,11 +3,7 @@
 import { useState, useMemo } from "react";
 import { X, Check, ChevronDown } from "lucide-react";
 import { StatusAvatar } from "@/components/ui/StatusAvatar";
-import {
-  MOCK_USERS,
-  MOCK_FRIENDSHIPS,
-  CURRENT_USER,
-} from "@/lib/mock-data";
+import { useFriendStore } from "@/stores/friendStore";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "@/lib/i18n";
 
@@ -25,29 +21,21 @@ export function NewMessageModal({ onClose, onCreateDM }: NewMessageModalProps) {
   const [friendsExpanded, setFriendsExpanded] = useState(true);
   const [serversExpanded, setServersExpanded] = useState(true);
 
-  // Get accepted friends of current user
-  const friends = useMemo(() => {
-    const friendUserIds = MOCK_FRIENDSHIPS
-      .filter(
-        (f) =>
-          f.status === "ACCEPTED" &&
-          (f.userId === CURRENT_USER.id || f.friendId === CURRENT_USER.id)
-      )
-      .map((f) =>
-        f.userId === CURRENT_USER.id ? f.friendId : f.userId
-      );
+  const { friends } = useFriendStore();
 
-    return MOCK_USERS.filter((u) => friendUserIds.includes(u.id));
-  }, []);
+  const acceptedFriends = useMemo(() => {
+    return friends
+      .filter((f) => f.status === "ACCEPTED")
+      .map((f) => f.user);
+  }, [friends]);
 
-  // Filter by search
   const filteredFriends = useMemo(() => {
-    if (!searchQuery.trim()) return friends;
+    if (!searchQuery.trim()) return acceptedFriends;
     const q = searchQuery.toLowerCase();
-    return friends.filter((f) =>
+    return acceptedFriends.filter((f) =>
       f.username.toLowerCase().includes(q)
     );
-  }, [friends, searchQuery]);
+  }, [acceptedFriends, searchQuery]);
 
   function toggleSelect(userId: string) {
     setSelectedIds((prev) => {
@@ -111,7 +99,7 @@ export function NewMessageModal({ onClose, onCreateDM }: NewMessageModalProps) {
           {selectedIds.length > 0 && (
             <div className="flex flex-wrap gap-1.5 pt-2 pb-1">
               {selectedIds.map((id) => {
-                const user = MOCK_USERS.find((u) => u.id === id);
+                const user = acceptedFriends.find((u) => u.id === id);
                 if (!user) return null;
                 return (
                   <span
@@ -177,7 +165,7 @@ export function NewMessageModal({ onClose, onCreateDM }: NewMessageModalProps) {
                         <StatusAvatar
                           src={friend.avatarUrl}
                           fallback={friend.username}
-                          status={friend.status}
+                          status={friend.status as any}
                           size="md"
                         />
                         <div className="min-w-0 text-left">

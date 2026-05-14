@@ -1,84 +1,117 @@
 import { create } from "zustand";
-import { MOCK_FRIENDSHIPS, MOCK_DIRECT_MESSAGES, MOCK_USERS, CURRENT_USER } from "@/lib/mock-data";
-import type { Friendship, DirectMessage } from "@/types";
+import { api } from "@/lib/api";
+import type { FriendResponse, PendingFriendResponse, DirectMessage } from "@/types/friend";
+
+// ── Debounced re-fetch (Gotcha B: avoid burst API calls) ──────────
+let pendingTimer: ReturnType<typeof setTimeout> | null = null;
+let friendsTimer: ReturnType<typeof setTimeout> | null = null;
+
+function debouncedFetchPending() {
+  if (pendingTimer) clearTimeout(pendingTimer);
+  pendingTimer = setTimeout(() => {
+    useFriendStore.getState().fetchPending();
+  }, 300);
+}
+
+function debouncedFetchFriends() {
+  if (friendsTimer) clearTimeout(friendsTimer);
+  friendsTimer = setTimeout(() => {
+    useFriendStore.getState().fetchFriends();
+  }, 300);
+}
 
 interface FriendState {
-  friendships: Friendship[];
+  friends: FriendResponse[];
+  pendingRequests: PendingFriendResponse[];
   dmList: DirectMessage[];
+  isLoading: boolean;
+  error: string | null;
 
   /* Actions */
-  acceptFriend: (userId: string) => void;
-  declineFriend: (userId: string) => void;
+  fetchFriends: () => Promise<void>;
+  fetchPending: () => Promise<void>;
+  sendRequest: (identifier: string) => Promise<void>;
+  acceptFriend: (friendshipId: string) => Promise<void>;
+  declineOrRemoveFriend: (friendshipId: string) => Promise<void>;
+
+  /* WebSocket event handler */
+  handleWsEvent: (type: string) => void;
 
   /* Computed helpers */
-  getAcceptedFriendIds: () => string[];
   getPendingCount: () => number;
 }
 
-/* Build initial DM list: only users with ACCEPTED friendships */
-function getInitialDmList(): DirectMessage[] {
-  const acceptedIds = MOCK_FRIENDSHIPS
-    .filter((f) => f.status === "ACCEPTED")
-    .map((f) => (f.userId === CURRENT_USER.id ? f.friendId : f.userId));
-
-  return MOCK_DIRECT_MESSAGES.filter((dm) => acceptedIds.includes(dm.recipientId));
-}
-
 export const useFriendStore = create<FriendState>((set, get) => ({
-  friendships: [...MOCK_FRIENDSHIPS],
-  dmList: getInitialDmList(),
+  friends: [],
+  pendingRequests: [],
+  dmList: [],
+  isLoading: false,
+  error: null,
 
-  acceptFriend: (userId: string) => {
-    const { friendships, dmList } = get();
-
-    // Change friendship status PENDING → ACCEPTED
-    const updatedFriendships = friendships.map((f) => {
-      const otherId = f.friendId === CURRENT_USER.id ? f.userId : f.friendId;
-      if (otherId === userId && f.status === "PENDING") {
-        return { ...f, status: "ACCEPTED" as const };
-      }
-      return f;
-    });
-
-    // Add user to DM list if not already there
-    let updatedDmList = dmList;
-    if (!dmList.some((dm) => dm.recipientId === userId)) {
-      const user = MOCK_USERS.find((u) => u.id === userId);
-      if (user) {
-        const newDm: DirectMessage = {
-          id: `dm-${userId}`,
-          recipientId: user.id,
-          recipientName: user.username,
-          recipientAvatar: user.avatarUrl,
-          recipientStatus: user.status,
-          lastMessage: "",
-          lastMessageAt: new Date().toISOString(),
-          unreadCount: 0,
-        };
-        updatedDmList = [newDm, ...dmList];
-      }
+  fetchFriends: async () => {
+    try {
+      set({ isLoading: true, error: null });
+      const res = await api.get<FriendResponse[]>("/users/friends");
+      set({ friends: res.data, isLoading: false });
+    } catch (error: any) {
+      set({ error: error.message, isLoading: false });
     }
-
-    set({ friendships: updatedFriendships, dmList: updatedDmList });
   },
 
-  declineFriend: (userId: string) => {
-    set((state) => ({
-      friendships: state.friendships.filter((f) => {
-        const otherId = f.friendId === CURRENT_USER.id ? f.userId : f.friendId;
-        return !(otherId === userId && f.status === "PENDING");
-      }),
-    }));
+  fetchPending: async () => {
+    try {
+      set({ isLoading: true, error: null });
+      const res = await api.get<PendingFriendResponse[]>("/users/friends/pending");
+      set({ pendingRequests: res.data, isLoading: false });
+    } catch (error: any) {
+      set({ error: error.message, isLoading: false });
+    }
   },
 
-  getAcceptedFriendIds: () => {
-    const { friendships } = get();
-    return friendships
-      .filter((f) => f.status === "ACCEPTED")
-      .map((f) => (f.userId === CURRENT_USER.id ? f.friendId : f.userId));
+  sendRequest: async (identifier: string) => {
+    try {
+      await api.post("/users/friends/request", { identifier });
+      await get().fetchPending();
+    } catch (error: any) {
+      set({ error: error.response?.data?.message || error.message });
+      throw error;
+    }
+  },
+
+  acceptFriend: async (friendshipId: string) => {
+    try {
+      await api.put(`/users/friends/${friendshipId}/accept`);
+      await Promise.all([get().fetchFriends(), get().fetchPending()]);
+    } catch (error: any) {
+      set({ error: error.message });
+    }
+  },
+
+  declineOrRemoveFriend: async (friendshipId: string) => {
+    try {
+      await api.delete(`/users/friends/${friendshipId}`);
+      await Promise.all([get().fetchFriends(), get().fetchPending()]);
+    } catch (error: any) {
+      set({ error: error.message });
+    }
+  },
+
+  handleWsEvent: (type: string) => {
+    switch (type) {
+      case "FRIEND_REQUEST_SENT":
+        debouncedFetchPending();
+        break;
+      case "FRIEND_ACCEPTED":
+        debouncedFetchFriends();
+        debouncedFetchPending();
+        break;
+      case "FRIEND_REMOVED":
+        debouncedFetchFriends();
+        break;
+    }
   },
 
   getPendingCount: () => {
-    return get().friendships.filter((f) => f.status === "PENDING").length;
+    return get().pendingRequests.length;
   },
 }));

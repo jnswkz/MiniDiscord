@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -40,6 +41,21 @@ public class RoomController {
         membershipService.addMember(roomId, requesterId, request.getUserId());
         return ResponseEntity.ok(ApiResponse.ok("Member added successfully", null));
     }
+
+    @GetMapping("/my")
+    public ResponseEntity<ApiResponse<List<RoomResponse>>> getMyRooms(@RequestHeader("X-User-Id") UUID userId) {
+        return ResponseEntity.ok(ApiResponse.ok("My rooms fetched", roomService.getMyRooms(userId)));
+    }
+
+    @GetMapping("/{roomId}")
+    public ResponseEntity<ApiResponse<RoomResponse>> getRoomDetail(@PathVariable UUID roomId) {
+        return ResponseEntity.ok(ApiResponse.ok("Room detail fetched", roomService.getRoomDetail(roomId)));
+    }
+
+    @GetMapping("/{roomId}/members")
+    public ResponseEntity<ApiResponse<List<com.discordmini.groupchannel.model.dto.MemberDetailResponse>>> getMembers(@PathVariable UUID roomId) {
+        return ResponseEntity.ok(ApiResponse.ok("Members fetched", membershipService.getMembers(roomId)));
+    }
     
     private RoomResponse mapToResponse(Room room) {
         return RoomResponse.builder()
@@ -47,7 +63,7 @@ public class RoomController {
                 .name(room.getName())
                 .description(room.getDescription())
                 .iconUrl(room.getIconUrl())
-                .type(room.getType())
+                .type(room.getType().name())
                 .ownerId(room.getOwnerId())
                 .createdAt(room.getCreatedAt())
                 .isActive(room.getIsActive())

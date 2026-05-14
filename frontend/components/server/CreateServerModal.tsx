@@ -13,6 +13,9 @@ import {
 } from "lucide-react";
 import { useTranslation } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
+import { useRoomStore } from "@/stores/roomStore";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 interface CreateServerModalProps {
   isOpen: boolean;
@@ -29,6 +32,21 @@ const TEMPLATE_OPTIONS = [
 export function CreateServerModal({ isOpen, onClose }: CreateServerModalProps) {
   const { t } = useTranslation();
   const modalRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
+  const { createRoom } = useRoomStore();
+
+  const [step, setStep] = useState<"templates" | "form">("templates");
+  const [serverName, setServerName] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Reset state when modal opens/closes
+  useEffect(() => {
+    if (isOpen) {
+      setStep("templates");
+      setServerName("");
+      setIsSubmitting(false);
+    }
+  }, [isOpen]);
 
   // Close on Escape
   useEffect(() => {
@@ -92,64 +110,112 @@ export function CreateServerModal({ isOpen, onClose }: CreateServerModalProps) {
         </div>
 
         {/* ─── Body ─── */}
-        <div className="flex-1 overflow-y-auto px-4 pb-2">
-          {/* Create your own */}
-          <button
-            className={cn(
-              "flex w-full items-center justify-between rounded-md border border-[#3f4147] p-3.5 transition-colors cursor-pointer",
-              "hover:bg-[#3a3c41]"
-            )}
-          >
-            <div className="flex items-center gap-3">
-              <span className="text-xl">🌈</span>
-              <span className="text-[15px] font-semibold text-foreground">
-                {t("createServer.createOwn")}
-              </span>
-            </div>
-            <ChevronRight className="h-5 w-5 text-[#b5bac1]" />
-          </button>
-
-          {/* Template label */}
-          <p className="mt-4 mb-2 text-xs font-bold text-[#b5bac1] uppercase tracking-wide">
-            {t("createServer.templateLabel")}
-          </p>
-
-          {/* Template options */}
-          <div className="flex flex-col gap-2">
-            {TEMPLATE_OPTIONS.map(({ key, emoji }) => (
+        {step === "templates" ? (
+          <>
+            <div className="flex-1 overflow-y-auto px-4 pb-2">
               <button
-                key={key}
+                onClick={() => setStep("form")}
                 className={cn(
                   "flex w-full items-center justify-between rounded-md border border-[#3f4147] p-3.5 transition-colors cursor-pointer",
                   "hover:bg-[#3a3c41]"
                 )}
               >
                 <div className="flex items-center gap-3">
-                  <span className="text-xl">{emoji}</span>
+                  <span className="text-xl">🌈</span>
                   <span className="text-[15px] font-semibold text-foreground">
-                    {t(`createServer.template.${key}`)}
+                    {t("createServer.createOwn")}
                   </span>
                 </div>
                 <ChevronRight className="h-5 w-5 text-[#b5bac1]" />
               </button>
-            ))}
-          </div>
-        </div>
 
-        {/* ─── Footer ─── */}
-        <div className="bg-[#2b2d31] px-4 py-4">
-          <h3 className="text-center text-base font-semibold text-foreground mb-2">
-            {t("createServer.joinTitle")}
-          </h3>
-          <button
-            className={cn(
-              "w-full rounded-md bg-[#4e5058] px-4 py-2.5 text-sm font-medium text-[#dbdee1] transition-colors cursor-pointer",
-              "hover:bg-[#6d6f78]"
-            )}
-          >
-            {t("createServer.joinButton")}
-          </button>
-        </div>
+              <p className="mt-4 mb-2 text-xs font-bold text-[#b5bac1] uppercase tracking-wide">
+                {t("createServer.templateLabel")}
+              </p>
+
+              <div className="flex flex-col gap-2">
+                {TEMPLATE_OPTIONS.map(({ key, emoji }) => (
+                  <button
+                    key={key}
+                    onClick={() => setStep("form")}
+                    className={cn(
+                      "flex w-full items-center justify-between rounded-md border border-[#3f4147] p-3.5 transition-colors cursor-pointer",
+                      "hover:bg-[#3a3c41]"
+                    )}
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="text-xl">{emoji}</span>
+                      <span className="text-[15px] font-semibold text-foreground">
+                        {t(`createServer.template.${key}`)}
+                      </span>
+                    </div>
+                    <ChevronRight className="h-5 w-5 text-[#b5bac1]" />
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="bg-[#2b2d31] px-4 py-4">
+              <h3 className="text-center text-base font-semibold text-foreground mb-2">
+                {t("createServer.joinTitle")}
+              </h3>
+              <button
+                className={cn(
+                  "w-full rounded-md bg-[#4e5058] px-4 py-2.5 text-sm font-medium text-[#dbdee1] transition-colors cursor-pointer",
+                  "hover:bg-[#6d6f78]"
+                )}
+              >
+                {t("createServer.joinButton")}
+              </button>
+            </div>
+          </>
+        ) : (
+          <>
+            <div className="px-4 pb-4">
+              <label className="text-xs font-bold uppercase tracking-wide text-[#b5bac1]">
+                Server Name
+              </label>
+              <input
+                type="text"
+                autoFocus
+                value={serverName}
+                onChange={(e) => setServerName(e.target.value)}
+                className="mt-2 w-full rounded-md bg-[#1e1f22] p-2.5 text-foreground outline-none border border-transparent focus:border-brand transition-colors"
+                placeholder="My Awesome Server"
+                disabled={isSubmitting}
+              />
+            </div>
+            <div className="flex items-center justify-between bg-[#2b2d31] px-4 py-4">
+              <button
+                onClick={() => setStep("templates")}
+                disabled={isSubmitting}
+                className="text-sm font-medium text-muted-foreground hover:underline cursor-pointer"
+              >
+                Back
+              </button>
+              <button
+                onClick={async () => {
+                  if (!serverName.trim()) return;
+                  try {
+                    setIsSubmitting(true);
+                    const newRoom = await createRoom(serverName.trim());
+                    onClose();
+                    // Just refresh to dashboard to let ServerList update, or navigate to a default view
+                    // We don't have default channels right away, so maybe just close the modal.
+                  } catch (err) {
+                    console.error(err);
+                  } finally {
+                    setIsSubmitting(false);
+                  }
+                }}
+                disabled={!serverName.trim() || isSubmitting}
+                className="rounded-md bg-brand px-6 py-2 text-sm font-medium text-white transition-colors hover:bg-brand/80 disabled:opacity-50 cursor-pointer"
+              >
+                {isSubmitting ? "Creating..." : "Create"}
+              </button>
+            </div>
+          </>
+        )}
       </div>
     </div>,
     document.body

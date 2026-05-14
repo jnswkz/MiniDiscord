@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -45,5 +46,15 @@ public class UserController {
         UUID userId = UUID.fromString(auth.getName());
         userService.updateStatus(userId, body.get("status"));
         return ResponseEntity.ok(ApiResponse.ok("Status updated", null));
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<ApiResponse<List<UserResponse>>> searchUsers(@RequestParam String q) {
+        return ResponseEntity.ok(ApiResponse.ok(userService.searchUsers(q)));
+    }
+
+    @PostMapping("/bulk")
+    public ResponseEntity<List<UserResponse>> getUsersByIds(@RequestBody List<UUID> ids) {
+        return ResponseEntity.ok(userService.getUsersByIds(ids));
     }
 }

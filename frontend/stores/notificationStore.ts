@@ -27,16 +27,7 @@ interface NotificationState {
 }
 
 export const useNotificationStore = create<NotificationState>((set, get) => ({
-  unreadCounts: {
-    // DM unreads — must match recipientId from MOCK_DIRECT_MESSAGES
-    u2: 3,   // MinhTran — 3 tin nhắn chưa đọc
-    u6: 5,   // DucPham  — 5 tin nhắn chưa đọc
-    // Server unreads — must match room.id from MOCK_ROOMS
-    r1: 1500,
-    r2: 42,
-    // Channel unreads — must match channel.id from MOCK_CHANNELS
-    c1: 5,   // #general — 5 tin nhắn chưa đọc (m16-m20, ngày 28/3)
-  },
+  unreadCounts: {},
 
   markAsRead: (id) => {
     set((state) => ({

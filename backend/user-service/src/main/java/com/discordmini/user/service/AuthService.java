@@ -20,6 +20,8 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
 import com.discordmini.user.model.dto.OAuthRequest;
 import com.discordmini.user.model.entity.UserRole;
+import com.discordmini.user.model.event.UserRegisteredEvent;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
 import java.util.Collections;
 import java.util.Optional;
@@ -35,6 +37,7 @@ public class AuthService {
     private final UserRepository userRepository;
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
+    private final RabbitTemplate rabbitTemplate;
 
     @Transactional
     public AuthResponse register(RegisterRequest request) {
@@ -52,6 +55,13 @@ public class AuthService {
                 .build();
 
         user = userRepository.save(user);
+
+        // Publish event
+        rabbitTemplate.convertAndSend(
+                "user.events",
+                "user.registered",
+                new UserRegisteredEvent(user.getId(), user.getUsername())
+        );
 
         String token = jwtService.generateToken(
                 user.getId().toString(),
@@ -117,6 +127,13 @@ public class AuthService {
                     .isActive(true)
                     .build();
             user = userRepository.save(user);
+
+            // Publish event
+            rabbitTemplate.convertAndSend(
+                    "user.events",
+                    "user.registered",
+                    new UserRegisteredEvent(user.getId(), user.getUsername())
+            );
         }
 
         String token = jwtService.generateToken(

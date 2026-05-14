@@ -20,4 +20,24 @@ public class RabbitMQConfig {
     public MessageConverter jsonMessageConverter() {
         return new Jackson2JsonMessageConverter();
     }
+
+    // --- User Events Consumer Configuration ---
+    
+    @org.springframework.beans.factory.annotation.Value("${rabbitmq.queues.user-registered}")
+    private String userRegisteredQueueName;
+
+    @Bean
+    public org.springframework.amqp.core.Queue userRegisteredQueue() {
+        return new org.springframework.amqp.core.Queue(userRegisteredQueueName, true);
+    }
+
+    @Bean
+    public TopicExchange userEventsExchange() {
+        return new TopicExchange("user.events");
+    }
+
+    @Bean
+    public org.springframework.amqp.core.Binding userRegisteredBinding(org.springframework.amqp.core.Queue userRegisteredQueue, TopicExchange userEventsExchange) {
+        return org.springframework.amqp.core.BindingBuilder.bind(userRegisteredQueue).to(userEventsExchange).with("user.registered");
+    }
 }
