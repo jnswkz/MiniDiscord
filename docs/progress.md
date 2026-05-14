@@ -288,3 +288,4 @@ graph TD
 - [x] Phase P4: Hoàn thành `messaging-service` (WebSocket STOMP, RabbitMQ routing, Redis Pub/Sub).
 - [x] Đã cấu hình độc lập `docker-compose.yml` cho backend và frontend để tối ưu tài nguyên.
 - [x] Phase P5: Hoàn thành `file-service` (B2 upload/delete, Apache Tika magic bytes, MIME whitelist, SecurityHeaderFilter).
+- [x] CI/CD Pipeline: Parallel matrix build (7 services), Docker BuildKit cache, change detection, health check, disk cleanup.
