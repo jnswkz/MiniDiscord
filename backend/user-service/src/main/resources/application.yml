@@ -5,13 +5,19 @@ spring:
   application:
     name: user-service
   datasource:
-    url: ${DB_URL:jdbc:postgresql://localhost:5432/discord_mini_users}
-    username: ${DB_USERNAME:postgres}
+    url: ${USER_DB_URL:${DB_URL:jdbc:postgresql://localhost:5432/discord_mini_users}}
+    username: ${USER_DB_USERNAME:${DB_USERNAME:postgres}}
     password: ${DB_PASSWORD:postgres}
     driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 3
+      minimum-idle: 1
+      connection-timeout: 20000
+      idle-timeout: 300000
+      max-lifetime: 600000
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: none
     show-sql: false
     properties:
       hibernate:
