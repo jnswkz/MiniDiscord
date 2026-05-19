@@ -141,3 +141,4 @@ $RECYCLE.BIN/
 .agents/
 
 *.md
+!README.md
