@@ -1,0 +1,20 @@
+{
+  "name": "@minidiscord/file-service",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node dist/server.js",
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@minidiscord/common": "*",
+    "express": "^4.19.0",
+    "multer": "^2.1.1"
+  },
+  "devDependencies": {
+    "@types/multer": "^2.1.0"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "name": "@minidiscord/messaging-service",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node dist/server.js",
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@minidiscord/common": "*",
+    "axios": "^1.16.1",
+    "express": "^4.19.0",
+    "ws": "^8.20.1"
+  },
+  "devDependencies": {
+    "@types/ws": "^8.18.1"
+  }
+}

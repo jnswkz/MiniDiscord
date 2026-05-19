@@ -1,0 +1,25 @@
+{
+  "name": "backend-express",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "test": "npm run build --workspace=@minidiscord/common && vitest run",
+    "typecheck": "npm run build --workspace=@minidiscord/common && npm run typecheck --workspaces --if-present",
+    "lint": "eslint ."
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.0.0",
+    "supertest": "^7.0.0",
+    "@types/supertest": "^6.0.0",
+    "tsx": "^4.10.0",
+    "typescript": "^5.4.0",
+    "vitest": "^2.0.0"
+  }
+}

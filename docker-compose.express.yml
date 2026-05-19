@@ -1,0 +1,95 @@
+version: '3.8'
+
+services:
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+
+  api-gateway:
+    build:
+      context: ./backend-express
+      args:
+        APP_NAME: api-gateway
+    ports:
+      - "9080:9080"
+    environment:
+      - NODE_ENV=production
+      - PORT=9080
+      - REDIS_URL=redis://redis:6379
+      - JWT_SECRET=minidiscord-express-secret-key-for-local-demo-only
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID:-mock-client-id}
+      - FRONTEND_URL=http://localhost:3000
+      - USER_SERVICE_URL=http://user-service:9081
+      - GROUP_CHANNEL_SERVICE_URL=http://group-channel-service:9082
+      - CHAT_HISTORY_SERVICE_URL=http://chat-history-service:9083
+      - FILE_SERVICE_URL=http://file-service:9084
+      - MESSAGING_SERVICE_URL=http://messaging-service:9085
+    depends_on:
+      - redis
+      - user-service
+      - group-channel-service
+      - chat-history-service
+      - file-service
+      - messaging-service
+
+  user-service:
+    build:
+      context: ./backend-express
+      args:
+        APP_NAME: user-service
+    ports:
+      - "9081:9081"
+    environment:
+      - NODE_ENV=production
+      - PORT=9081
+      - JWT_SECRET=minidiscord-express-secret-key-for-local-demo-only
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID:-mock-client-id}
+
+  group-channel-service:
+    build:
+      context: ./backend-express
+      args:
+        APP_NAME: group-channel-service
+    ports:
+      - "9082:9082"
+    environment:
+      - NODE_ENV=production
+      - PORT=9082
+
+  chat-history-service:
+    build:
+      context: ./backend-express
+      args:
+        APP_NAME: chat-history-service
+    ports:
+      - "9083:9083"
+    environment:
+      - NODE_ENV=production
+      - PORT=9083
+      - GROUP_CHANNEL_SERVICE_URL=http://group-channel-service:9082
+
+  file-service:
+    build:
+      context: ./backend-express
+      args:
+        APP_NAME: file-service
+    ports:
+      - "9084:9084"
+    environment:
+      - NODE_ENV=production
+      - PORT=9084
+
+  messaging-service:
+    build:
+      context: ./backend-express
+      args:
+        APP_NAME: messaging-service
+    ports:
+      - "9085:9085"
+    environment:
+      - NODE_ENV=production
+      - PORT=9085
+      - JWT_SECRET=minidiscord-express-secret-key-for-local-demo-only
+      - GROUP_CHANNEL_SERVICE_URL=http://group-channel-service:9082
+      - CHAT_HISTORY_SERVICE_URL=http://chat-history-service:9083

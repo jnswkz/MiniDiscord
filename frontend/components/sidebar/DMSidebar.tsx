@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { ScrollArea } from "@/components/ui/ScrollArea";
 import { StatusAvatar } from "@/components/ui/StatusAvatar";
-import { Users, Plus, X } from "lucide-react";
+import { Users, Plus, X, Shield, Lock, Activity } from "lucide-react";
 import { useFriendStore } from "@/stores/friendStore";
 import { useNotificationStore } from "@/stores/notificationStore";
 import { useTranslation } from "@/lib/i18n";
@@ -137,6 +137,51 @@ export function DMSidebar({ activeUserId }: { activeUserId?: string }) {
                   }}
                 />
               ))}
+            </div>
+
+            {/* Demo Section */}
+            <div className="mt-6 mb-1 px-3">
+              <h3 className="text-[12px] font-semibold uppercase tracking-wide text-[#f5c211]">
+                Demo Seminar
+              </h3>
+            </div>
+            <div className="mt-1 space-y-0.5 pb-4">
+              <button
+                onClick={() => router.push("/demo/oauth-flow")}
+                className={cn(
+                  "flex w-full items-center gap-3 rounded-md px-3 py-2 transition-colors cursor-pointer text-sm font-medium",
+                  pathname === "/demo/oauth-flow"
+                    ? "bg-secondary text-foreground"
+                    : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
+                )}
+              >
+                <Activity className="h-4 w-4 shrink-0 text-[#f5c211]" />
+                <span className="truncate">1. OAuth Flow</span>
+              </button>
+              <button
+                onClick={() => router.push("/demo/authz")}
+                className={cn(
+                  "flex w-full items-center gap-3 rounded-md px-3 py-2 transition-colors cursor-pointer text-sm font-medium",
+                  pathname === "/demo/authz"
+                    ? "bg-secondary text-foreground"
+                    : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
+                )}
+              >
+                <Lock className="h-4 w-4 shrink-0 text-[#f5c211]" />
+                <span className="truncate">2. Authorization</span>
+              </button>
+              <button
+                onClick={() => router.push("/demo/security")}
+                className={cn(
+                  "flex w-full items-center gap-3 rounded-md px-3 py-2 transition-colors cursor-pointer text-sm font-medium",
+                  pathname === "/demo/security"
+                    ? "bg-secondary text-foreground"
+                    : "text-muted-foreground hover:text-foreground hover:bg-secondary/50"
+                )}
+              >
+                <Shield className="h-4 w-4 shrink-0 text-[#f5c211]" />
+                <span className="truncate">3. Security</span>
+              </button>
             </div>
           </div>
         </ScrollArea>

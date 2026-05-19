@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Loader2 } from "lucide-react";
 import { useTranslation } from "@/lib/i18n";
-import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 import { useAuthStore } from "@/stores/authStore";
 
 function GoogleIcon({ className }: { className?: string }) {
@@ -40,7 +39,6 @@ export default function LoginPage() {
   const router = useRouter();
   const { t } = useTranslation();
   const loginAction = useAuthStore((state) => state.login);
-  const loginWithGoogle = useAuthStore((state) => state.loginWithGoogle);
   const isLoading = useAuthStore((state) => state.isLoading);
   const error = useAuthStore((state) => state.error);
 
@@ -68,15 +66,9 @@ export default function LoginPage() {
     }
   }
 
-  async function handleGoogleLoginSuccess(credentialResponse: any) {
-    if (credentialResponse.credential) {
-      await loginWithGoogle(credentialResponse.credential);
-      
-      const { isAuthenticated, error } = useAuthStore.getState();
-      if (isAuthenticated && !error) {
-        router.push("/dashboard");
-      }
-    }
+  function handleGoogleLogin() {
+    const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api";
+    window.location.href = `${apiBase}/auth/oauth2/google/start?client=discord`;
   }
 
   return (
@@ -198,13 +190,15 @@ export default function LoginPage() {
           </p>
 
           <div className="mt-4 w-full flex justify-center">
-            <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || "905392681989-uun3otevkfu4mi3i11meckemp9gh2udp.apps.googleusercontent.com"}>
-              <GoogleLogin
-                onSuccess={handleGoogleLoginSuccess}
-                onError={() => console.log('Google Login Failed')}
-                useOneTap
-              />
-            </GoogleOAuthProvider>
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full flex items-center justify-center gap-2 h-11"
+              onClick={handleGoogleLogin}
+            >
+              <GoogleIcon className="h-5 w-5" />
+              {t("auth.googleLoginTitle")}
+            </Button>
           </div>
 
           <p className="mt-3 text-center text-[11px] text-muted-foreground/60 leading-relaxed">

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>MiniPortal - Profile</title>
+  <style>
+    body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #f4f4f9; margin: 0; }
+    .card { background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center; min-width: 300px; }
+    img { border-radius: 50%; width: 80px; height: 80px; margin-bottom: 10px; background: #ddd; }
+    button { background: #e74c3c; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; margin-top: 20px; }
+    button:hover { background: #c0392b; }
+    .hidden { display: none; }
+    p { margin: 5px 0; color: #555; }
+    h3 { margin: 10px 0 5px 0; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>SSO Profile</h2>
+    <div id="loading">Loading user data...</div>
+    <div id="profile-card" class="hidden">
+      <img id="avatar" src="" alt="Avatar" />
+      <h3 id="username"></h3>
+      <p id="email"></p>
+      <p>Role: <strong id="role"></strong></p>
+      <button onclick="logout()">Logout</button>
+    </div>
+    <div id="error" class="hidden" style="color: red; margin-top: 15px;"></div>
+  </div>
+  <script src="app.js"></script>
+  <script>
+    // Execute profile load on mount
+    window.onload = loadProfile;
+  </script>
+</body>
+</html>
