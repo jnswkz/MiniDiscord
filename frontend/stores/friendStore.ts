@@ -51,8 +51,8 @@ export const useFriendStore = create<FriendState>((set, get) => ({
   fetchFriends: async () => {
     try {
       set({ isLoading: true, error: null });
-      const res = await api.get<FriendResponse[]>("/users/friends");
-      set({ friends: res.data, isLoading: false });
+      const res = await api.get<{ success: boolean; data: FriendResponse[] }>("/users/friends");
+      set({ friends: res.data.data || [], isLoading: false });
     } catch (error: any) {
       set({ error: error.message, isLoading: false });
     }
@@ -61,8 +61,8 @@ export const useFriendStore = create<FriendState>((set, get) => ({
   fetchPending: async () => {
     try {
       set({ isLoading: true, error: null });
-      const res = await api.get<PendingFriendResponse[]>("/users/friends/pending");
-      set({ pendingRequests: res.data, isLoading: false });
+      const res = await api.get<{ success: boolean; data: PendingFriendResponse[] }>("/users/friends/pending");
+      set({ pendingRequests: res.data.data || [], isLoading: false });
     } catch (error: any) {
       set({ error: error.message, isLoading: false });
     }

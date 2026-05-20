@@ -12,8 +12,17 @@ export function ReverseAuthGuard({ children }: { children: React.ReactNode }) {
   const [isHydrating, setIsHydrating] = useState(true);
 
   useEffect(() => {
-    hydrate();
-    setIsHydrating(false);
+    let active = true;
+    const initAuth = async () => {
+      await hydrate();
+      if (active) {
+        setIsHydrating(false);
+      }
+    };
+    initAuth();
+    return () => {
+      active = false;
+    };
   }, [hydrate]);
 
   useEffect(() => {

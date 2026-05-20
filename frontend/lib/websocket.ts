@@ -1,7 +1,7 @@
 import { Client, type IMessage, type StompSubscription } from "@stomp/stompjs";
 
 const WS_URL =
-  process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:8080/ws/chat";
+  process.env.NEXT_PUBLIC_WS_URL || "ws://localhost:9080/ws/chat";
 const IS_DEV = process.env.NODE_ENV === "development";
 
 let client: Client | null = null;

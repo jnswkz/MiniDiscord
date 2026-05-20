@@ -26,16 +26,16 @@ app.use(authMiddleware);
 app.use(rateLimitMiddleware);
 
 // Proxy Routes
-app.use('/api/auth', createProxyMiddleware({ target: config.services.user, changeOrigin: true }));
-app.use('/api/users', createProxyMiddleware({ target: config.services.user, changeOrigin: true }));
-app.use('/api/demo', createProxyMiddleware({ target: config.services.user, changeOrigin: true }));
-app.use('/api/rooms', createProxyMiddleware({ target: config.services.groupChannel, changeOrigin: true }));
-app.use('/api/channels', createProxyMiddleware({ target: config.services.groupChannel, changeOrigin: true }));
-app.use('/api/messages', createProxyMiddleware({ target: config.services.chatHistory, changeOrigin: true }));
-app.use('/api/files', createProxyMiddleware({ target: config.services.file, changeOrigin: true }));
+app.use(createProxyMiddleware({ pathFilter: '/api/auth', target: config.services.user, changeOrigin: true }));
+app.use(createProxyMiddleware({ pathFilter: '/api/users', target: config.services.user, changeOrigin: true }));
+app.use(createProxyMiddleware({ pathFilter: '/api/demo', target: config.services.user, changeOrigin: true }));
+app.use(createProxyMiddleware({ pathFilter: '/api/rooms', target: config.services.groupChannel, changeOrigin: true }));
+app.use(createProxyMiddleware({ pathFilter: '/api/channels', target: config.services.groupChannel, changeOrigin: true }));
+app.use(createProxyMiddleware({ pathFilter: '/api/messages', target: config.services.chatHistory, changeOrigin: true }));
+app.use(createProxyMiddleware({ pathFilter: '/api/files', target: config.services.file, changeOrigin: true }));
 
 // WebSocket proxy
-app.use('/ws', createProxyMiddleware({ target: config.services.messaging, changeOrigin: true, ws: true }));
+app.use(createProxyMiddleware({ pathFilter: '/ws', target: config.services.messaging, changeOrigin: true, ws: true }));
 
 app.use(errorHandler);
 

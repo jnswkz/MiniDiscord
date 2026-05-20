@@ -16,9 +16,17 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
   useWebSocket();
 
   useEffect(() => {
-    // Attempt to load token from localStorage
-    hydrate();
-    setIsHydrating(false);
+    let active = true;
+    const initAuth = async () => {
+      await hydrate();
+      if (active) {
+        setIsHydrating(false);
+      }
+    };
+    initAuth();
+    return () => {
+      active = false;
+    };
   }, [hydrate]);
 
   useEffect(() => {

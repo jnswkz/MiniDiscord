@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { StatusAvatar } from "@/components/ui/StatusAvatar";
-import { Mic, MicOff, Headphones, HeadphoneOff, Settings } from "lucide-react";
+import { Mic, MicOff, Headphones, HeadphoneOff, Settings, LogOut } from "lucide-react";
 import { useTranslation } from "@/lib/i18n";
 import { useUIStore } from "@/stores/uiStore";
 import { useAuthStore } from "@/stores/authStore";
@@ -10,12 +11,19 @@ import { cn } from "@/lib/utils";
 
 export function UserPanel() {
   const { t } = useTranslation();
+  const router = useRouter();
   const openSettings = useUIStore((s) => s.openSettings);
   const user = useAuthStore((s) => s.user);
+  const logout = useAuthStore((s) => s.logout);
   const [isMuted, setIsMuted] = useState(false);
   const [isDeafened, setIsDeafened] = useState(false);
 
   if (!user) return null;
+
+  async function handleLogout() {
+    await logout();
+    router.push("/login");
+  }
 
   const statusKey = user.status.toLowerCase() as
     | "online"
@@ -115,6 +123,16 @@ export function UserPanel() {
             className="flex h-8 w-8 items-center justify-center rounded-md text-[#b5bac1] hover:bg-[#3f4147] hover:text-[#dbdee1] transition-colors duration-150 cursor-pointer"
           >
             <Settings className="h-[18px] w-[18px]" />
+          </button>
+
+          {/* Logout */}
+          <button
+            aria-label="Logout"
+            onClick={handleLogout}
+            className="flex h-8 w-8 items-center justify-center rounded-md text-[#ed4245] hover:bg-[#ed4245]/15 hover:text-[#ed4245] transition-colors duration-150 cursor-pointer"
+            title="Log Out"
+          >
+            <LogOut className="h-[18px] w-[18px]" />
           </button>
         </div>
       </div>

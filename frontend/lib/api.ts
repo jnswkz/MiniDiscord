@@ -1,7 +1,7 @@
 import axios from "axios";
 
 export const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api",
+  baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:9080/api",
   timeout: 10000,
   withCredentials: true,
   headers: {
@@ -26,10 +26,13 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       if (typeof window !== "undefined") {
-        import("@/stores/authStore").then(({ useAuthStore }) => {
-          useAuthStore.getState().logout();
-          window.location.href = "/login";
-        });
+        const currentPath = window.location.pathname;
+        if (currentPath !== "/login" && currentPath !== "/register") {
+          import("@/stores/authStore").then(({ useAuthStore }) => {
+            useAuthStore.getState().logout();
+            window.location.href = "/login";
+          });
+        }
       }
     }
     return Promise.reject(error);

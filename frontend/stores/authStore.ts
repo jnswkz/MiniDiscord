@@ -12,7 +12,7 @@ interface AuthState {
   login: (data: LoginRequest) => Promise<void>;
   loginWithGoogle: (idToken: string) => Promise<void>;
   register: (data: RegisterRequest) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
   setUser: (user: User) => void;
   hydrate: () => Promise<void>;
 }
@@ -63,7 +63,12 @@ export const useAuthStore = create<AuthState>((set) => ({
     }
   },
 
-  logout: () => {
+  logout: async () => {
+    try {
+      await api.post("/auth/logout");
+    } catch (err) {
+      console.error("Backend logout failed:", err);
+    }
     localStorage.removeItem("token");
     set({ user: null, token: null, isAuthenticated: false, error: null });
   },
@@ -71,14 +76,17 @@ export const useAuthStore = create<AuthState>((set) => ({
   setUser: (user) => set({ user }),
 
   hydrate: async () => {
-    const token = localStorage.getItem("token");
+    const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
     if (token) {
       set({ token, isAuthenticated: true });
-      try {
-        const res = await api.get<ApiResponse<User>>("/users/me");
-        set({ user: res.data.data });
-      } catch (err) {
-        console.error("Failed to fetch user data on hydrate", err);
+    }
+    try {
+      const res = await api.get<ApiResponse<User>>("/users/me");
+      set({ user: res.data.data, isAuthenticated: true });
+    } catch (err) {
+      console.error("Failed to fetch user data on hydrate", err);
+      if (!token) {
+        set({ user: null, token: null, isAuthenticated: false });
       }
     }
   },

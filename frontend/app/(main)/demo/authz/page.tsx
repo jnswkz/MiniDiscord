@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { ShieldAlert, ShieldCheck, HelpCircle } from "lucide-react";
-import api from "@/lib/api";
+import { api } from "@/lib/api";
 import { AxiosError } from "axios";
 
 export default function AuthzDemoPage() {

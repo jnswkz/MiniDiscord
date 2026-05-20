@@ -46,7 +46,7 @@ export class AuthController {
     setAccessTokenCookie(res, token);
 
     const { passwordHash, ...safeUser } = user;
-    sendSuccess(res, { user: safeUser, token }, 201);
+    sendSuccess(res, { user: { ...safeUser, username: user.name }, token }, 201);
   });
 
   static login = asyncHandler(async (req: Request, res: Response) => {
@@ -63,7 +63,7 @@ export class AuthController {
     setAccessTokenCookie(res, token);
 
     const { passwordHash, ...safeUser } = user;
-    sendSuccess(res, { user: safeUser, token });
+    sendSuccess(res, { user: { ...safeUser, username: user.name }, token });
   });
 
   static logout = asyncHandler(async (req: Request, res: Response) => {
@@ -83,7 +83,7 @@ export class AuthController {
     }
 
     const { passwordHash, ...safeUser } = user;
-    sendSuccess(res, safeUser);
+    sendSuccess(res, { ...safeUser, username: user.name });
   });
 
   // OAUTH: Start Code Flow
@@ -167,6 +167,6 @@ export class AuthController {
     setAccessTokenCookie(res, token);
 
     const { passwordHash, ...safeUser } = user;
-    sendSuccess(res, { user: safeUser, token });
+    sendSuccess(res, { user: { ...safeUser, username: user.name }, token });
   });
 }

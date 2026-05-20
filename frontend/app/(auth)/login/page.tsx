@@ -67,7 +67,7 @@ export default function LoginPage() {
   }
 
   function handleGoogleLogin() {
-    const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api";
+    const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:9080/api";
     window.location.href = `${apiBase}/auth/oauth2/google/start?client=discord`;
   }
 

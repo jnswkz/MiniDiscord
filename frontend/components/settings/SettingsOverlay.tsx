@@ -365,8 +365,8 @@ export function SettingsOverlay({ onClose }: { onClose: () => void }) {
 
   const logout = useAuthStore((s) => s.logout);
 
-  function handleLogout() {
-    logout();
+  async function handleLogout() {
+    await logout();
     onClose();
     router.push("/login");
   }

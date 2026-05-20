@@ -30,7 +30,7 @@ export class UserController {
     if (!user) throw new AppError('User not found', 404);
 
     const { passwordHash, ...safeUser } = user;
-    sendSuccess(res, safeUser);
+    sendSuccess(res, { ...safeUser, username: user.name });
   });
 
   static updateMe = asyncHandler(async (req: Request, res: Response) => {
@@ -44,7 +44,7 @@ export class UserController {
     user.updatedAt = new Date();
 
     const { passwordHash, ...safeUser } = user;
-    sendSuccess(res, safeUser);
+    sendSuccess(res, { ...safeUser, username: user.name });
   });
 
   static updateStatus = asyncHandler(async (req: Request, res: Response) => {
@@ -57,7 +57,7 @@ export class UserController {
     user.updatedAt = new Date();
 
     const { passwordHash, ...safeUser } = user;
-    sendSuccess(res, safeUser);
+    sendSuccess(res, { ...safeUser, username: user.name });
   });
 
   static searchUsers = asyncHandler(async (req: Request, res: Response) => {
@@ -67,13 +67,13 @@ export class UserController {
     }
 
     const currentUserId = (req as any).user?.sub;
-    const results: Partial<User>[] = [];
+    const results: any[] = [];
 
     for (const user of db.users.values()) {
       if (user.id !== currentUserId && 
          (user.name.toLowerCase().includes(query) || user.email.toLowerCase().includes(query))) {
         const { passwordHash, ...safeUser } = user;
-        results.push(safeUser);
+        results.push({ ...safeUser, username: user.name });
       }
     }
 
@@ -94,7 +94,7 @@ export class UserController {
             friendshipId: friendship.id,
             status: friendship.status,
             createdAt: friendship.createdAt,
-            user: safeUser
+            user: { ...safeUser, username: otherUser.name }
           });
         }
       }
@@ -170,12 +170,12 @@ export class UserController {
     const { userIds } = req.body;
     if (!Array.isArray(userIds)) throw new AppError('userIds must be an array', 400);
 
-    const results: Partial<User>[] = [];
+    const results: any[] = [];
     for (const id of userIds) {
       const user = db.users.get(id);
       if (user) {
         const { passwordHash, ...safeUser } = user;
-        results.push(safeUser);
+        results.push({ ...safeUser, username: user.name });
       }
     }
 

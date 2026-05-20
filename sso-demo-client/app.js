@@ -1,10 +1,27 @@
-const API_BASE = "http://localhost:8080/api";
+const API_BASE = "http://localhost:9080/api";
 
 function login() {
   window.location.href = `${API_BASE}/auth/oauth2/google/start?client=portal`;
 }
 
-function logout() {
+async function logout() {
+  const token = localStorage.getItem("miniportal_token");
+  const headers = {};
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
+  try {
+    // Notify backend to clear cookie session
+    await fetch(`${API_BASE}/auth/logout`, {
+      method: "POST",
+      headers,
+      credentials: "include"
+    });
+  } catch (err) {
+    console.error("Backend logout failed:", err);
+  }
+
   localStorage.removeItem("miniportal_token");
   window.location.href = "index.html";
 }
@@ -17,35 +34,33 @@ async function loadProfile() {
   if (tokenFromUrl) {
     localStorage.setItem("miniportal_token", tokenFromUrl);
     // Remove token from URL so it doesn't linger
-    window.history.replaceState({}, document.title, "/profile.html");
+    window.history.replaceState({}, document.title, window.location.pathname);
   }
 
   const token = localStorage.getItem("miniportal_token");
-
-  if (!token) {
-    // Not logged in, go to home
-    window.location.href = "index.html";
-    return;
+  const headers = {};
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
   }
 
   try {
+    // Fetch profile using token (if present in localStorage) or HttpOnly Cookie
     const response = await fetch(`${API_BASE}/auth/me`, {
-      headers: {
-        "Authorization": `Bearer ${token}`
-      }
+      headers,
+      credentials: "include" // Crucial: send session cookie to backend
     });
 
     if (response.ok) {
       const result = await response.json();
       const user = result.data;
-      
+
       document.getElementById("loading").classList.add("hidden");
       document.getElementById("profile-card").classList.remove("hidden");
-      
-      document.getElementById("username").innerText = user.username || user.email;
+
+      document.getElementById("username").innerText = user.username || user.name || user.email;
       document.getElementById("email").innerText = user.email;
       document.getElementById("role").innerText = user.role;
-      
+
       if (user.avatarUrl) {
         document.getElementById("avatar").src = user.avatarUrl;
       }
@@ -53,11 +68,36 @@ async function loadProfile() {
       throw new Error(`HTTP ${response.status}`);
     }
   } catch (err) {
-    console.error(err);
-    document.getElementById("loading").classList.add("hidden");
-    const errEl = document.getElementById("error");
-    errEl.innerText = "Failed to load profile. Session might be invalid or expired.";
-    errEl.classList.remove("hidden");
+    console.error("Profile load failed / SSO inactive:", err);
     localStorage.removeItem("miniportal_token");
+    // Not authenticated, redirect to login page
+    window.location.href = "index.html";
   }
+}
+
+async function checkSSOOnHome() {
+  const token = localStorage.getItem("miniportal_token");
+  const headers = {};
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
+  try {
+    // Attempt silently fetching /auth/me using credentials/cookie
+    const response = await fetch(`${API_BASE}/auth/me`, {
+      headers,
+      credentials: "include"
+    });
+    if (response.ok) {
+      // User is already logged in via SSO cookie! Redirect to profile page
+      window.location.href = "profile.html";
+    }
+  } catch (err) {
+    // Not logged in, stay on index.html
+  }
+}
+
+// Auto-check SSO when landing on index.html
+if (window.location.pathname.endsWith("index.html") || window.location.pathname === "/" || window.location.pathname.endsWith("/")) {
+  window.onload = checkSSOOnHome;
 }
